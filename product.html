@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>ROMetrics — Product Information</title>
+
+<style>
+:root{
+  --bg:#020617;
+  --card:#0f172a;
+  --accent:#38bdf8;
+  --accent2:#22c55e;
+  --accent3:#f59e0b;
+  --accent4:#a855f7;
+  --accent5:#ec4899;
+  --text:#f8fafc;
+  --muted:#94a3b8;
+  --border:rgba(56,189,248,0.1);
+}
+
+*{box-sizing:border-box}
+html,body{
+  margin:0;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background: var(--bg);
+  color:var(--text);
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background: radial-gradient(circle at 50% 0%, rgba(56,189,248,0.15) 0%, transparent 50%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+main{
+  position: relative;
+  max-width:1100px;
+  margin:0 auto;
+  padding:100px 24px;
+  z-index: 1;
+}
+
+/* ===== NAVIGATION ===== */
+.nav-bar {
+  position: fixed;
+  top: 25px;
+  left: 25px;
+  z-index: 100;
+}
+
+.return-btn {
+  text-decoration: none;
+  background: rgba(15, 23, 42, 0.8);
+  border: 1px solid var(--border);
+  color: var(--accent);
+  padding: 12px 24px;
+  border-radius: 12px;
+  font-weight: 800;
+  font-size: 0.85rem;
+  letter-spacing: 0.05em;
+  backdrop-filter: blur(10px);
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+}
+
+.return-btn:hover {
+  background: var(--accent);
+  color: var(--bg);
+  transform: translateX(5px);
+  box-shadow: 0 0 25px rgba(56,189,248,0.4);
+}
+
+/* ===== HERO ===== */
+.hero{
+  text-align:left;
+  margin-bottom:80px;
+  animation:fadeUp 0.8s ease-out both;
+  border-left: 4px solid var(--accent);
+  padding-left: 30px;
+}
+
+.hero h1{
+  font-size:clamp(2.5rem, 5vw, 4rem);
+  font-weight:900;
+  letter-spacing:-.04em;
+  margin:0;
+}
+
+.hero p{
+  margin-top:20px;
+  color:var(--muted);
+  font-size:1.25rem;
+  max-width:850px;
+  line-height: 1.6;
+}
+
+/* ===== SECTION WRAPPER ===== */
+.area-section {
+  margin-bottom: 60px;
+  animation: fadeUp 0.8s ease-out both;
+}
+
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 28px;
+  padding: 40px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 40px;
+  transition: border-color 0.3s ease;
+}
+
+.card-header {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 20px;
+}
+
+.icon-box {
+  width: 60px;
+  height: 60px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 900;
+  font-size: 1.4rem;
+}
+
+.card h2 {
+  font-size: 2rem;
+  margin: 0;
+  letter-spacing: -0.02em;
+}
+
+.card h3 {
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--accent);
+  margin-bottom: 15px;
+  margin-top: 0;
+}
+
+.card ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.card li {
+  color: var(--muted);
+  margin-bottom: 10px;
+  padding-left: 20px;
+  position: relative;
+  line-height: 1.5;
+}
+
+.card li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 10px;
+  width: 6px;
+  height: 1px;
+  background: var(--muted);
+}
+
+.info-block p {
+  color: var(--text);
+  font-weight: 500;
+  line-height: 1.6;
+  margin-top: 10px;
+}
+
+/* Colors */
+.g-theme { --accent: var(--accent); }
+.m-theme { --accent: var(--accent2); }
+.l-theme { --accent: var(--accent3); }
+.s-theme { --accent: var(--accent4); }
+.f-theme { --accent: var(--accent5); }
+
+.icon-box { background: rgba(255,255,255,0.05); color: var(--accent); border: 1px solid var(--accent); }
+
+@keyframes fadeUp{
+  from{opacity:0; transform:translateY(30px)}
+  to{opacity:1; transform:translateY(0)}
+}
+
+@media (max-width: 900px) {
+  .card { grid-template-columns: 1fr; gap: 30px; }
+  .nav-bar { position: absolute; top: 20px; }
+}
+</style>
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <title>ROMetrics</title>
+
+  <link rel="icon" type="image/png" sizes="192x192" href="/favicon-192.png">
+  <link rel="apple-touch-icon" sizes="192x192" href="/favicon-192.png">
+</head>
+
+<body>
+
+<div class="nav-bar" style="display:flex; justify-content:space-between; align-items:center;">
+  <a href="https://rometrics.app">
+    <img src="/rometrics-logo.png" alt="ROMetrics" style="height:36px;">
+  </a>
+
+  <a href="https://rometrics.app" class="return-btn">RETURN TO HOME</a>
+</div>
+
+<main>
+
+
+
+  <section class="hero">
+    <h1>Product Information</h1>
+    <p>
+      ROMetrics provides interactive tools for learning, practicing, and applying movement assessment through structured modules and simulations.
+    </p>
+  </section>
+
+  <div class="area-section g-theme">
+    <div class="card">
+      <div class="card-header">
+        <div class="icon-box">GT</div>
+        <h2>Goniometry Trainer</h2>
+      </div>
+      <div class="info-block">
+        <h3>How it is used</h3>
+        <ul>
+          <li>Select a model and body position (standing, sitting, supine, prone).</li>
+          <li>Choose a body region and joint action.</li>
+          <li>Place the goniometer by selecting: Fulcrum, Stationary arm, Moving arm.</li>
+          <li>Press Start ROM to move the joint and track the angle.</li>
+        </ul>
+      </div>
+      <div class="info-block">
+        <h3>What this teaches</h3>
+        <ul>
+          <li>Proper goniometer placement and joint-specific measurement technique.</li>
+          <li>Plane and axis awareness.</li>
+          <li>How positioning affects measurements.</li>
+        </ul>
+        <p>This module is guided and instructional. It is where users learn how to measure.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="area-section m-theme">
+    <div class="card">
+      <div class="card-header">
+        <div class="icon-box">MT</div>
+        <h2>Manual Muscle Testing (MMT)</h2>
+      </div>
+      <div class="info-block">
+        <h3>How it is used</h3>
+        <ul>
+          <li>Select an MMT test and review test position and movement direction.</li>
+          <li>Choose the appropriate grade range (Grades 0–2 or 3–5).</li>
+          <li>Apply resistance using the interactive control.</li>
+          <li>Observe hold time, fatigue, and break response to assign a grade.</li>
+        </ul>
+      </div>
+      <div class="info-block">
+        <h3>What this teaches</h3>
+        <ul>
+          <li>Muscle function, action, and proper test positioning.</li>
+          <li>Grading logic and exceptions.</li>
+          <li>Why resistance is applied where it is.</li>
+        </ul>
+        <p>This module focuses on understanding test mechanics, not memorization.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="area-section l-theme">
+    <div class="card">
+      <div class="card-header">
+        <div class="icon-box">ML</div>
+        <h2>Motion Lab</h2>
+      </div>
+      <div class="info-block">
+        <h3>How it is used</h3>
+        <ul>
+          <li>Select a body region and movement.</li>
+          <li>Move joints manually or through predefined actions.</li>
+          <li>Observe segment motion, coordination, and sequencing.</li>
+          <li>Adjust posture, model orientation, and view angle.</li>
+        </ul>
+      </div>
+      <div class="info-block">
+        <h3>What this teaches</h3>
+        <ul>
+          <li>How joints move in isolation and combination.</li>
+          <li>Segment relationships and movement direction during motion.</li>
+          <li>Foundational motion understanding before testing.</li>
+        </ul>
+        <p>This lab is exploratory, not evaluative.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="area-section s-theme">
+    <div class="card">
+      <div class="card-header">
+        <div class="icon-box">SE</div>
+        <h2>Simulated Evaluations</h2>
+      </div>
+      <div class="info-block">
+        <h3>How they work</h3>
+        <ul>
+          <li>User is given case context, clues, and patient history.</li>
+          <li>User decides what to observe, measure, and which tools to use.</li>
+          <li>Includes range-of-motion limitations and strength deficits.</li>
+        </ul>
+      </div>
+      <div class="info-block">
+        <h3>Purpose</h3>
+        <ul>
+          <li>Apply learned skills without guidance.</li>
+          <li>Practice clinical decision-making.</li>
+          <li>Prepare for practical exams and real assessments.</li>
+        </ul>
+        <p>This is where training becomes application.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="area-section f-theme">
+    <div class="card">
+      <div class="card-header">
+        <div class="icon-box">FL</div>
+        <h2>Forensic Motion Lab</h2>
+      </div>
+      <div class="info-block">
+        <h3>What it focuses on</h3>
+        <ul>
+          <li>Balance, stability, and compensatory strategies.</li>
+          <li>Center of mass and base of support.</li>
+          <li>Joint sequencing and posture.</li>
+        </ul>
+      </div>
+      <div class="info-block">
+        <h3>How it is used</h3>
+        <ul>
+          <li>Select a forensic module and observe a task outcome.</li>
+          <li>Adjust posture, joint motion, or strategy.</li>
+          <li>Analyze why movement was improved or impaired</li>
+        </ul>
+        <p>This module answers “why did this happen?” through mechanical reasoning.</p>
+      </div>
+    </div>
+  </div>
+
+  <footer style="margin-top:100px; text-align:center; padding:40px; color:var(--muted); font-weight:700; border-top:1px solid var(--border);">
+    ROMETRICS.APP
+  </footer>
+
+</main>
+
+</body>
+</html>
