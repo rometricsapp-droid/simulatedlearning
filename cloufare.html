@@ -1,0 +1,395 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ROMetrics | Motion Analysis Platform</title>
+
+<style>
+:root {
+  --primary: #0f172a;
+  --accent: #2563eb; 
+  --bg: #fcfdfe;
+  --text-main: #1e293b;
+  --text-muted: #475569;
+  --border: #eef2f6;
+}
+
+@keyframes slideUpFade {
+  0% { opacity: 0; transform: translateY(20px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+*{box-sizing:border-box}
+html,body{
+  margin:0;
+  height:100%;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background: var(--bg);
+  color: var(--primary);
+  overflow-x: hidden; /* Prevent horizontal scroll */
+}
+
+/* ===== HEADER ===== */
+header {
+  padding: 1rem 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(255,255,255,0.95);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+  color: inherit;
+}
+
+.brand img { height: 32px; width: auto; }
+.brand span { font-weight: 800; font-size: 1.25rem; letter-spacing: -0.04em; }
+
+.header-actions { display: flex; gap: 8px; }
+
+.header-actions a {
+  background: var(--accent);
+  color: #fff;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-decoration: none;
+  transition: all 0.2s;
+}
+/* ===== MODULE QUICK NAV (HEADER) ===== */
+.module-nav {
+  display: flex;
+  gap: 6px;
+  justify-content: center;
+  flex: 1;
+}
+
+.module-nav a {
+  background: rgba(34,197,94,0.08); /* subtle green */
+  color: #166534;                  /* dark green text */
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-decoration: none;
+  border: 1px solid rgba(34,197,94,0.25);
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.module-nav a:hover {
+  background: rgba(34,197,94,0.18);
+  border-color: rgba(34,197,94,0.45);
+}
+
+/* ===== MAIN CONTENT ===== */
+main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+section {
+  padding: 60px 20px;
+  display: flex;
+  justify-content: center;
+}
+
+.content-wrapper {
+  width: 100%;
+  max-width: 1200px;
+}
+
+/* ROW 1: HERO */
+.hero-content {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 40px;
+  align-items: center;
+  animation: slideUpFade 0.8s ease-out;
+}
+
+.copy h1 {
+  font-size: 2.5rem;
+  line-height: 1.1;
+  margin: 0;
+  font-weight: 900;
+  letter-spacing: -0.04em;
+}
+
+.copy p {
+  margin-top: 1.5rem;
+  font-size: 1.1rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+.visual { position: relative; width: 100%; text-align: right; }
+.laptop{
+  max-width:680px;
+  width:100%;
+  transform: translate(20px, 0px) scale(1.06);
+}
+
+.phone{
+  width:180px;
+  transform: translate(-353px, -117px) scale(1.48);
+}
+/* ROW 2: ACCESS & PRICING */
+.access-section { background: #f1f5f9; }
+.access-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 40px;
+  align-items: center;
+}
+
+.pricing-table {
+  background: #fff;
+  padding: 30px;
+  border-radius: 20px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+}
+
+.price-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 12px 0;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.price-row:last-child { border: none; }
+.price-label { font-weight: 600; color: var(--text-muted); font-size: 0.9rem; }
+.price-value { font-weight: 800; color: var(--accent); font-size: 0.9rem; }
+
+/* ROW 3: REFERRAL */
+.referral-content {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 40px;
+  align-items: center;
+}
+
+.referral-text h2 {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--accent);
+  margin-bottom: 1rem;
+}
+
+.referral-text h3 {
+  font-size: 1.8rem;
+  font-weight: 800;
+  margin: 0 0 1rem;
+}
+
+/* BUTTONS */
+.cta-btn {
+  background: var(--accent);
+  color: #fff;
+  padding: 14px 28px;
+  border-radius: 10px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  text-decoration: none;
+  display: inline-block;
+  margin-top: 1.5rem;
+  text-align: center;
+}
+
+/* ===== MODULE DOCK ===== */
+.modules {
+  background: #fff;
+  border-top: 1px solid var(--border);
+  padding: 40px 20px;
+}
+
+.module-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 12px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.module {
+  padding: 20px 10px;
+  border-radius: 12px;
+  text-align: center;
+  font-size: 0.8rem;
+  font-weight: 700;
+  background: var(--bg);
+  border: 1px solid var(--border);
+}
+
+.module span {
+  display: block;
+  font-size: 0.65rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 8px;
+}
+
+/* ===== MOBILE OPTIMIZATION (FITS ALL PHONES) ===== */
+@media (max-width: 850px) {
+  header { padding: 1rem; }
+  .brand span { font-size: 1.1rem; }
+  
+  .hero-content, .access-grid, .referral-content {
+    grid-template-columns: 1fr;
+    text-align: center;
+    gap: 30px;
+  }
+
+  .copy h1 { font-size: 2rem; }
+  .copy p { font-size: 1rem; max-width: 100%; }
+
+  /* Corrected Phone visibility */
+  .visual { 
+    text-align: center; 
+    position: relative; 
+    display: block;
+    margin-top: 20px;
+    height: 250px; /* Gives space for the images */
+  }
+  
+  .laptop { 
+    max-width: 100%; 
+    margin: 0 auto; 
+    transform: none; 
+    position: relative;
+    z-index: 1;
+  }
+  
+  .phone { 
+    width: 80px; 
+    position: absolute;
+    left: 15%; 
+    bottom: 10%; 
+    transform: none; 
+    z-index: 2;
+  }
+
+  .referral-text h3 { font-size: 1.5rem; }
+  
+  .module-row {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .header-actions { gap: 4px; }
+  .header-actions a { padding: 6px 8px; font-size: 0.65rem; }
+  .module-row { grid-template-columns: 1fr; } /* Single column for tiny screens */
+}
+</style>
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <title>ROMetrics</title>
+
+  <link rel="icon" type="image/png" sizes="192x192" href="/favicon-192.png">
+  <link rel="apple-touch-icon" sizes="192x192" href="/favicon-192.png">
+</head>
+
+<body>
+
+<header>
+  <a href="https://rometrics.app" class="brand">
+    <img src="/rometrics-logo.png" alt="ROMetrics logo">
+    <span>ROMetrics</span>
+  </a>
+
+ <nav class="module-nav">
+    <a href="/coming-soon.html">Download App</a>
+  </nav>
+
+
+  <div class="header-actions">
+    <a href="support.html">Support</a>
+    <a href="about.html">About</a>
+    <a href="signin.html">Sign In</a>
+  </div>
+</header>
+
+
+<main>
+
+  <section class="hero-section">
+    <div class="content-wrapper hero-content">
+        <div class="copy">
+          <h1>Measure. Train. <br>Analyze.</h1>
+          <p>The unified workspace for goniometry training, motion lab analysis, and manual muscle testing. Designed for the rigorous demands of physical therapy and kinesiology education.</p>
+          <a href="product.html" class="cta-btn">Explore Details</a>
+        </div>
+        <div class="visual">
+          <img src="Rometrics on laptop.png" class="laptop" alt="ROMetrics on laptop">
+          <img src="Rometrics on phone.png" class="phone" alt="ROMetrics on phone">
+        </div>
+    </div>
+  </section>
+
+  <section class="access-section">
+    <div class="content-wrapper access-grid">
+        <div class="pricing-table">
+            <div class="price-row"><span class="price-label">Trial Period</span><span class="price-value">1 Month Free</span></div>
+            <div class="price-row"><span class="price-label">Regular Rate</span><span class="price-value">$5.99 / mo</span></div>
+            <div class="price-row"><span class="price-label">Student Rate (.edu)</span><span class="price-value">$3.99 / mo</span></div>
+            <div class="price-row"><span class="price-label">Card Requirement</span><span class="price-value">None for Trial</span></div>
+        </div>
+        <div class="copy">
+            <h2>Instant Access</h2>
+            <p>Start your evaluation immediately. Register using Gmail, Facebook, or your personal email address. No credit card is required to begin your trial.</p>
+            <a href="register.html" class="cta-btn">Register Now</a>
+        </div>
+    </div>
+  </section>
+
+  <section class="referral-section">
+    <div class="content-wrapper referral-content">
+        <div class="referral-text">
+            <h2>Growth & Community</h2>
+            <h3>Empower your peers.</h3>
+            <p>Mastering biomechanics is better together. Refer a colleague or classmate; once they sign up, you receive an additional free month added to your account automatically.</p>
+            <a href="refer.html" class="cta-btn">Refer a Colleague</a>
+        </div>
+        <div class="visual">
+           
+        </div>
+    </div>
+  </section>
+</main>
+
+<section class="modules">
+  <div class="module-row">
+    <div class="module"><span>Measure</span>Goniometry Trainer</div>
+    <div class="module"><span>Analyze</span>Motions Lab</div>
+    <div class="module"><span>Strength</span>Manual Muscle Tests</div>
+    <div class="module"><span>Simulate</span>Simulated Evaluations</div>
+    <div class="module"><span>Investigate</span>Motion Forensics</div>
+  </div>
+</section>
+
+<footer>
+    <div style="text-align: center; padding: 20px; color: #94a3b8; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;">
+        ROMetrics &copy; 2026
+    </div>
+</footer>
+
+</body>
+</html>
