@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ROMetrics — Sign In</title>
+
+<!-- FAVICON -->
+<link rel="icon" type="image/png" sizes="192x192" href="favicon-192.png">
+<link rel="apple-touch-icon" sizes="192x192" href="favicon-192.png">
+
+<style>
+:root{
+  --bg:#fcfdfe;
+  --primary:#0f172a;
+  --accent:#2563eb;
+  --muted:#475569;
+  --border:#e5e7eb;
+}
+
+*{box-sizing:border-box}
+html,body{
+  margin:0;
+  height:100%;
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Inter, Arial, sans-serif;
+  background:var(--bg);
+  color:var(--primary);
+}
+
+main{
+  min-height:100%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:24px;
+}
+
+.card{
+  max-width:420px;
+  width:100%;
+  background:#fff;
+  border:1px solid var(--border);
+  border-radius:16px;
+  padding:32px 26px;
+  text-align:center;
+}
+
+.logo{
+  height:34px;
+  margin-bottom:18px;
+}
+
+h1{
+  margin:0 0 8px;
+  font-size:1.8rem;
+  font-weight:900;
+  letter-spacing:-0.03em;
+}
+
+p{
+  margin:0 0 24px;
+  color:var(--muted);
+  font-size:0.95rem;
+}
+
+.btn{
+  width:100%;
+  padding:12px 14px;
+  border-radius:10px;
+  font-size:0.9rem;
+  font-weight:800;
+  border:1px solid var(--border);
+  background:#f8fafc;
+  cursor:pointer;
+  margin-bottom:12px;
+}
+
+.btn.primary{
+  background:var(--accent);
+  color:#fff;
+  border:none;
+}
+
+input{
+  width:100%;
+  padding:12px;
+  border-radius:10px;
+  border:1px solid var(--border);
+  margin-bottom:10px;
+  font-size:0.9rem;
+}
+
+.small{
+  font-size:0.75rem;
+  color:#64748b;
+  margin-top:12px;
+}
+
+a{
+  color:var(--accent);
+  text-decoration:none;
+  font-weight:700;
+}
+</style>
+</head>
+
+<body>
+<main>
+  <div class="card">
+
+    <!-- LOGO -->
+    <a href="/">
+      <img src="rometrics-logo.png" alt="ROMetrics logo" class="logo">
+    </a>
+
+    <h1>Sign In</h1>
+    <p>Sign in or create an account to continue.</p>
+
+    <!-- GOOGLE SIGN IN -->
+    <button class="btn primary" id="googleSignIn">
+      Continue with Google
+    </button>
+
+    <hr style="border:none;border-top:1px solid var(--border);margin:18px 0">
+
+    <!-- EMAIL SIGN IN -->
+    <input type="email" id="email" placeholder="Email">
+    <input type="password" id="password" placeholder="Password">
+
+    <button class="btn" id="emailSignIn">
+      Sign In / Sign Up with Email
+    </button>
+
+    <div class="small">
+      By continuing, you agree to ROMetrics’ terms and policies.
+    </div>
+  </div>
+</main>
+
+<!-- FIREBASE SDKs -->
+<script src="https://www.gstatic.com/firebasejs/10.12.4/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.4/firebase-auth-compat.js"></script>
+
+<script>
+/* 🔥 FIREBASE CONFIG — REPLACE WITH YOUR OWN */
+const firebaseConfig = {
+  apiKey: "YOUR_API_KEY",
+  authDomain: "YOUR_PROJECT.firebaseapp.com",
+  projectId: "YOUR_PROJECT_ID",
+  appId: "YOUR_APP_ID"
+};
+
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+
+/* GOOGLE SIGN IN */
+document.getElementById('googleSignIn').onclick = () => {
+  const provider = new firebase.auth.GoogleAuthProvider();
+  auth.signInWithPopup(provider)
+    .then(() => window.location.href = "/")
+    .catch(err => alert(err.message));
+};
+
+/* EMAIL SIGN IN / SIGN UP */
+document.getElementById('emailSignIn').onclick = () => {
+  const email = document.getElementById('email').value;
+  const password = document.getElementById('password').value;
+
+  if(!email || !password){
+    alert("Enter email and password");
+    return;
+  }
+
+  auth.signInWithEmailAndPassword(email, password)
+    .then(() => window.location.href = "/")
+    .catch(() => {
+      auth.createUserWithEmailAndPassword(email, password)
+        .then(() => window.location.href = "/")
+        .catch(err => alert(err.message));
+    });
+};
+</script>
+</body>
+</html>
