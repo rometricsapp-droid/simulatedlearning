@@ -5,6 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Settings | ROMetrics</title>
 
+<link rel="icon" type="image/png" sizes="192x192" href="/favicon-192.png">
+<link rel="apple-touch-icon" sizes="192x192" href="/favicon-192.png">
+
 <style>
 :root {
   --primary: #0f172a;
@@ -38,44 +41,22 @@ body {
   box-shadow: 0 4px 20px rgba(0,0,0,0.03);
 }
 
-header { margin-bottom: 32px; }
+header { margin-bottom: 32px; border-bottom: 1px solid var(--border); padding-bottom: 20px; }
 
-.back-link {
-  font-size: 0.8rem;
-  font-weight: 700;
-  color: var(--accent);
-  text-decoration: none;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  display: inline-block;
-  margin-bottom: 12px;
-}
+.brand-link { display: flex; align-items: center; gap: 8px; text-decoration: none; margin-bottom: 20px; }
+.brand-link img { height: 28px; }
+.brand-link span { font-weight: 800; color: var(--primary); font-size: 1.1rem; }
 
-h1 { font-size: 1.8rem; font-weight: 900; margin: 0; letter-spacing: -0.04em; }
+.back-link { font-size: 0.75rem; font-weight: 700; color: var(--accent); text-decoration: none; text-transform: uppercase; }
 
-.settings-group {
-  margin-bottom: 32px;
-  padding-bottom: 24px;
-  border-bottom: 1px solid var(--border);
-}
+h1 { font-size: 1.5rem; font-weight: 900; margin-top: 10px; letter-spacing: -0.04em; }
 
+.settings-group { margin-bottom: 32px; padding-bottom: 24px; border-bottom: 1px solid var(--border); }
 .settings-group:last-of-type { border: none; }
 
-h2 {
-  font-size: 0.75rem;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  color: var(--text-muted);
-  margin-bottom: 16px;
-}
+h2 { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-muted); margin-bottom: 16px; }
 
-.setting-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 16px;
-}
-
+.setting-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
 .label-box { display: flex; flex-direction: column; }
 .label-main { font-weight: 700; font-size: 0.95rem; }
 .label-sub { font-size: 0.8rem; color: var(--text-muted); }
@@ -89,81 +70,68 @@ h2 {
   font-size: 0.8rem;
   font-weight: 700;
   cursor: pointer;
-  transition: all 0.2s;
 }
 
-.action-btn:hover { background: #e2e8f0; }
 .action-btn.danger { color: var(--danger); border-color: rgba(239, 68, 68, 0.2); }
 
-.status-badge {
-  padding: 4px 8px;
-  border-radius: 4px;
-  font-size: 0.7rem;
-  font-weight: 800;
-  text-transform: uppercase;
-}
-
+.status-badge { padding: 4px 8px; border-radius: 4px; font-size: 0.65rem; font-weight: 800; text-transform: uppercase; }
 .status-active { background: rgba(34,197,94,0.1); color: var(--success); }
 .status-inactive { background: #f1f5f9; color: var(--text-muted); }
 
-@media (max-width: 480px) {
-  .setting-row { flex-direction: column; align-items: flex-start; gap: 12px; }
-}
+@media (max-width: 480px) { .setting-row { flex-direction: column; align-items: flex-start; gap: 12px; } }
 </style>
 </head>
 <body>
 
 <div class="settings-container">
   <header>
-    <a href="index.html" class="back-link">← Dashboard</a>
+    <a href="index.html" class="brand-link">
+        <img src="/rometrics-logo.png" alt="ROMetrics logo">
+        <span>ROMetrics</span>
+    </a>
+    <a href="index.html" class="back-link">← Return to Dashboard</a>
     <h1>Account Settings</h1>
   </header>
 
   <section class="settings-group">
-    <h2>Profile Information</h2>
+    <h2>Identity</h2>
     <div class="setting-row">
       <div class="label-box">
-        <span class="label-main">Email Address</span>
+        <span class="label-main">Email</span>
         <span class="label-sub" id="userEmail">Loading...</span>
       </div>
-    </div>
-    <div class="setting-row">
-      <div class="label-box">
-        <span class="label-main">Password</span>
-        <span class="label-sub">Security handled via Firebase Auth</span>
-      </div>
-      <button class="action-btn" onclick="sendPasswordReset()">Update</button>
+      <span id="authProvider" class="status-badge status-inactive">Google User</span>
     </div>
   </section>
 
   <section class="settings-group">
-    <h2>Subscription & Billing</h2>
+    <h2>Subscription</h2>
     <div class="setting-row">
       <div class="label-box">
         <span class="label-main">Current Plan</span>
-        <span class="label-sub" id="planNameDisplay">Loading plan...</span>
+        <span class="label-sub" id="planNameDisplay">Checking...</span>
       </div>
-      <span id="statusBadge" class="status-badge status-inactive">Pending</span>
+      <span id="statusBadge" class="status-badge status-inactive">Unknown</span>
     </div>
     <div class="setting-row">
       <div class="label-box">
-        <span class="label-main">Billing Rate</span>
-        <span class="label-sub" id="rateDisplay">Fetching rate...</span>
+        <span class="label-main">Rate</span>
+        <span class="label-sub" id="rateDisplay">...</span>
       </div>
       <div id="billingActions">
-        <button class="action-btn" id="mainBillingBtn" onclick="location.href='billing.html'">Manage</button>
+        <button class="action-btn" onclick="location.href='billing.html'">Manage Subscription</button>
       </div>
     </div>
   </section>
 
   <section class="settings-group">
-    <h2 style="color: var(--danger);">Danger Zone</h2>
+    <h2 style="color: var(--danger);">System Actions</h2>
     <div class="setting-row">
       <div class="label-box">
-        <span class="label-main">Delete Account</span>
-        <span class="label-sub">Permanently remove all data.</span>
+        <span class="label-main">Delete My Account</span>
+        <span class="label-sub">This clears all motion logs and data instantly.</span>
       </div>
-      <button class="action-btn danger" onclick="deleteAccount()">Delete</button>
+      <button class="action-btn danger" onclick="handleDeleteAccount()">Delete Account</button>
     </div>
   </section>
 </div>
@@ -197,52 +165,51 @@ async function loadUserData(uid) {
     const doc = await db.collection('users').doc(uid).get();
     if (doc.exists) {
       const data = doc.data();
-      
-      // Update UI with real data
-      document.getElementById('planNameDisplay').textContent = data.planName || "No Plan Selected";
+      document.getElementById('planNameDisplay').textContent = data.planName || "Trial User";
       document.getElementById('rateDisplay').textContent = data.billingRate || "$0.00";
       
       const badge = document.getElementById('statusBadge');
-      const billingActions = document.getElementById('billingActions');
-
       if (data.status === 'active') {
         badge.textContent = 'Active';
         badge.className = 'status-badge status-active';
-        // Swap Manage button for Cancel button if active
-        billingActions.innerHTML = `<button class="action-btn danger" onclick="cancelSubscription('${uid}')">Cancel Subscription</button>`;
+        document.getElementById('billingActions').innerHTML = `<button class="action-btn danger" onclick="cancelSubscription('${uid}')">Cancel Subscription</button>`;
       } else {
         badge.textContent = 'Inactive';
         badge.className = 'status-badge status-inactive';
       }
     }
-  } catch (e) {
-    console.error("Error loading data:", e);
-  }
+  } catch (e) { console.error(e); }
 }
 
 async function cancelSubscription(uid) {
-  if (confirm("Are you sure you want to cancel your subscription? You will lose access at the end of the period.")) {
-    try {
-      await db.collection('users').doc(uid).update({
-        status: 'cancelled',
-        planName: 'Free / Cancelled'
-      });
-      alert("Subscription cancelled successfully.");
-      location.reload();
-    } catch (e) {
-      alert("Error cancelling subscription: " + e.message);
-    }
+  if (confirm("Cancel subscription?")) {
+    await db.collection('users').doc(uid).update({ status: 'cancelled' });
+    location.reload();
   }
 }
 
-function sendPasswordReset() {
+async function handleDeleteAccount() {
   const user = auth.currentUser;
-  auth.sendPasswordResetEmail(user.email).then(() => alert("Reset email sent!"));
-}
+  if (!user) return;
 
-function deleteAccount() {
-  if (confirm("Permanently delete account?")) {
-    auth.currentUser.delete().then(() => window.location.href = "index.html");
+  const msg = "WARNING: This permanently deletes your motion analysis history and profile. Type 'DELETE' to confirm.";
+  if (prompt(msg) === "DELETE") {
+    try {
+      // 1. Delete Firestore Data
+      await db.collection('users').doc(user.uid).delete();
+      
+      // 2. Delete Auth Account
+      await user.delete();
+      
+      alert("Account removed.");
+      window.location.href = "index.html";
+    } catch (error) {
+      if (error.code === 'auth/requires-recent-login') {
+        alert("For security, please sign out and sign back in to delete your account.");
+      } else {
+        alert("Error: " + error.message);
+      }
+    }
   }
 }
 </script>
