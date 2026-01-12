@@ -1,0 +1,227 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Settings | ROMetrics</title>
+
+<style>
+:root {
+  --primary: #0f172a;
+  --accent: #2563eb; 
+  --bg: #fcfdfe;
+  --text-main: #1e293b;
+  --text-muted: #475569;
+  --border: #eef2f6;
+  --danger: #ef4444;
+}
+
+*{box-sizing:border-box}
+body {
+  margin:0;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background: var(--bg);
+  color: var(--primary);
+  display: flex;
+  justify-content: center;
+  padding: 40px 20px;
+}
+
+.settings-container {
+  width: 100%;
+  max-width: 600px;
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 32px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.03);
+}
+
+header {
+  margin-bottom: 32px;
+}
+
+.back-link {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--accent);
+  text-decoration: none;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  display: inline-block;
+  margin-bottom: 12px;
+}
+
+h1 {
+  font-size: 1.8rem;
+  font-weight: 900;
+  margin: 0;
+  letter-spacing: -0.04em;
+}
+
+.settings-group {
+  margin-bottom: 32px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid var(--border);
+}
+
+.settings-group:last-of-type { border: none; }
+
+h2 {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-muted);
+  margin-bottom: 16px;
+}
+
+.setting-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.label-box {
+  display: flex;
+  flex-direction: column;
+}
+
+.label-main { font-weight: 700; font-size: 0.95rem; }
+.label-sub { font-size: 0.8rem; color: var(--text-muted); }
+
+.action-btn {
+  background: #f1f5f9;
+  color: var(--primary);
+  border: 1px solid var(--border);
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.action-btn:hover { background: #e2e8f0; }
+.action-btn.primary { background: var(--accent); color: white; border: none; }
+.action-btn.danger { color: var(--danger); }
+
+.status-badge {
+  background: rgba(34,197,94,0.1);
+  color: #166534;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.7rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+@media (max-width: 480px) {
+  .setting-row { flex-direction: column; align-items: flex-start; gap: 12px; }
+}
+</style>
+</head>
+<body>
+
+<div class="settings-container">
+  <header>
+    <a href="index.html" class="back-link">← Dashboard</a>
+    <h1>Account Settings</h1>
+  </header>
+
+  <section class="settings-group">
+    <h2>Profile Information</h2>
+    <div class="setting-row">
+      <div class="label-box">
+        <span class="label-main">Email Address</span>
+        <span class="label-sub" id="userEmail">Loading...</span>
+      </div>
+    </div>
+    
+    <div class="setting-row">
+      <div class="label-box">
+        <span class="label-main">Password</span>
+        <span class="label-sub">Last updated: Secured via Firebase</span>
+      </div>
+      <button class="action-btn" onclick="sendPasswordReset()">Update</button>
+    </div>
+  </section>
+
+  <section class="settings-group">
+    <h2>Subscription & Billing</h2>
+    <div class="setting-row">
+      <div class="label-box">
+        <span class="label-main">Current Plan</span>
+        <span class="label-sub">Trial Period (Free)</span>
+      </div>
+      <span class="status-badge">Active</span>
+    </div>
+    <div class="setting-row">
+      <div class="label-box">
+        <span class="label-main">Billing Rate</span>
+        <span class="label-sub">Standard Rate: $5.99/mo after trial</span>
+      </div>
+      <a href="billing.html" class="action-btn">Manage</a>
+    </div>
+  </section>
+
+  <section class="settings-group">
+    <h2 style="color: var(--danger);">Danger Zone</h2>
+    <div class="setting-row">
+      <div class="label-box">
+        <span class="label-main">Delete Account</span>
+        <span class="label-sub">Permanently remove all motion data and logs.</span>
+      </div>
+      <button class="action-btn danger" onclick="deleteAccount()">Delete</button>
+    </div>
+  </section>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.4/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.4/firebase-auth-compat.js"></script>
+
+<script>
+firebase.initializeApp({
+  apiKey: "AIzaSyAxMFW5gguPiiaomPbuoMc7suxHmgPEhRg",
+  authDomain: "rometricsapp-1444e.firebaseapp.com",
+  projectId: "rometricsapp-1444e",
+  appId: "1:1016564998048:web:1d4c7e4780de0323664ec5"
+});
+
+const auth = firebase.auth();
+
+auth.onAuthStateChanged(user => {
+  if (user) {
+    document.getElementById('userEmail').textContent = user.email;
+  } else {
+    // Redirect to login if they access settings while logged out
+    window.location.href = "signin.html";
+  }
+});
+
+function sendPasswordReset() {
+  const user = auth.currentUser;
+  if (user) {
+    auth.sendPasswordResetEmail(user.email).then(() => {
+      alert("Password reset email sent to " + user.email);
+    }).catch(error => {
+      alert(error.message);
+    });
+  }
+}
+
+function deleteAccount() {
+  if (confirm("Are you absolutely sure? This cannot be undone.")) {
+    const user = auth.currentUser;
+    user.delete().then(() => {
+      window.location.href = "index.html";
+    }).catch(error => {
+      alert("For security, please sign in again before deleting your account.");
+      auth.signOut().then(() => window.location.href = "signin.html");
+    });
+  }
+}
+</script>
+
+</body>
+</html>
