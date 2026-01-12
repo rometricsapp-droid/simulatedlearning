@@ -13,7 +13,6 @@
   --text-main: #1e293b;
   --text-muted: #475569;
   --border: #eef2f6;
-  --danger: #ef4444;
 }
 
 @keyframes slideUpFade {
@@ -56,9 +55,9 @@ header {
 .brand img { height: 32px; width: auto; }
 .brand span { font-weight: 800; font-size: 1.25rem; letter-spacing: -0.04em; }
 
-.header-actions { display: flex; gap: 8px; align-items: center; }
+.header-actions { display: flex; gap: 8px; align-items: center; position: relative; }
 
-.header-actions a, .auth-btn {
+.header-actions a, .profile-trigger {
   background: var(--accent);
   color: #fff;
   padding: 8px 12px;
@@ -71,32 +70,66 @@ header {
   border: none;
 }
 
-/* User Profile Dropdown Style */
-.user-menu {
-  position: relative;
-  display: none; /* Hidden by default, shown via JS */
-  align-items: center;
-  gap: 10px;
-}
-
-.user-email {
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: var(--text-muted);
-}
-
-.signout-btn {
-  background: #f1f5f9;
+/* Restored styling for secondary links */
+.header-actions .secondary-link {
+  background: transparent;
   color: var(--text-main);
   border: 1px solid var(--border);
 }
 
-.signout-btn:hover {
-  background: #fee2e2;
-  color: var(--danger);
+/* DROPDOWN MENU */
+.dropdown-menu {
+  display: none;
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+  min-width: 200px;
+  flex-direction: column;
+  padding: 8px;
+  z-index: 1001;
 }
 
-/* ===== MODULE QUICK NAV (HEADER) ===== */
+.dropdown-menu.show { display: flex; }
+
+.user-info-header {
+  padding: 12px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 8px;
+}
+
+.user-info-header span {
+  display: block;
+  font-size: 0.7rem;
+  color: var(--text-muted);
+}
+
+.user-info-header strong {
+  font-size: 0.85rem;
+  word-break: break-all;
+}
+
+.dropdown-item {
+  padding: 10px 12px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-main);
+  text-decoration: none;
+  border-radius: 6px;
+  transition: background 0.2s;
+  text-align: left;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.dropdown-item:hover { background: #f1f5f9; }
+.sign-out-item { color: #ef4444; }
+
+/* ===== MODULE QUICK NAV ===== */
 .module-nav {
   display: flex;
   gap: 6px;
@@ -117,218 +150,51 @@ header {
   white-space: nowrap;
 }
 
-.module-nav a:hover {
-  background: rgba(34,197,94,0.18);
-  border-color: rgba(34,197,94,0.45);
-}
-
 /* ===== MAIN CONTENT ===== */
-main {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-}
+main { flex: 1; display: flex; flex-direction: column; }
+section { padding: 60px 20px; display: flex; justify-content: center; }
+.content-wrapper { width: 100%; max-width: 1200px; }
 
-section {
-  padding: 60px 20px;
-  display: flex;
-  justify-content: center;
-}
-
-.content-wrapper {
-  width: 100%;
-  max-width: 1200px;
-}
-
-/* ROW 1: HERO */
-.hero-content {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 40px;
-  align-items: center;
-  animation: slideUpFade 0.8s ease-out;
-}
-
-.copy h1 {
-  font-size: 2.5rem;
-  line-height: 1.1;
-  margin: 0;
-  font-weight: 900;
-  letter-spacing: -0.04em;
-}
-
-.copy p {
-  margin-top: 1.5rem;
-  font-size: 1.1rem;
-  color: var(--text-muted);
-  line-height: 1.5;
-}
-
+/* HERO */
+.hero-content { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: center; animation: slideUpFade 0.8s ease-out; }
+.copy h1 { font-size: 2.5rem; line-height: 1.1; margin: 0; font-weight: 900; letter-spacing: -0.04em; }
+.copy p { margin-top: 1.5rem; font-size: 1.1rem; color: var(--text-muted); line-height: 1.5; }
 .visual { position: relative; width: 100%; text-align: right; }
-.laptop{
-  max-width:680px;
-  width:100%;
-  transform: translate(20px, 0px) scale(1.06);
-}
+.laptop{ max-width:680px; width:100%; transform: translate(20px, 0px) scale(1.06); }
+.phone{ width:180px; transform: translate(-353px, -117px) scale(1.48); }
 
-.phone{
-  width:180px;
-  transform: translate(-353px, -117px) scale(1.48);
-}
-
-/* ROW 2: ACCESS & PRICING */
+/* ACCESS & PRICING */
 .access-section { background: #f1f5f9; }
-.access-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 40px;
-  align-items: center;
-}
-
-.pricing-table {
-  background: #fff;
-  padding: 30px;
-  border-radius: 20px;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.05);
-}
-
-.price-row {
-  display: flex;
-  justify-content: space-between;
-  padding: 12px 0;
-  border-bottom: 1px solid #f1f5f9;
-}
-
+.access-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: center; }
+.pricing-table { background: #fff; padding: 30px; border-radius: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); }
+.price-row { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #f1f5f9; }
 .price-row:last-child { border: none; }
 .price-label { font-weight: 600; color: var(--text-muted); font-size: 0.9rem; }
 .price-value { font-weight: 800; color: var(--accent); font-size: 0.9rem; }
 
-/* ROW 3: REFERRAL */
-.referral-content {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 40px;
-  align-items: center;
-}
-
-.referral-text h2 {
-  font-size: 0.75rem;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  color: var(--accent);
-  margin-bottom: 1rem;
-}
-
-.referral-text h3 {
-  font-size: 1.8rem;
-  font-weight: 800;
-  margin: 0 0 1rem;
-}
+/* REFERRAL */
+.referral-content { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: center; }
+.referral-text h2 { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--accent); margin-bottom: 1rem; }
+.referral-text h3 { font-size: 1.8rem; font-weight: 800; margin: 0 0 1rem; }
 
 /* BUTTONS */
-.cta-btn {
-  background: var(--accent);
-  color: #fff;
-  padding: 14px 28px;
-  border-radius: 10px;
-  font-size: 0.95rem;
-  font-weight: 700;
-  text-decoration: none;
-  display: inline-block;
-  margin-top: 1.5rem;
-  text-align: center;
-}
+.cta-btn { background: var(--accent); color: #fff; padding: 14px 28px; border-radius: 10px; font-size: 0.95rem; font-weight: 700; text-decoration: none; display: inline-block; margin-top: 1.5rem; text-align: center; }
 
-/* ===== MODULE DOCK ===== */
-.modules {
-  background: #fff;
-  border-top: 1px solid var(--border);
-  padding: 40px 20px;
-}
+/* MODULE DOCK */
+.modules { background: #fff; border-top: 1px solid var(--border); padding: 40px 20px; }
+.module-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; max-width: 1200px; margin: 0 auto; }
+.module { padding: 20px 10px; border-radius: 12px; text-align: center; font-size: 0.8rem; font-weight: 700; background: var(--bg); border: 1px solid var(--border); }
+.module span { display: block; font-size: 0.65rem; font-weight: 800; text-transform: uppercase; color: var(--accent); margin-bottom: 8px; }
 
-.module-row {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-  gap: 12px;
-  max-width: 1200px;
-  margin: 0 auto;
-}
-
-.module {
-  padding: 20px 10px;
-  border-radius: 12px;
-  text-align: center;
-  font-size: 0.8rem;
-  font-weight: 700;
-  background: var(--bg);
-  border: 1px solid var(--border);
-}
-
-.module span {
-  display: block;
-  font-size: 0.65rem;
-  font-weight: 800;
-  text-transform: uppercase;
-  color: var(--accent);
-  margin-bottom: 8px;
-}
-
-/* ===== MOBILE OPTIMIZATION ===== */
+/* MOBILE */
 @media (max-width: 850px) {
   header { padding: 1rem; }
-  .brand span { font-size: 1.1rem; }
-  
-  .hero-content, .access-grid, .referral-content {
-    grid-template-columns: 1fr;
-    text-align: center;
-    gap: 30px;
-  }
-
-  .copy h1 { font-size: 2rem; }
-  .copy p { font-size: 1rem; max-width: 100%; }
-
-  .visual { 
-    text-align: center; 
-    position: relative; 
-    display: block;
-    margin-top: 20px;
-    height: 250px; 
-  }
-  
-  .laptop { 
-    max-width: 100%; 
-    margin: 0 auto; 
-    transform: none; 
-    position: relative;
-    z-index: 1;
-  }
-  
-  .phone { 
-    width: 80px; 
-    position: absolute;
-    left: 15%; 
-    bottom: 10%; 
-    transform: none; 
-    z-index: 2;
-  }
-
-  .referral-text h3 { font-size: 1.5rem; }
-  
-  .module-row {
-    grid-template-columns: 1fr 1fr;
-  }
-}
-
-@media (max-width: 480px) {
-  .header-actions { gap: 4px; }
-  .header-actions a, .auth-btn { padding: 6px 8px; font-size: 0.65rem; }
-  .module-row { grid-template-columns: 1fr; }
-  .user-email { display: none; } /* Hide email on very small screens to save space */
+  .hero-content, .access-grid, .referral-content { grid-template-columns: 1fr; text-align: center; }
+  .visual { text-align: center; height: 250px; }
+  .laptop { transform: none; }
+  .phone { width: 80px; position: absolute; left: 15%; bottom: 10%; transform: none; }
 }
 </style>
-
-<link rel="icon" type="image/png" sizes="192x192" href="/favicon-192.png">
-<link rel="apple-touch-icon" sizes="192x192" href="/favicon-192.png">
 </head>
 
 <body>
@@ -340,18 +206,25 @@ section {
   </a>
 
   <nav class="module-nav">
-    <a href="/coming-soon.html">Download App</a>
+    <a href="/coming-soon.html" style="text-decoration:none">Download App</a>
   </nav>
 
   <div class="header-actions">
-    <a href="support.html">Support</a>
+    <a href="support.html" class="secondary-link">Support</a>
+    <a href="about.html" class="secondary-link">About</a>
     
     <a href="signin.html" id="signinLink">Sign In</a>
     
-    <div id="userMenu" class="user-menu">
-      <span class="user-email" id="userEmailDisplay"></span>
-      <a href="profile.html" class="auth-btn">Profile</a>
-      <button onclick="handleSignOut()" class="auth-btn signout-btn">Sign Out</button>
+    <div id="profileWrapper" style="display:none;">
+      <button class="profile-trigger" onclick="toggleDropdown()">Profile</button>
+      <div id="profileDropdown" class="dropdown-menu">
+        <div class="user-info-header">
+          <span>Logged in as</span>
+          <strong id="userEmailDisplay">user@example.com</strong>
+        </div>
+        <a href="settings.html" class="dropdown-item">Settings</a>
+        <button onclick="handleSignOut()" class="dropdown-item sign-out-item">Sign Out</button>
+      </div>
     </div>
   </div>
 </header>
@@ -428,32 +301,40 @@ firebase.initializeApp({
 });
 
 const auth = firebase.auth();
-auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
-
 const signinLink = document.getElementById("signinLink");
-const userMenu = document.getElementById("userMenu");
+const profileWrapper = document.getElementById("profileWrapper");
 const userEmailDisplay = document.getElementById("userEmailDisplay");
+const profileDropdown = document.getElementById("profileDropdown");
 
-// Handle UI updates based on Auth state
+// AUTH LISTENER
 auth.onAuthStateChanged(user => {
   if (user) {
-    // User is signed in
     signinLink.style.display = "none";
-    userMenu.style.display = "flex";
+    profileWrapper.style.display = "block";
     userEmailDisplay.textContent = user.email;
   } else {
-    // User is signed out
     signinLink.style.display = "inline-block";
-    userMenu.style.display = "none";
+    profileWrapper.style.display = "none";
   }
 });
 
-// Handle Sign Out action
+// UI TOGGLE
+function toggleDropdown() {
+  profileDropdown.classList.toggle("show");
+}
+
+// Close dropdown if clicked outside
+window.onclick = function(event) {
+  if (!event.target.matches('.profile-trigger')) {
+    if (profileDropdown.classList.contains('show')) {
+      profileDropdown.classList.remove('show');
+    }
+  }
+}
+
 function handleSignOut() {
   auth.signOut().then(() => {
     window.location.reload();
-  }).catch((error) => {
-    console.error("Sign out error:", error);
   });
 }
 </script>
