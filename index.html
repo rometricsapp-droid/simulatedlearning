@@ -13,6 +13,7 @@
   --text-main: #1e293b;
   --text-muted: #475569;
   --border: #eef2f6;
+  --danger: #ef4444;
 }
 
 @keyframes slideUpFade {
@@ -27,7 +28,7 @@ html,body{
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
   background: var(--bg);
   color: var(--primary);
-  overflow-x: hidden; /* Prevent horizontal scroll */
+  overflow-x: hidden;
 }
 
 /* ===== HEADER ===== */
@@ -55,9 +56,9 @@ header {
 .brand img { height: 32px; width: auto; }
 .brand span { font-weight: 800; font-size: 1.25rem; letter-spacing: -0.04em; }
 
-.header-actions { display: flex; gap: 8px; }
+.header-actions { display: flex; gap: 8px; align-items: center; }
 
-.header-actions a {
+.header-actions a, .auth-btn {
   background: var(--accent);
   color: #fff;
   padding: 8px 12px;
@@ -66,7 +67,35 @@ header {
   font-weight: 700;
   text-decoration: none;
   transition: all 0.2s;
+  cursor: pointer;
+  border: none;
 }
+
+/* User Profile Dropdown Style */
+.user-menu {
+  position: relative;
+  display: none; /* Hidden by default, shown via JS */
+  align-items: center;
+  gap: 10px;
+}
+
+.user-email {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.signout-btn {
+  background: #f1f5f9;
+  color: var(--text-main);
+  border: 1px solid var(--border);
+}
+
+.signout-btn:hover {
+  background: #fee2e2;
+  color: var(--danger);
+}
+
 /* ===== MODULE QUICK NAV (HEADER) ===== */
 .module-nav {
   display: flex;
@@ -76,8 +105,8 @@ header {
 }
 
 .module-nav a {
-  background: rgba(34,197,94,0.08); /* subtle green */
-  color: #166534;                  /* dark green text */
+  background: rgba(34,197,94,0.08);
+  color: #166534;
   padding: 6px 10px;
   border-radius: 999px;
   font-size: 0.65rem;
@@ -146,6 +175,7 @@ section {
   width:180px;
   transform: translate(-353px, -117px) scale(1.48);
 }
+
 /* ROW 2: ACCESS & PRICING */
 .access-section { background: #f1f5f9; }
 .access-grid {
@@ -243,7 +273,7 @@ section {
   margin-bottom: 8px;
 }
 
-/* ===== MOBILE OPTIMIZATION (FITS ALL PHONES) ===== */
+/* ===== MOBILE OPTIMIZATION ===== */
 @media (max-width: 850px) {
   header { padding: 1rem; }
   .brand span { font-size: 1.1rem; }
@@ -257,13 +287,12 @@ section {
   .copy h1 { font-size: 2rem; }
   .copy p { font-size: 1rem; max-width: 100%; }
 
-  /* Corrected Phone visibility */
   .visual { 
     text-align: center; 
     position: relative; 
     display: block;
     margin-top: 20px;
-    height: 250px; /* Gives space for the images */
+    height: 250px; 
   }
   
   .laptop { 
@@ -292,19 +321,14 @@ section {
 
 @media (max-width: 480px) {
   .header-actions { gap: 4px; }
-  .header-actions a { padding: 6px 8px; font-size: 0.65rem; }
-  .module-row { grid-template-columns: 1fr; } /* Single column for tiny screens */
+  .header-actions a, .auth-btn { padding: 6px 8px; font-size: 0.65rem; }
+  .module-row { grid-template-columns: 1fr; }
+  .user-email { display: none; } /* Hide email on very small screens to save space */
 }
 </style>
 
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-
-  <title>ROMetrics</title>
-
-  <link rel="icon" type="image/png" sizes="192x192" href="/favicon-192.png">
-  <link rel="apple-touch-icon" sizes="192x192" href="/favicon-192.png">
+<link rel="icon" type="image/png" sizes="192x192" href="/favicon-192.png">
+<link rel="apple-touch-icon" sizes="192x192" href="/favicon-192.png">
 </head>
 
 <body>
@@ -315,21 +339,24 @@ section {
     <span>ROMetrics</span>
   </a>
 
- <nav class="module-nav">
+  <nav class="module-nav">
     <a href="/coming-soon.html">Download App</a>
   </nav>
 
-
   <div class="header-actions">
     <a href="support.html">Support</a>
-    <a href="about.html">About</a>
-    <a href="signin.html">Sign In</a>
+    
+    <a href="signin.html" id="signinLink">Sign In</a>
+    
+    <div id="userMenu" class="user-menu">
+      <span class="user-email" id="userEmailDisplay"></span>
+      <a href="profile.html" class="auth-btn">Profile</a>
+      <button onclick="handleSignOut()" class="auth-btn signout-btn">Sign Out</button>
+    </div>
   </div>
 </header>
 
-
 <main>
-
   <section class="hero-section">
     <div class="content-wrapper hero-content">
         <div class="copy">
@@ -368,9 +395,7 @@ section {
             <p>Mastering biomechanics is better together. Refer a colleague or classmate; once they sign up, you receive an additional free month added to your account automatically.</p>
             <a href="refer.html" class="cta-btn">Refer a Colleague</a>
         </div>
-        <div class="visual">
-           
-        </div>
+        <div class="visual"></div>
     </div>
   </section>
 </main>
@@ -391,7 +416,6 @@ section {
     </div>
 </footer>
 
-<!-- 🔐 FIREBASE AUTH — MINIMAL ADDITION -->
 <script src="https://www.gstatic.com/firebasejs/10.12.4/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.4/firebase-auth-compat.js"></script>
 
@@ -407,18 +431,31 @@ const auth = firebase.auth();
 auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
 
 const signinLink = document.getElementById("signinLink");
-const signedInText = document.getElementById("signedInText");
+const userMenu = document.getElementById("userMenu");
+const userEmailDisplay = document.getElementById("userEmailDisplay");
 
+// Handle UI updates based on Auth state
 auth.onAuthStateChanged(user => {
   if (user) {
+    // User is signed in
     signinLink.style.display = "none";
-    signedInText.style.display = "inline";
-    signedInText.textContent = "Signed in as " + user.email;
+    userMenu.style.display = "flex";
+    userEmailDisplay.textContent = user.email;
   } else {
-    signinLink.style.display = "inline";
-    signedInText.style.display = "none";
+    // User is signed out
+    signinLink.style.display = "inline-block";
+    userMenu.style.display = "none";
   }
 });
+
+// Handle Sign Out action
+function handleSignOut() {
+  auth.signOut().then(() => {
+    window.location.reload();
+  }).catch((error) => {
+    console.error("Sign out error:", error);
+  });
+}
 </script>
 
 </body>
