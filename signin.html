@@ -129,14 +129,21 @@ input{
 <div id="signedInUI" style="display:none">
   <div class="signed-in" id="userEmail"></div>
 
-  <button class="btn primary" onclick="location.href='/'">
-    Continue to ROMetrics
+  <p style="font-size:.9rem;color:var(--muted);margin-bottom:14px">
+    You are now signed in.<br>
+    Please return to the ROMetrics app to continue.
+  </p>
+
+  <button class="btn primary" onclick="window.close()">
+    Done
   </button>
 
   <button class="btn link" id="signOutBtn">
     Sign Out
   </button>
 </div>
+
+
 
 </div>
 </main>
@@ -163,6 +170,10 @@ const signedInUI = document.getElementById("signedInUI");
 const title = document.getElementById("title");
 const subtitle = document.getElementById("subtitle");
 const userEmail = document.getElementById("userEmail");
+const params = new URLSearchParams(window.location.search);
+const fromApp = params.get("source") === "app";
+
+const continueBtn = document.getElementById("continueBtn");
 
 /* STATE LISTENER */
 auth.onAuthStateChanged(user => {
@@ -172,6 +183,19 @@ auth.onAuthStateChanged(user => {
     title.textContent = "Signed In";
     subtitle.textContent = "You are signed in as:";
     userEmail.textContent = user.email;
+
+    if (fromApp) {
+  continueBtn.textContent = "Return to ROMetrics App";
+  continueBtn.onclick = () => {
+    window.location.href = "rometrics://auth";
+  };
+} else {
+  continueBtn.textContent = "Continue to ROMetrics";
+  continueBtn.onclick = () => {
+    window.location.href = "/";
+  };
+}
+
   } else {
     authUI.style.display = "block";
     signedInUI.style.display = "none";
