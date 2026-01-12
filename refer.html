@@ -1,0 +1,69 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Upload Referral Codes</title>
+</head>
+<body>
+  <h3>Referral Upload</h3>
+  <input type="file" id="csv" accept=".csv" />
+  <button id="upload">Upload</button>
+  <pre id="log"></pre>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyAxMFW5gguPiiaomPbuoMc7suxHmgPEhRg",
+  authDomain: "rometricsapp-1444e.firebaseapp.com",
+  projectId: "rometricsapp-1444e",
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+const log = msg => document.getElementById("log").textContent += msg + "\n";
+
+onAuthStateChanged(auth, user => {
+  if (!user) {
+    log("❌ Not signed in");
+    return;
+  }
+
+  // OPTIONAL: lock to YOUR UID
+  // if (user.uid !== "YOUR_UID_HERE") return;
+
+  log("✅ Signed in as " + user.email);
+
+  document.getElementById("upload").onclick = async () => {
+    const file = document.getElementById("csv").files[0];
+    if (!file) return;
+
+    const text = await file.text();
+    const lines = text.trim().split("\n").slice(1);
+
+    for (const line of lines) {
+      const code = line.split(",")[0].trim();
+      if (!code) continue;
+
+      await setDoc(doc(db, "referralCodes", code), {
+        status: "unused",
+        subscription_reward: "1_month_free",
+        referrer_uid: "",
+        referred_uid: "",
+        issued_at: null,
+        redeemed_at: null
+      });
+
+      log("Uploaded " + code);
+    }
+
+    log("✅ DONE");
+  };
+});
+</script>
+</body>
+</html>
