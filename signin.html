@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>ROMetrics — Sign In</title>
 
-<!-- FAVICON -->
 <link rel="icon" type="image/png" sizes="192x192" href="favicon-192.png">
 <link rel="apple-touch-icon" sizes="192x192" href="favicon-192.png">
 
@@ -22,7 +21,7 @@
 html,body{
   margin:0;
   height:100%;
-  font-family: system-ui, -apple-system, Segoe UI, Roboto, Inter, Arial, sans-serif;
+  font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial,sans-serif;
   background:var(--bg);
   color:var(--primary);
 }
@@ -45,29 +44,25 @@ main{
   text-align:center;
 }
 
-.logo{
-  height:34px;
-  margin-bottom:18px;
-}
+.logo{height:34px;margin-bottom:18px}
 
 h1{
   margin:0 0 8px;
   font-size:1.8rem;
   font-weight:900;
-  letter-spacing:-0.03em;
 }
 
 p{
   margin:0 0 24px;
   color:var(--muted);
-  font-size:0.95rem;
+  font-size:.95rem;
 }
 
 .btn{
   width:100%;
-  padding:12px 14px;
+  padding:12px;
   border-radius:10px;
-  font-size:0.9rem;
+  font-size:.9rem;
   font-weight:800;
   border:1px solid var(--border);
   background:#f8fafc;
@@ -81,116 +76,116 @@ p{
   border:none;
 }
 
+.btn.link{
+  background:none;
+  border:none;
+  color:var(--accent);
+}
+
 input{
   width:100%;
   padding:12px;
   border-radius:10px;
   border:1px solid var(--border);
   margin-bottom:10px;
-  font-size:0.9rem;
-}
-
-.small{
-  font-size:0.75rem;
-  color:#64748b;
-  margin-top:12px;
 }
 
 .signed-in{
   font-weight:800;
   color:var(--accent);
-  margin-top:8px;
+  margin-bottom:16px;
 }
 </style>
 </head>
 
 <body>
 <main>
-  <div class="card">
+<div class="card">
 
-    <!-- LOGO -->
-    <a href="/">
-      <img src="rometrics-logo.png" alt="ROMetrics logo" class="logo">
-    </a>
+<a href="/">
+  <img src="rometrics-logo.png" class="logo" alt="ROMetrics">
+</a>
 
-    <h1 id="title">Sign In</h1>
-    <p id="subtitle">Sign in or create an account to continue.</p>
+<h1 id="title">Sign In</h1>
+<p id="subtitle">Sign in or create an account to continue.</p>
 
-    <div id="authUI">
-      <!-- GOOGLE -->
-      <button class="btn primary" id="googleSignIn">
-        Continue with Google
-      </button>
+<!-- SIGN IN UI -->
+<div id="authUI">
+  <button class="btn primary" id="googleSignIn">
+    Continue with Google
+  </button>
 
-      <hr style="border:none;border-top:1px solid var(--border);margin:18px 0">
+  <hr style="border:none;border-top:1px solid var(--border);margin:18px 0">
 
-      <!-- EMAIL -->
-      <input type="email" id="email" placeholder="Email">
-      <input type="password" id="password" placeholder="Password">
+  <input id="email" type="email" placeholder="Email">
+  <input id="password" type="password" placeholder="Password">
 
-      <button class="btn" id="emailSignIn">
-        Sign In / Sign Up with Email
-      </button>
-    </div>
+  <button class="btn" id="emailSignIn">
+    Sign In / Sign Up with Email
+  </button>
+</div>
 
-    <div id="signedInUI" style="display:none">
-      <div class="signed-in" id="userEmail"></div>
-    </div>
+<!-- SIGNED IN UI -->
+<div id="signedInUI" style="display:none">
+  <div class="signed-in" id="userEmail"></div>
 
-    <div class="small">
-      By continuing, you agree to ROMetrics’ terms and policies.
-    </div>
-  </div>
+  <button class="btn primary" onclick="location.href='/'">
+    Continue to ROMetrics
+  </button>
+
+  <button class="btn link" id="signOutBtn">
+    Sign Out
+  </button>
+</div>
+
+</div>
 </main>
 
-<!-- FIREBASE -->
 <script src="https://www.gstatic.com/firebasejs/10.12.4/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.4/firebase-auth-compat.js"></script>
 
 <script>
-const firebaseConfig = {
+firebase.initializeApp({
   apiKey: "AIzaSyAxMFW5gguPiiaomPbuoMc7suxHmgPEhRg",
   authDomain: "rometricsapp-1444e.firebaseapp.com",
   projectId: "rometricsapp-1444e",
   appId: "1:1016564998048:web:1d4c7e4780de0323664ec5"
-};
+});
 
-firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 
-/* AUTH STATE */
+/* STATE */
 auth.onAuthStateChanged(user => {
-  if (user) {
-    document.getElementById("authUI").style.display = "none";
-    document.getElementById("signedInUI").style.display = "block";
-    document.getElementById("title").textContent = "Signed In";
-    document.getElementById("subtitle").textContent = "You are signed in as:";
-    document.getElementById("userEmail").textContent = user.email;
+  if(user){
+    authUI.style.display = "none";
+    signedInUI.style.display = "block";
+    title.textContent = "Signed In";
+    subtitle.textContent = "You are signed in as:";
+    userEmail.textContent = user.email;
   }
 });
 
 /* GOOGLE */
-document.getElementById("googleSignIn").onclick = () => {
-  const provider = new firebase.auth.GoogleAuthProvider();
-  auth.signInWithPopup(provider).catch(err => alert(err.message));
+googleSignIn.onclick = () => {
+  auth.signInWithPopup(new firebase.auth.GoogleAuthProvider())
+    .catch(e => alert(e.message));
 };
 
-/* EMAIL (SIGN IN OR SIGN UP) */
-document.getElementById("emailSignIn").onclick = () => {
-  const email = email.value;
-  const password = password.value;
+/* EMAIL */
+emailSignIn.onclick = () => {
+  const e = email.value;
+  const p = password.value;
+  if(!e || !p) return alert("Enter email and password");
 
-  if (!email || !password) {
-    alert("Enter email and password");
-    return;
-  }
-
-  auth.signInWithEmailAndPassword(email, password)
+  auth.signInWithEmailAndPassword(e,p)
     .catch(() =>
-      auth.createUserWithEmailAndPassword(email, password)
+      auth.createUserWithEmailAndPassword(e,p)
         .catch(err => alert(err.message))
     );
 };
+
+/* SIGN OUT */
+signOutBtn.onclick = () => auth.signOut();
 </script>
 </body>
 </html>
