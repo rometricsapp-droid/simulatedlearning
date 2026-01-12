@@ -1,301 +1,262 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>ROMetrics | Motion Analysis Platform</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=1280, initial-scale=0.3, maximum-scale=1.0, user-scalable=yes">
+  <title>Settings — ROMetrics</title>
 
-<link rel="icon" type="image/png" sizes="192x192" href="/favicon-192.png">
-<link rel="apple-touch-icon" sizes="192x192" href="/favicon-192.png">
+  <style>
+    :root {
+      --bg-dark: #121212;
+      --card-dark: #1e1e1e;
+      --text-main: #ffffff;
+      --text-muted: #9ca3af;
+      --accent: #bef264; /* Lime accent like the image */
+      --border: #2d2d2d;
+    }
 
-<style>
-:root {
-  --primary: #0f172a;
-  --accent: #2563eb; 
-  --bg: #fcfdfe;
-  --text-main: #1e293b;
-  --text-muted: #475569;
-  --border: #eef2f6;
-  --danger: #ef4444;
-}
+    * { box-sizing: border-box; }
+    
+    body {
+      margin: 0;
+      width: 1280px !important;
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      background: var(--bg-dark);
+      color: var(--text-main);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding-top: 40px;
+    }
 
-@keyframes slideUpFade {
-  0% { opacity: 0; transform: translateY(20px); }
-  100% { opacity: 1; transform: translateY(0); }
-}
+    /* 🧭 TOP NAV BAR (Matches Image) */
+    .settings-nav {
+      background: #1a1a1a;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      display: flex;
+      padding: 6px;
+      gap: 4px;
+      margin-bottom: 60px;
+    }
 
-*{box-sizing:border-box}
-html,body{
-  margin:0;
-  height:100%;
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
-  background: var(--bg);
-  color: var(--primary);
-  overflow-x: hidden;
-}
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+      text-decoration: none;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      font-weight: 600;
+      border-radius: 8px;
+      transition: 0.2s;
+    }
 
-/* ===== HEADER ===== */
-header {
-  padding: 1rem 1.5rem;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background: rgba(255,255,255,0.95);
-  backdrop-filter: blur(10px);
-  border-bottom: 1px solid var(--border);
-  position: sticky;
-  top: 0;
-  z-index: 1000;
-}
+    .nav-item svg { width: 16px; height: 16px; fill: currentColor; }
+    
+    .nav-item.active {
+      color: var(--accent);
+    }
 
-.brand {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  text-decoration: none;
-  color: inherit;
-}
+    .nav-item:hover:not(.active) {
+      background: #252525;
+      color: #fff;
+    }
 
-.brand img { height: 32px; width: auto; }
-.brand span { font-weight: 800; font-size: 1.25rem; letter-spacing: -0.04em; }
+    /* 📄 CONTENT AREA */
+    .content-wrapper {
+      width: 900px;
+      text-align: left;
+    }
 
-.header-actions { display: flex; gap: 8px; align-items: center; position: relative; }
+    h1 {
+      font-size: 2.8rem;
+      font-weight: 800;
+      margin: 0 0 10px 0;
+      letter-spacing: -0.02em;
+    }
 
-.header-actions a, .profile-trigger {
-  background: var(--accent);
-  color: #fff;
-  padding: 8px 12px;
-  border-radius: 6px;
-  font-size: 0.75rem;
-  font-weight: 700;
-  text-decoration: none;
-  transition: all 0.2s;
-  cursor: pointer;
-  border: none;
-}
+    .description {
+      font-size: 1.1rem;
+      color: var(--text-muted);
+      margin-bottom: 40px;
+    }
 
-.header-actions .secondary-link {
-  background: transparent;
-  color: var(--text-main);
-  border: 1px solid var(--border);
-}
+    hr {
+      border: 0;
+      border-top: 1px solid var(--border);
+      margin-bottom: 50px;
+    }
 
-/* DROPDOWN MENU */
-.dropdown-menu {
-  display: none;
-  position: absolute;
-  top: calc(100% + 10px);
-  right: 0;
-  background: white;
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-  min-width: 220px;
-  flex-direction: column;
-  padding: 8px;
-  z-index: 1001;
-}
+    h2 {
+      font-size: 1.8rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 30px;
+    }
 
-.dropdown-menu.show { display: flex; }
+    .help-icon {
+      width: 18px;
+      height: 18px;
+      border: 1.5px solid var(--text-muted);
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      color: var(--text-muted);
+      cursor: help;
+    }
 
-.user-info-header {
-  padding: 12px;
-  border-bottom: 1px solid var(--border);
-  margin-bottom: 8px;
-}
+    /* 💳 STATUS BOX */
+    .status-card {
+      background: var(--card-dark);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
 
-.user-info-header span { display: block; font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase; }
-.user-info-header strong { display: block; font-size: 0.85rem; color: var(--primary); word-break: break-all; }
+    .status-info div { font-size: 1.2rem; font-weight: 700; }
+    .status-info span { color: var(--text-muted); font-size: 0.9rem; }
 
-.dropdown-item {
-  padding: 10px 12px;
-  font-size: 0.8rem;
-  font-weight: 600;
-  color: var(--text-main);
-  text-decoration: none;
-  border-radius: 6px;
-  transition: background 0.2s;
-  text-align: left;
-  background: none;
-  border: none;
-  cursor: pointer;
-}
+    .btn-upgrade {
+      background: var(--accent);
+      color: #000;
+      text-decoration: none;
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-weight: 800;
+      font-size: 0.9rem;
+    }
 
-.dropdown-item:hover { background: #f1f5f9; }
-.sign-out-item { color: var(--danger); border-top: 1px solid var(--border); margin-top: 4px; }
+    .billing-history {
+      margin-top: 60px;
+    }
 
-/* ===== MODULE QUICK NAV ===== */
-.module-nav { display: flex; gap: 6px; justify-content: center; flex: 1; }
-.module-nav a {
-  background: rgba(34,197,94,0.08);
-  color: #166534;
-  padding: 6px 10px;
-  border-radius: 999px;
-  font-size: 0.65rem;
-  font-weight: 700;
-  text-decoration: none;
-  border: 1px solid rgba(34,197,94,0.25);
-}
+    .billing-history table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
 
-/* ===== MAIN CONTENT ===== */
-main { flex: 1; display: flex; flex-direction: column; }
-section { padding: 60px 20px; display: flex; justify-content: center; }
-.content-wrapper { width: 100%; max-width: 1200px; }
+    .billing-history th { text-align: left; color: var(--text-muted); font-size: 0.8rem; padding: 12px; border-bottom: 1px solid var(--border); }
+    .billing-history td { padding: 16px 12px; border-bottom: 1px solid #1a1a1a; font-size: 0.95rem; }
 
-/* HERO */
-.hero-content { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: center; animation: slideUpFade 0.8s ease-out; }
-.copy h1 { font-size: 2.5rem; line-height: 1.1; margin: 0; font-weight: 900; letter-spacing: -0.04em; }
-.copy p { margin-top: 1.5rem; font-size: 1.1rem; color: var(--text-muted); line-height: 1.5; }
-.visual { position: relative; width: 100%; text-align: right; }
-.laptop{ max-width:680px; width:100%; transform: translate(20px, 0px) scale(1.06); }
-.phone{ width:180px; transform: translate(-353px, -117px) scale(1.48); }
+    .back-link { position: absolute; top: 40px; left: 40px; color: var(--accent); text-decoration: none; font-weight: 700; }
 
-/* ACCESS & PRICING */
-.access-section { background: #f1f5f9; }
-.access-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: center; }
-.pricing-table { background: #fff; padding: 30px; border-radius: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); }
-.price-row { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #f1f5f9; }
-.price-label { font-weight: 600; color: var(--text-muted); font-size: 0.9rem; }
-.price-value { font-weight: 800; color: var(--accent); font-size: 0.9rem; }
-
-/* MODULE DOCK */
-.modules { background: #fff; border-top: 1px solid var(--border); padding: 40px 20px; }
-.module-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; max-width: 1200px; margin: 0 auto; }
-.module { padding: 20px 10px; border-radius: 12px; text-align: center; font-size: 0.8rem; font-weight: 700; background: var(--bg); border: 1px solid var(--border); }
-.module span { display: block; font-size: 0.65rem; font-weight: 800; text-transform: uppercase; color: var(--accent); margin-bottom: 8px; }
-
-/* MOBILE */
-@media (max-width: 850px) {
-  header { padding: 1rem; }
-  .hero-content, .access-grid { grid-template-columns: 1fr; text-align: center; }
-  .visual { text-align: center; height: 250px; }
-  .laptop { transform: none; }
-  .phone { width: 80px; position: absolute; left: 15%; bottom: 10%; transform: none; }
-}
-</style>
+  </style>
 </head>
-
 <body>
 
-<header>
-  <a href="https://rometrics.app" class="brand">
-    <img src="/rometrics-logo.png" alt="ROMetrics logo">
-    <span>ROMetrics</span>
-  </a>
+  <a href="index.html" class="back-link">← Return to App</a>
 
-  <nav class="module-nav">
-    <a href="/coming-soon.html">Download App</a>
-  </nav>
+  <div class="settings-nav">
+    <a href="profile.html" class="nav-item">
+      <svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+      Profile
+    </a>
+    <a href="#" class="nav-item active">
+      <svg viewBox="0 0 24 24"><path d="M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm16-4H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-1 9h-4v4h-2v-4H9V9h4V5h2v4h4v2z"/></svg>
+      Subscription
+    </a>
+    <a href="billing.html" class="nav-item">
+      <svg viewBox="0 0 24 24"><path d="M20 4H4c-1.11 0-1.99.89-1.99 2L2 18c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4V10h16v8zm0-12H4V4h16v2z"/></svg>
+      Billing
+    </a>
+  </div>
 
-  <div class="header-actions">
-    <a href="support.html" class="secondary-link">Support</a>
-    <a href="about.html" class="secondary-link">About</a>
+  <div class="content-wrapper">
+    <h1>Subscription</h1>
+    <p class="description">Manage your subscription plan and track your billing history.</p>
     
-    <a href="signin.html" id="signinLink">Sign In</a>
-    
-    <div id="profileWrapper" style="display:none;">
-      <button class="profile-trigger" onclick="toggleDropdown(event)">Profile</button>
-      <div id="profileDropdown" class="dropdown-menu">
-        <div class="user-info-header">
-          <span>Account</span>
-          <strong id="userEmailDisplay">...</strong>
-        </div>
-        <a href="settings.html" class="dropdown-item">Settings</a>
-        <button onclick="handleSignOut()" class="dropdown-item sign-out-item">Sign Out</button>
+    <hr>
+
+    <h2>Current plan <span class="help-icon">?</span></h2>
+
+    <div class="status-card">
+      <div class="status-info">
+        <div id="planTitle">ROMetrics Pro Trial</div>
+        <span id="expiryText">Renews on: ...</span>
       </div>
+      <a href="#" id="upgradeBtn" class="btn-upgrade" style="display:none;">Upgrade Plan</a>
+    </div>
+
+    <div class="billing-history">
+      <h3>Recent Invoices</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Description</th>
+            <th>Amount</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody id="invoiceList">
+          </tbody>
+      </table>
     </div>
   </div>
-</header>
 
-<main>
-  <section class="hero-section">
-    <div class="content-wrapper hero-content">
-        <div class="copy">
-          <h1>Measure. Train. <br>Analyze.</h1>
-          <p>The unified workspace for goniometry training, motion lab analysis, and manual muscle testing.</p>
-          <a href="product.html" class="cta-btn">Explore Details</a>
-        </div>
-        <div class="visual">
-          <img src="Rometrics on laptop.png" class="laptop" alt="ROMetrics on laptop">
-          <img src="Rometrics on phone.png" class="phone" alt="ROMetrics on phone">
-        </div>
-    </div>
-  </section>
+  <script src="https://www.gstatic.com/firebasejs/10.12.4/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.4/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore-compat.js"></script>
 
-  <section class="access-section">
-    <div class="content-wrapper access-grid">
-        <div class="pricing-table">
-            <div class="price-row"><span class="price-label">Trial Period</span><span class="price-value">1 Month Free</span></div>
-            <div class="price-row"><span class="price-label">Regular Rate</span><span class="price-value">$5.99 / mo</span></div>
-            <div class="price-row"><span class="price-label">Student Rate (.edu)</span><span class="price-value">$3.99 / mo</span></div>
-        </div>
-        <div class="copy">
-            <h2>Instant Access</h2>
-            <p>No credit card is required to begin your trial.</p>
-            <a href="register.html" class="cta-btn">Register Now</a>
-        </div>
-    </div>
-  </section>
-</main>
+  <script>
+    firebase.initializeApp({
+      apiKey: "AIzaSyAxMFW5gguPiiaomPbuoMc7suxHmgPEhRg",
+      authDomain: "rometricsapp-1444e.firebaseapp.com",
+      projectId: "rometricsapp-1444e",
+      appId: "1:1016564998048:web:1d4c7e4780de0323664ec5"
+    });
 
-<section class="modules">
-  <div class="module-row">
-    <div class="module"><span>Measure</span>Goniometry Trainer</div>
-    <div class="module"><span>Analyze</span>Motions Lab</div>
-    <div class="module"><span>Strength</span>Manual Muscle Tests</div>
-    <div class="module"><span>Simulate</span>Simulated Evaluations</div>
-    <div class="module"><span>Investigate</span>Motion Forensics</div>
-  </div>
-</section>
+    const auth = firebase.auth();
+    const db = firebase.firestore();
 
-<footer>
-    <div style="text-align: center; padding: 20px; color: #94a3b8; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;">
-        ROMetrics &copy; 2026
-    </div>
-</footer>
+    auth.onAuthStateChanged(async user => {
+      if (!user) { window.location.href = "signin.html"; return; }
 
-<script src="https://www.gstatic.com/firebasejs/10.12.4/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.4/firebase-auth-compat.js"></script>
+      // 1. Check Pro Status
+      const userDoc = await db.collection("users").doc(user.uid).get();
+      if (userDoc.exists) {
+        const data = userDoc.data();
+        const expiry = data.accessExpiry.toDate();
+        const now = new Date();
 
-<script>
-firebase.initializeApp({
-  apiKey: "AIzaSyAxMFW5gguPiiaomPbuoMc7suxHmgPEhRg",
-  authDomain: "rometricsapp-1444e.firebaseapp.com",
-  projectId: "rometricsapp-1444e",
-  appId: "1:1016564998048:web:1d4c7e4780de0323664ec5"
-});
+        document.getElementById('expiryText').textContent = "Next billing date: " + expiry.toLocaleDateString();
 
-const auth = firebase.auth();
-const signinLink = document.getElementById("signinLink");
-const profileWrapper = document.getElementById("profileWrapper");
-const userEmailDisplay = document.getElementById("userEmailDisplay");
-const profileDropdown = document.getElementById("profileDropdown");
+        if (now > expiry) {
+          document.getElementById('planTitle').textContent = "Plan Expired";
+          document.getElementById('upgradeBtn').style.display = "block";
+          const baseUrl = user.email.toLowerCase().endsWith(".edu") ? "subscribe-edu" : "subscribe";
+          document.getElementById('upgradeBtn').href = `https://rometrics.app/${baseUrl}?uid=${user.uid}`;
+        }
+      }
 
-auth.onAuthStateChanged(user => {
-  if (user) {
-    signinLink.style.display = "none";
-    profileWrapper.style.display = "block";
-    userEmailDisplay.textContent = user.email;
-  } else {
-    signinLink.style.display = "inline-block";
-    profileWrapper.style.display = "none";
-  }
-});
+      // 2. Load Invoices ($0.00 receipts, etc)
+      const invSnap = await db.collection("invoices")
+        .where("userId", "==", user.uid)
+        .orderBy("date", "desc")
+        .get();
 
-function toggleDropdown(e) {
-  e.stopPropagation();
-  profileDropdown.classList.toggle("show");
-}
-
-window.onclick = function() {
-  profileDropdown.classList.remove("show");
-}
-
-async function handleSignOut() {
-  await auth.signOut();
-  window.location.reload();
-}
-</script>
-
+      let rows = "";
+      invSnap.forEach(doc => {
+        const inv = doc.data();
+        rows += `<tr>
+          <td>${inv.date ? inv.date.toDate().toLocaleDateString() : 'N/A'}</td>
+          <td>${inv.description}</td>
+          <td>$${inv.amount}</td>
+          <td style="color:var(--accent); font-weight:800;">Paid</td>
+        </tr>`;
+      });
+      document.getElementById('invoiceList').innerHTML = rows || "<tr><td colspan='4'>No transaction history found.</td></tr>";
+    });
+  </script>
 </body>
 </html>
