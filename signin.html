@@ -96,10 +96,10 @@ input{
   margin-top:12px;
 }
 
-a{
+.signed-in{
+  font-weight:800;
   color:var(--accent);
-  text-decoration:none;
-  font-weight:700;
+  margin-top:8px;
 }
 </style>
 </head>
@@ -113,23 +113,29 @@ a{
       <img src="rometrics-logo.png" alt="ROMetrics logo" class="logo">
     </a>
 
-    <h1>Sign In</h1>
-    <p>Sign in or create an account to continue.</p>
+    <h1 id="title">Sign In</h1>
+    <p id="subtitle">Sign in or create an account to continue.</p>
 
-    <!-- GOOGLE SIGN IN -->
-    <button class="btn primary" id="googleSignIn">
-      Continue with Google
-    </button>
+    <div id="authUI">
+      <!-- GOOGLE -->
+      <button class="btn primary" id="googleSignIn">
+        Continue with Google
+      </button>
 
-    <hr style="border:none;border-top:1px solid var(--border);margin:18px 0">
+      <hr style="border:none;border-top:1px solid var(--border);margin:18px 0">
 
-    <!-- EMAIL SIGN IN -->
-    <input type="email" id="email" placeholder="Email">
-    <input type="password" id="password" placeholder="Password">
+      <!-- EMAIL -->
+      <input type="email" id="email" placeholder="Email">
+      <input type="password" id="password" placeholder="Password">
 
-    <button class="btn" id="emailSignIn">
-      Sign In / Sign Up with Email
-    </button>
+      <button class="btn" id="emailSignIn">
+        Sign In / Sign Up with Email
+      </button>
+    </div>
+
+    <div id="signedInUI" style="display:none">
+      <div class="signed-in" id="userEmail"></div>
+    </div>
 
     <div class="small">
       By continuing, you agree to ROMetrics’ terms and policies.
@@ -137,7 +143,7 @@ a{
   </div>
 </main>
 
-<!-- FIREBASE SDKs -->
+<!-- FIREBASE -->
 <script src="https://www.gstatic.com/firebasejs/10.12.4/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.4/firebase-auth-compat.js"></script>
 
@@ -146,40 +152,44 @@ const firebaseConfig = {
   apiKey: "AIzaSyAxMFW5gguPiiaomPbuoMc7suxHmgPEhRg",
   authDomain: "rometricsapp-1444e.firebaseapp.com",
   projectId: "rometricsapp-1444e",
-  storageBucket: "rometricsapp-1444e.firebasestorage.app",
-  messagingSenderId: "1016564998048",
-  appId: "1:1016564998048:web:1d4c7e4780de0323664ec5",
-  measurementId: "G-90F1CLB744"
+  appId: "1:1016564998048:web:1d4c7e4780de0323664ec5"
 };
 
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 
-/* GOOGLE SIGN IN */
-document.getElementById('googleSignIn').onclick = () => {
+/* AUTH STATE */
+auth.onAuthStateChanged(user => {
+  if (user) {
+    document.getElementById("authUI").style.display = "none";
+    document.getElementById("signedInUI").style.display = "block";
+    document.getElementById("title").textContent = "Signed In";
+    document.getElementById("subtitle").textContent = "You are signed in as:";
+    document.getElementById("userEmail").textContent = user.email;
+  }
+});
+
+/* GOOGLE */
+document.getElementById("googleSignIn").onclick = () => {
   const provider = new firebase.auth.GoogleAuthProvider();
-  auth.signInWithPopup(provider)
-    .then(() => window.location.href = "/")
-    .catch(err => alert(err.message));
+  auth.signInWithPopup(provider).catch(err => alert(err.message));
 };
 
-/* EMAIL SIGN IN / SIGN UP */
-document.getElementById('emailSignIn').onclick = () => {
-  const email = document.getElementById('email').value;
-  const password = document.getElementById('password').value;
+/* EMAIL (SIGN IN OR SIGN UP) */
+document.getElementById("emailSignIn").onclick = () => {
+  const email = email.value;
+  const password = password.value;
 
-  if(!email || !password){
+  if (!email || !password) {
     alert("Enter email and password");
     return;
   }
 
   auth.signInWithEmailAndPassword(email, password)
-    .then(() => window.location.href = "/")
-    .catch(() => {
+    .catch(() =>
       auth.createUserWithEmailAndPassword(email, password)
-        .then(() => window.location.href = "/")
-        .catch(err => alert(err.message));
-    });
+        .catch(err => alert(err.message))
+    );
 };
 </script>
 </body>
