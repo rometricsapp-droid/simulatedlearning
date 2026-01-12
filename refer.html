@@ -1,69 +1,75 @@
-<!doctype html>
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <title>Upload Referral Codes</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RoMetrics Referral System</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f0f2f5; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .container { background: white; padding: 2rem; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); width: 100%; max-width: 400px; text-align: center; }
+        h1 { color: #1a73e8; font-size: 24px; }
+        p { color: #5f6368; font-size: 14px; margin-bottom: 1.5rem; }
+        input { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #dadce0; border-radius: 4px; box-sizing: border-box; }
+        button { width: 100%; padding: 12px; background-color: #1a73e8; color: white; border: none; border-radius: 4px; font-weight: 600; cursor: pointer; margin-top: 10px; }
+        button:hover { background-color: #1557b0; }
+        #message { margin-top: 15px; font-size: 14px; font-weight: bold; }
+    </style>
 </head>
 <body>
-  <h3>Referral Upload</h3>
-  <input type="file" id="csv" accept=".csv" />
-  <button id="upload">Upload</button>
-  <pre id="log"></pre>
+
+<div class="container">
+    <h1>RoMetrics Referrals</h1>
+    <p>Enter your friend's email to give them a free month and earn one for yourself!</p>
+    
+    <input type="email" id="friendEmail" placeholder="Friend's Email Address" required>
+    <button onclick="submitReferral()">Send Invitation</button>
+    
+    <div id="message"></div>
+</div>
 
 <script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+  import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-const firebaseConfig = {
-  apiKey: "AIzaSyAxMFW5gguPiiaomPbuoMc7suxHmgPEhRg",
-  authDomain: "rometricsapp-1444e.firebaseapp.com",
-  projectId: "rometricsapp-1444e",
-};
+  // Your Firebase configuration based on serviceAccount.json 
+  const firebaseConfig = {
+    projectId: "rometricsapp-1444e",
+    authDomain: "rometricsapp-1444e.firebaseapp.com",
+    storageBucket: "rometricsapp-1444e.appspot.com",
+  };
 
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
 
-const log = msg => document.getElementById("log").textContent += msg + "\n";
+  window.submitReferral = async () => {
+    const friendEmail = document.getElementById('friendEmail').value;
+    const messageDiv = document.getElementById('message');
 
-onAuthStateChanged(auth, user => {
-  if (!user) {
-    log("❌ Not signed in");
-    return;
-  }
-
-  // OPTIONAL: lock to YOUR UID
-  // if (user.uid !== "YOUR_UID_HERE") return;
-
-  log("✅ Signed in as " + user.email);
-
-  document.getElementById("upload").onclick = async () => {
-    const file = document.getElementById("csv").files[0];
-    if (!file) return;
-
-    const text = await file.text();
-    const lines = text.trim().split("\n").slice(1);
-
-    for (const line of lines) {
-      const code = line.split(",")[0].trim();
-      if (!code) continue;
-
-      await setDoc(doc(db, "referralCodes", code), {
-        status: "unused",
-        subscription_reward: "1_month_free",
-        referrer_uid: "",
-        referred_uid: "",
-        issued_at: null,
-        redeemed_at: null
-      });
-
-      log("Uploaded " + code);
+    if (!friendEmail) {
+        messageDiv.innerText = "Please enter an email.";
+        messageDiv.style.color = "red";
+        return;
     }
 
-    log("✅ DONE");
+    try {
+        // This triggers the Cloud Function logic we prepared
+        // It creates a document in the 'users' collection which the function watches 
+        await addDoc(collection(db, "users"), {
+            email: friendEmail,
+            referred_by_uid: "current_user_id_here", // This will be linked to the logged-in user
+            status: "pending",
+            created_at: serverTimestamp()
+        });
+
+        messageDiv.innerText = "Success! Once they register, you both get a code.";
+        messageDiv.style.color = "green";
+        document.getElementById('friendEmail').value = "";
+    } catch (error) {
+        messageDiv.innerText = "Error: " + error.message;
+        messageDiv.style.color = "red";
+    }
   };
-});
 </script>
+
 </body>
 </html>
