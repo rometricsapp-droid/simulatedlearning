@@ -5,135 +5,161 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>ROMetrics | Motion Analysis Platform</title>
 
-<link rel="icon" type="image/png" sizes="192x192" href="/favicon-192.png">
-<link rel="apple-touch-icon" sizes="192x192" href="/favicon-192.png">
-
 <style>
 :root {
-  --primary:#0f172a;
-  --accent:#2563eb;
-  --bg:#fcfdfe;
-  --text-main:#1e293b;
-  --text-muted:#475569;
-  --border:#eef2f6;
+  --primary: #0f172a;
+  --accent: #2563eb; 
+  --bg: #fcfdfe;
+  --text-main: #1e293b;
+  --text-muted: #475569;
+  --border: #eef2f6;
+}
+
+@keyframes slideUpFade {
+  0% { opacity: 0; transform: translateY(20px); }
+  100% { opacity: 1; transform: translateY(0); }
 }
 
 *{box-sizing:border-box}
 html,body{
   margin:0;
   height:100%;
-  font-family:'Inter',system-ui,-apple-system,sans-serif;
-  background:var(--bg);
-  color:var(--primary);
-  overflow-x:hidden;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background: var(--bg);
+  color: var(--primary);
+  overflow-x: hidden;
 }
 
-header{
-  padding:1rem 1.5rem;
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  background:rgba(255,255,255,.95);
-  backdrop-filter:blur(10px);
-  border-bottom:1px solid var(--border);
-  position:sticky;
-  top:0;
-  z-index:1000;
+/* ===== HEADER ===== */
+header {
+  padding: 1rem 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(255,255,255,0.95);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
 }
 
-.brand{
-  display:flex;
-  align-items:center;
-  gap:8px;
-  text-decoration:none;
-  color:inherit;
-}
-.brand img{height:32px}
-.brand span{font-weight:800;font-size:1.25rem}
-
-.module-nav{
-  display:flex;
-  gap:6px;
-  justify-content:center;
-  flex:1;
-}
-.module-nav a{
-  background:rgba(34,197,94,.08);
-  color:#166534;
-  padding:6px 10px;
-  border-radius:999px;
-  font-size:.65rem;
-  font-weight:700;
-  text-decoration:none;
-  border:1px solid rgba(34,197,94,.25);
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+  color: inherit;
 }
 
-.header-actions{
-  display:flex;
-  gap:8px;
-  align-items:center;
-}
-.header-actions a{
-  background:var(--accent);
-  color:#fff;
-  padding:8px 12px;
-  border-radius:6px;
-  font-size:.75rem;
-  font-weight:700;
-  text-decoration:none;
+.brand img { height: 32px; width: auto; }
+.brand span { font-weight: 800; font-size: 1.25rem; letter-spacing: -0.04em; }
+
+.header-actions { display: flex; gap: 8px; align-items:center; }
+
+.header-actions a {
+  background: var(--accent);
+  color: #fff;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-decoration: none;
 }
 
 #signedInText{
   display:none;
-  font-size:.75rem;
-  font-weight:800;
-  color:var(--primary);
+  font-size:0.75rem;
+  font-weight:700;
 }
 
-/* ===== MAIN ===== */
-main{display:flex;flex-direction:column}
-section{padding:60px 20px;display:flex;justify-content:center}
-.content-wrapper{width:100%;max-width:1200px}
+/* ===== MODULE QUICK NAV ===== */
+.module-nav {
+  display: flex;
+  gap: 6px;
+  justify-content: center;
+  flex: 1;
+}
+
+.module-nav a {
+  background: rgba(34,197,94,0.08);
+  color: #166534;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-decoration: none;
+  border: 1px solid rgba(34,197,94,0.25);
+}
+
+/* ===== MAIN CONTENT ===== */
+main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+section {
+  padding: 60px 20px;
+  display: flex;
+  justify-content: center;
+}
+
+.content-wrapper {
+  width: 100%;
+  max-width: 1200px;
+}
 
 /* HERO */
-.hero-content{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:40px;
-  align-items:center;
+.hero-content {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 40px;
+  align-items: center;
 }
-.copy h1{font-size:2.5rem;font-weight:900}
-.copy p{font-size:1.1rem;color:var(--text-muted)}
 
-.visual{text-align:right}
+.copy h1 {
+  font-size: 2.5rem;
+  font-weight: 900;
+}
+
+.copy p {
+  font-size: 1.1rem;
+  color: var(--text-muted);
+}
+
+.visual { text-align:right; }
 .laptop{max-width:680px;width:100%}
 .phone{width:180px}
 
-/* MODULES */
-.modules{
-  background:#fff;
-  border-top:1px solid var(--border);
-  padding:40px 20px;
+/* ===== MODULE DOCK ===== */
+.modules {
+  background: #fff;
+  border-top: 1px solid var(--border);
+  padding: 40px 20px;
 }
-.module-row{
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(160px,1fr));
-  gap:12px;
+
+.module-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 12px;
 }
-.module{
-  padding:20px 10px;
-  border-radius:12px;
-  text-align:center;
-  font-size:.8rem;
-  font-weight:700;
-  background:var(--bg);
-  border:1px solid var(--border);
+
+.module {
+  padding: 20px 10px;
+  border-radius: 12px;
+  text-align: center;
+  font-size: 0.8rem;
+  font-weight: 700;
+  background: var(--bg);
+  border: 1px solid var(--border);
 }
-.module span{
-  display:block;
-  font-size:.65rem;
-  font-weight:800;
-  color:var(--accent);
+
+.module span {
+  display: block;
+  font-size: 0.65rem;
+  font-weight: 800;
+  color: var(--accent);
 }
 </style>
 </head>
@@ -141,7 +167,7 @@ section{padding:60px 20px;display:flex;justify-content:center}
 <body>
 
 <header>
-  <a href="/" class="brand">
+  <a href="https://rometrics.app" class="brand">
     <img src="/rometrics-logo.png" alt="ROMetrics logo">
     <span>ROMetrics</span>
   </a>
@@ -154,7 +180,7 @@ section{padding:60px 20px;display:flex;justify-content:center}
     <a href="support.html">Support</a>
     <a href="about.html">About</a>
 
-    <!-- AUTH -->
+    <!-- AUTH (UNCHANGED VISUALLY) -->
     <a href="signin.html" id="signinLink">Sign In</a>
     <span id="signedInText"></span>
   </div>
@@ -162,7 +188,7 @@ section{padding:60px 20px;display:flex;justify-content:center}
 
 <main>
 
-<section>
+<section class="hero-section">
   <div class="content-wrapper hero-content">
     <div class="copy">
       <h1>Measure. Train.<br>Analyze.</h1>
@@ -188,12 +214,12 @@ section{padding:60px 20px;display:flex;justify-content:center}
 </section>
 
 <footer>
-  <div style="text-align:center;padding:20px;font-size:.75rem;font-weight:700;color:#94a3b8">
+  <div style="text-align:center;padding:20px;color:#94a3b8;font-size:.75rem;font-weight:700;">
     ROMetrics © 2026
   </div>
 </footer>
 
-<!-- 🔐 FIREBASE AUTH (HOME PAGE FIX) -->
+<!-- 🔐 FIREBASE AUTH — MINIMAL ADDITION -->
 <script src="https://www.gstatic.com/firebasejs/10.12.4/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.4/firebase-auth-compat.js"></script>
 
