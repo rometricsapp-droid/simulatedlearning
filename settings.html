@@ -100,7 +100,7 @@ h2 { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.1em; color:
         <span class="label-main">Email</span>
         <span class="label-sub" id="userEmail">Loading...</span>
       </div>
-      <span id="authProvider" class="status-badge status-inactive">Google User</span>
+      <span id="authProvider" class="status-badge status-inactive">Google Account</span>
     </div>
   </section>
 
@@ -129,7 +129,7 @@ h2 { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.1em; color:
     <div class="setting-row">
       <div class="label-box">
         <span class="label-main">Delete My Account</span>
-        <span class="label-sub">This clears all motion logs and data instantly.</span>
+        <span class="label-sub">This will permanently delete your user record from ROMetrics.</span>
       </div>
       <button class="action-btn danger" onclick="handleDeleteAccount()">Delete Account</button>
     </div>
@@ -192,20 +192,20 @@ async function handleDeleteAccount() {
   const user = auth.currentUser;
   if (!user) return;
 
-  const msg = "WARNING: This permanently deletes your motion analysis history and profile. Type 'DELETE' to confirm.";
-  if (prompt(msg) === "DELETE") {
+  if (confirm("Are you sure you want to delete your ROMetrics account? This will remove your profile and access entirely.")) {
     try {
-      // 1. Delete Firestore Data
+      // 1. Delete user document from Firestore first
       await db.collection('users').doc(user.uid).delete();
       
-      // 2. Delete Auth Account
+      // 2. Delete user from Firebase Auth (completely unlinking them)
       await user.delete();
       
-      alert("Account removed.");
+      alert("Account successfully deleted.");
       window.location.href = "index.html";
     } catch (error) {
+      // Firebase requires a recent login for account deletion
       if (error.code === 'auth/requires-recent-login') {
-        alert("For security, please sign out and sign back in to delete your account.");
+        alert("For security reasons, please sign out and sign back in before deleting your account.");
       } else {
         alert("Error: " + error.message);
       }
