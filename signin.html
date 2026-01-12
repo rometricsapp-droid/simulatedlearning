@@ -117,8 +117,8 @@ input{
 
   <hr style="border:none;border-top:1px solid var(--border);margin:18px 0">
 
-  <input id="email" type="email" placeholder="Email">
-  <input id="password" type="password" placeholder="Password">
+  <input id="emailInput" type="email" placeholder="Email">
+  <input id="passwordInput" type="password" placeholder="Password">
 
   <button class="btn" id="emailSignIn">
     Sign In / Sign Up with Email
@@ -154,38 +154,59 @@ firebase.initializeApp({
 
 const auth = firebase.auth();
 
-/* STATE */
+/* 🔒 FORCE PERSISTENCE */
+auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
+
+/* DOM refs */
+const authUI = document.getElementById("authUI");
+const signedInUI = document.getElementById("signedInUI");
+const title = document.getElementById("title");
+const subtitle = document.getElementById("subtitle");
+const userEmail = document.getElementById("userEmail");
+
+/* STATE LISTENER */
 auth.onAuthStateChanged(user => {
-  if(user){
+  if (user) {
     authUI.style.display = "none";
     signedInUI.style.display = "block";
     title.textContent = "Signed In";
     subtitle.textContent = "You are signed in as:";
     userEmail.textContent = user.email;
+  } else {
+    authUI.style.display = "block";
+    signedInUI.style.display = "none";
+    title.textContent = "Sign In";
+    subtitle.textContent = "Sign in or create an account to continue.";
   }
 });
 
 /* GOOGLE */
-googleSignIn.onclick = () => {
+document.getElementById("googleSignIn").onclick = () => {
   auth.signInWithPopup(new firebase.auth.GoogleAuthProvider())
     .catch(e => alert(e.message));
 };
 
 /* EMAIL */
-emailSignIn.onclick = () => {
-  const e = email.value;
-  const p = password.value;
-  if(!e || !p) return alert("Enter email and password");
+document.getElementById("emailSignIn").onclick = () => {
+  const email = document.getElementById("emailInput").value;
+  const password = document.getElementById("passwordInput").value;
 
-  auth.signInWithEmailAndPassword(e,p)
+  if (!email || !password) {
+    alert("Enter email and password");
+    return;
+  }
+
+  auth.signInWithEmailAndPassword(email, password)
     .catch(() =>
-      auth.createUserWithEmailAndPassword(e,p)
+      auth.createUserWithEmailAndPassword(email, password)
         .catch(err => alert(err.message))
     );
 };
 
 /* SIGN OUT */
-signOutBtn.onclick = () => auth.signOut();
+document.getElementById("signOutBtn").onclick = () => {
+  auth.signOut();
+};
 </script>
 </body>
 </html>
