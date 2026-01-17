@@ -14,6 +14,7 @@
   --text-muted: #94a3b8;
   --border: #334155;
   --error: #fb7185;
+  --success: #10b981;
 }
 
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -58,6 +59,21 @@ body {
 h1 { font-size: 1.4rem; font-weight: 800; text-align: center; margin: 0 0 8px; letter-spacing: -0.02em; }
 p { font-size: 0.85rem; color: var(--text-muted); text-align: center; margin: 0 0 24px; line-height: 1.5; }
 
+/* In-App Console Message Bar */
+.console-msg {
+  background: #0f172a;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  text-align: center;
+  margin-bottom: 20px;
+  display: none; /* Hidden by default */
+}
+.console-error { border-color: var(--error); color: var(--error); }
+.console-info { border-color: var(--primary); color: var(--primary); }
+
 .input-group { margin-bottom: 16px; }
 .input-label { font-size: 10px; font-weight: 700; text-transform: uppercase; color: var(--primary); margin-bottom: 6px; display: block; letter-spacing: 0.05em; }
 input {
@@ -68,7 +84,6 @@ input {
   padding: 12px 16px;
   color: #fff;
   font-size: 14px;
-  transition: border-color 0.2s;
 }
 input:focus { outline: none; border-color: var(--primary); }
 
@@ -83,41 +98,12 @@ input:focus { outline: none; border-color: var(--primary); }
   transition: all 0.2s;
 }
 .btn-primary { background: var(--primary); color: #0b1120; margin-bottom: 12px; }
-.btn-primary:hover { background: #7dd3fc; }
 .btn-outline { background: transparent; color: var(--text); border: 1px solid var(--border); }
-.btn-outline:hover { background: var(--border); }
 
-.divider {
-  text-align: center;
-  margin: 16px 0;
-  font-size: 10px;
-  color: var(--text-muted);
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-}
+.divider { text-align: center; margin: 16px 0; font-size: 10px; color: var(--text-muted); font-weight: 700; text-transform: uppercase; }
 
 #successCard { width: 100%; max-width: 480px; text-align: center; }
 .user-badge { background: #0f172a; padding: 14px; border-radius: 12px; font-weight: 700; color: var(--primary); margin-bottom: 24px; font-family: monospace; }
-
-.error-msg {
-  color: var(--error);
-  font-size: 12px;
-  font-weight: 600;
-  text-align: center;
-  margin-bottom: 16px;
-  display: none;
-}
-
-.forgot-link {
-  display: block;
-  text-align: center;
-  margin-top: 10px;
-  font-size: 11px;
-  color: var(--primary);
-  cursor: pointer;
-  text-decoration: none;
-}
 </style>
 </head>
 
@@ -129,10 +115,10 @@ input:focus { outline: none; border-color: var(--primary); }
     <div class="logo-header">
       <img src="rometrics-logo.png" class="logo" alt="ROMetrics Logo">
       <h1>Sign In</h1>
-      <p>Access your existing account.</p>
+      <p>Access your account.</p>
     </div>
     
-    <div id="loginError" class="error-msg"></div>
+    <div id="loginConsole" class="console-msg"></div>
 
     <div class="input-group">
       <span class="input-label">Email</span>
@@ -143,7 +129,7 @@ input:focus { outline: none; border-color: var(--primary); }
       <input id="loginPass" type="password" placeholder="••••••••">
     </div>
     <button class="btn btn-primary" id="doLogin">Sign In</button>
-    <a class="forgot-link" id="forgotPass">Forgot Password?</a>
+    <div style="text-align:center; margin-top:10px;"><a id="forgotPass" style="font-size:11px; color:var(--primary); cursor:pointer;">Forgot Password?</a></div>
     
     <div class="divider">or</div>
     <button class="btn btn-outline" id="googleLogin">Continue with Google</button>
@@ -153,10 +139,10 @@ input:focus { outline: none; border-color: var(--primary); }
     <div class="logo-header">
       <img src="rometrics-logo.png" class="logo" alt="ROMetrics Logo">
       <h1>Register</h1>
-      <p>Create a new account to get started.</p>
+      <p>Use .edu for student discounts.</p>
     </div>
     
-    <div id="regError" class="error-msg"></div>
+    <div id="regConsole" class="console-msg"></div>
 
     <div class="input-group">
       <span class="input-label">Full Name</span>
@@ -181,10 +167,15 @@ input:focus { outline: none; border-color: var(--primary); }
 <div id="successCard" class="auth-card" style="display:none">
   <div class="logo-header">
     <img src="rometrics-logo.png" class="logo" alt="ROMetrics Logo">
-    <h1>Authentication Verified</h1>
+    <h1 id="successTitle">Authentication Verified</h1>
   </div>
   <div class="user-badge" id="displayEmail"></div>
-  <p>Your session is active. You may now return to the ROMetrics environment.</p>
+  <p id="successMsg">Your session is active. You may now return to the ROMetrics environment.</p>
+  
+  <div id="verifyActions" style="display:none; flex-direction:column; gap:10px;">
+    <button class="btn btn-primary" onclick="window.location.reload()">I've Clicked the Email Link</button>
+  </div>
+  
   <button class="btn btn-primary" id="returnBtn">Return to App</button>
   <button class="btn btn-outline" id="logoutBtn" style="margin-top:12px; font-size:12px;">Sign Out / Switch Account</button>
 </div>
@@ -204,97 +195,92 @@ firebase.initializeApp({
 const auth = firebase.auth();
 const db = firebase.firestore();
 
-// Professional Error Handler
-const handleAuthError = (error, elementId) => {
-  const errorEl = document.getElementById(elementId);
-  let message = "An error occurred.";
-  switch (error.code) {
-    case 'auth/user-not-found': message = "No account found with this email."; break;
-    case 'auth/wrong-password': 
-    case 'auth/invalid-credential': message = "Invalid email or password."; break;
-    case 'auth/email-already-in-use': message = "This email is already registered."; break;
-    case 'auth/weak-password': message = "Password must be at least 6 characters."; break;
-    default: message = error.message;
-  }
-  errorEl.textContent = message;
-  errorEl.style.display = "block";
+// Console Messenger instead of window.alert
+const postToConsole = (elementId, message, type = "error") => {
+  const el = document.getElementById(elementId);
+  el.textContent = message;
+  el.className = `console-msg console-${type}`;
+  el.style.display = "block";
 };
 
 auth.onAuthStateChanged(user => {
   const mainUI = document.getElementById("mainUI");
   const successCard = document.getElementById("successCard");
   const displayEmail = document.getElementById("displayEmail");
+
   if (user) {
+    // .edu Verification Gate
+    if (user.email.toLowerCase().endsWith('.edu') && !user.emailVerified) {
+      mainUI.style.display = "none";
+      successCard.style.display = "flex";
+      displayEmail.textContent = user.email;
+      document.getElementById("successTitle").textContent = "Verification Required";
+      document.getElementById("successMsg").innerHTML = "A link was sent to your .edu email. <br>Click that link and return here to continue.";
+      document.getElementById("returnBtn").style.display = "none";
+      document.getElementById("verifyActions").style.display = "flex";
+      return;
+    }
+
     mainUI.style.display = "none";
     successCard.style.display = "flex";
     displayEmail.textContent = user.email;
+    document.getElementById("successTitle").textContent = "Authentication Verified";
+    document.getElementById("returnBtn").style.display = "block";
+    document.getElementById("verifyActions").style.display = "none";
   } else {
     mainUI.style.display = "flex";
     successCard.style.display = "none";
   }
 });
 
+// LOGIN ACTION
 document.getElementById("doLogin").onclick = () => {
   const email = document.getElementById("loginEmail").value;
   const pass = document.getElementById("loginPass").value;
-  document.getElementById("loginError").style.display = "none";
-  auth.signInWithEmailAndPassword(email, pass).catch(err => handleAuthError(err, "loginError"));
+  if (!email || !pass) return postToConsole("loginConsole", "Missing credentials.");
+  
+  auth.signInWithEmailAndPassword(email, pass).catch(err => {
+    let msg = "Invalid credentials.";
+    if (err.code === 'auth/user-not-found') msg = "Account not found. Please register.";
+    postToConsole("loginConsole", msg);
+  });
 };
 
-document.getElementById("forgotPass").onclick = () => {
-  const email = document.getElementById("loginEmail").value;
-  if (!email) return alert("Enter your email address first.");
-  auth.sendPasswordResetEmail(email)
-    .then(() => alert("Password reset link sent to your email."))
-    .catch(err => alert(err.message));
-};
-
+// REGISTER ACTION
 document.getElementById("doRegister").onclick = async () => {
   const name = document.getElementById("regName").value;
   const email = document.getElementById("regEmail").value;
   const pass = document.getElementById("regPass").value;
   const confirm = document.getElementById("regConfirm").value;
-  const errorEl = document.getElementById("regError");
-  errorEl.style.display = "none";
 
-  if (pass !== confirm) {
-    errorEl.textContent = "Passwords do not match.";
-    errorEl.style.display = "block";
-    return;
-  }
+  if (pass !== confirm) return postToConsole("regConsole", "Passwords do not match.");
+  if (pass.length < 6) return postToConsole("regConsole", "Password too short (min 6 chars).");
 
   try {
     const cred = await auth.createUserWithEmailAndPassword(email, pass);
-    
-    // Trigger .edu verification if applicable
     if (email.toLowerCase().endsWith('.edu')) {
       await cred.user.sendEmailVerification();
-      alert("A verification link has been sent to your .edu email. Please validate your account to secure the student discount.");
     }
-
     await db.collection("users").doc(cred.user.uid).set({
-      fullName: name,
-      email: email,
-      isEdu: email.toLowerCase().endsWith('.edu'),
-      createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-      accessExpiry: new Date(0) 
+      fullName: name, email: email, createdAt: firebase.firestore.FieldValue.serverTimestamp(), accessExpiry: new Date(0) 
     });
-  } catch(err) { handleAuthError(err, "regError"); }
+  } catch(err) { postToConsole("regConsole", err.message); }
 };
 
-document.getElementById("googleLogin").onclick = () => {
-  auth.signInWithPopup(new firebase.auth.GoogleAuthProvider());
+document.getElementById("forgotPass").onclick = () => {
+  const email = document.getElementById("loginEmail").value;
+  if (!email) return postToConsole("loginConsole", "Enter email first.");
+  auth.sendPasswordResetEmail(email)
+    .then(() => postToConsole("loginConsole", "Reset link sent to your inbox.", "info"))
+    .catch(err => postToConsole("loginConsole", err.message));
 };
 
+document.getElementById("googleLogin").onclick = () => auth.signInWithPopup(new firebase.auth.GoogleAuthProvider());
 document.getElementById("logoutBtn").onclick = () => auth.signOut();
 
 document.getElementById("returnBtn").onclick = () => {
   const params = new URLSearchParams(window.location.search);
-  if (params.get("source") === "app") {
-    window.location.href = "rometrics://auth";
-  } else {
-    window.location.href = "https://rometrics.app";
-  }
+  window.location.href = (params.get("source") === "app") ? "rometrics://auth" : "https://rometrics.app";
 };
 </script>
 </body>
