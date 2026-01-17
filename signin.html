@@ -258,10 +258,13 @@ document.getElementById("logoutBtn").onclick = () => auth.signOut();
 
 document.getElementById("returnBtn").onclick = () => {
   const params = new URLSearchParams(window.location.search);
+  
   if (params.get("source") === "app") {
+    // Returns control to the Android app
     window.location.href = "rometrics://auth";
   } else {
-    window.location.href = "/simulated-evaluations/index.html";
+    // Redirects to the live production home page
+    window.location.href = "https://rometrics.app";
   }
 };
 </script>
