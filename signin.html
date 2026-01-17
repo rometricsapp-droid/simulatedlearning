@@ -3,153 +3,183 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>ROMetrics — Sign In</title>
-
-<link rel="icon" type="image/png" sizes="192x192" href="favicon-192.png">
-<link rel="apple-touch-icon" sizes="192x192" href="favicon-192.png">
+<title>ROMetrics | Clinical Authentication</title>
 
 <style>
-:root{
-  --bg:#fcfdfe;
-  --primary:#0f172a;
-  --accent:#2563eb;
-  --muted:#475569;
-  --border:#e5e7eb;
+:root {
+  --bg: #0b1120; 
+  --card: #1e293b;
+  --primary: #38bdf8; 
+  --text: #f8fafc;
+  --text-muted: #94a3b8;
+  --border: #334155;
+  --error: #fb7185;
 }
 
-*{box-sizing:border-box}
-html,body{
-  margin:0;
-  height:100%;
-  font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial,sans-serif;
-  background:var(--bg);
-  color:var(--primary);
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
 }
 
-main{
-  min-height:100%;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  padding:24px;
+.auth-container {
+  display: flex;
+  flex-direction: row;
+  gap: 24px;
+  width: 100%;
+  max-width: 900px;
 }
 
-.card{
-  max-width:420px;
-  width:100%;
-  background:#fff;
-  border:1px solid var(--border);
-  border-radius:16px;
-  padding:32px 26px;
-  text-align:center;
+@media (max-width: 768px) {
+  .auth-container { flex-direction: column; align-items: center; }
 }
 
-.logo{height:34px;margin-bottom:18px}
-
-h1{
-  margin:0 0 8px;
-  font-size:1.8rem;
-  font-weight:900;
+.auth-card {
+  flex: 1;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 24px;
+  padding: 40px 32px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  display: flex;
+  flex-direction: column;
 }
 
-p{
-  margin:0 0 24px;
-  color:var(--muted);
-  font-size:.95rem;
+.logo-header { text-align: center; margin-bottom: 24px; width: 100%; }
+.logo { height: 42px; margin-bottom: 12px; }
+
+h1 { font-size: 1.4rem; font-weight: 800; text-align: center; margin: 0 0 8px; letter-spacing: -0.02em; }
+p { font-size: 0.85rem; color: var(--text-muted); text-align: center; margin: 0 0 24px; line-height: 1.5; }
+
+.input-group { margin-bottom: 16px; }
+.input-label { font-size: 10px; font-weight: 700; text-transform: uppercase; color: var(--primary); margin-bottom: 6px; display: block; letter-spacing: 0.05em; }
+input {
+  width: 100%;
+  background: #0f172a;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 12px 16px;
+  color: #fff;
+  font-size: 14px;
+  transition: border-color 0.2s;
+}
+input:focus { outline: none; border-color: var(--primary); }
+
+.btn {
+  width: 100%;
+  padding: 14px;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 14px;
+  cursor: pointer;
+  border: none;
+  transition: all 0.2s;
+}
+.btn-primary { background: var(--primary); color: #0b1120; margin-bottom: 12px; }
+.btn-primary:hover { background: #7dd3fc; }
+.btn-outline { background: transparent; color: var(--text); border: 1px solid var(--border); }
+.btn-outline:hover { background: var(--border); }
+
+.divider {
+  text-align: center;
+  margin: 16px 0;
+  font-size: 10px;
+  color: var(--text-muted);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
 }
 
-.btn{
-  width:100%;
-  padding:12px;
-  border-radius:10px;
-  font-size:.9rem;
-  font-weight:800;
-  border:1px solid var(--border);
-  background:#f8fafc;
-  cursor:pointer;
-  margin-bottom:12px;
-}
+#successCard { width: 100%; max-width: 480px; text-align: center; }
+.user-badge { background: #0f172a; padding: 14px; border-radius: 12px; font-weight: 700; color: var(--primary); margin-bottom: 24px; font-family: monospace; }
 
-.btn.primary{
-  background:var(--accent);
-  color:#fff;
-  border:none;
-}
-
-.btn.link{
-  background:none;
-  border:none;
-  color:var(--accent);
-}
-
-input{
-  width:100%;
-  padding:12px;
-  border-radius:10px;
-  border:1px solid var(--border);
-  margin-bottom:10px;
-}
-
-.signed-in{
-  font-weight:800;
-  color:var(--accent);
-  margin-bottom:16px;
+/* Error Message Styling */
+.error-msg {
+  color: var(--error);
+  font-size: 12px;
+  font-weight: 600;
+  text-align: center;
+  margin-bottom: 16px;
+  display: none;
 }
 </style>
 </head>
 
 <body>
-<main>
-<div class="card">
 
-<a href="/">
-  <img src="rometrics-logo.png" class="logo" alt="ROMetrics">
-</a>
+<div id="mainUI" class="auth-container">
+  
+  <div class="auth-card">
+    <div class="logo-header">
+      <img src="rometrics-logo.png" class="logo" alt="ROMetrics Logo">
+      <h1>Sign In</h1>
+      <p>Returning users and clinical instructors.</p>
+    </div>
+    
+    <div class="input-group">
+      <span class="input-label">Clinical Email</span>
+      <input id="loginEmail" type="email" placeholder="name@domain.com">
+    </div>
+    <div class="input-group">
+      <span class="input-label">Password</span>
+      <input id="loginPass" type="password" placeholder="••••••••">
+    </div>
+    <button class="btn btn-primary" id="doLogin">Secure Sign In</button>
+    
+    <div class="divider">or</div>
+    <button class="btn btn-outline" id="googleLogin">Continue with Google</button>
+  </div>
 
-<h1 id="title">Sign In</h1>
-<p id="subtitle">Sign in or create an account to continue.</p>
+  <div class="auth-card" style="border-top: 4px solid var(--primary);">
+    <div class="logo-header">
+      <img src="rometrics-logo.png" class="logo" alt="ROMetrics Logo">
+      <h1>Register</h1>
+      <p>New student enrollment and educator access.</p>
+    </div>
+    
+    <div id="regError" class="error-msg">Passwords do not match.</div>
 
-<!-- SIGN IN UI -->
-<div id="authUI">
-  <button class="btn primary" id="googleSignIn">
-    Continue with Google
-  </button>
-
-  <hr style="border:none;border-top:1px solid var(--border);margin:18px 0">
-
-  <input id="emailInput" type="email" placeholder="Email">
-  <input id="passwordInput" type="password" placeholder="Password">
-
-  <button class="btn" id="emailSignIn">
-    Sign In / Sign Up with Email
-  </button>
+    <div class="input-group">
+      <span class="input-label">Full Legal Name</span>
+      <input id="regName" type="text" placeholder="Jane Smith">
+    </div>
+    <div class="input-group">
+      <span class="input-label">Academic Email</span>
+      <input id="regEmail" type="email" placeholder="student@university.edu">
+    </div>
+    <div class="input-group">
+      <span class="input-label">Create Password</span>
+      <input id="regPass" type="password" placeholder="Min. 6 characters">
+    </div>
+    <div class="input-group">
+      <span class="input-label">Confirm Password</span>
+      <input id="regConfirm" type="password" placeholder="Repeat password">
+    </div>
+    <button class="btn btn-primary" id="doRegister">Create Clinical Account</button>
+  </div>
 </div>
 
-<!-- SIGNED IN UI -->
-<div id="signedInUI" style="display:none">
-  <div class="signed-in" id="userEmail"></div>
-
-  <p style="font-size:.9rem;color:var(--muted);margin-bottom:14px">
-    You are now signed in.<br>
-    Please return to the ROMetrics app to continue.
-  </p>
-
-  <button class="btn primary" onclick="window.close()">
-    Done
-  </button>
-
-  <button class="btn link" id="signOutBtn">
-    Sign Out
-  </button>
+<div id="successCard" class="auth-card" style="display:none">
+  <div class="logo-header">
+    <img src="rometrics-logo.png" class="logo" alt="ROMetrics Logo">
+    <h1>Authentication Verified</h1>
+  </div>
+  <div class="user-badge" id="displayEmail"></div>
+  <p>Security clearance confirmed. You may now return to the ROMetrics clinical simulation environment to continue your evaluation.</p>
+  <button class="btn btn-primary" id="returnBtn">Return to App</button>
+  <button class="btn btn-outline" id="logoutBtn" style="margin-top:12px; font-size:12px;">Sign Out / Switch Account</button>
 </div>
-
-
-
-</div>
-</main>
 
 <script src="https://www.gstatic.com/firebasejs/10.12.4/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.4/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore-compat.js"></script>
 
 <script>
 firebase.initializeApp({
@@ -160,76 +190,79 @@ firebase.initializeApp({
 });
 
 const auth = firebase.auth();
+const db = firebase.firestore();
 
-/* 🔒 FORCE PERSISTENCE */
-auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
-
-/* DOM refs */
-const authUI = document.getElementById("authUI");
-const signedInUI = document.getElementById("signedInUI");
-const title = document.getElementById("title");
-const subtitle = document.getElementById("subtitle");
-const userEmail = document.getElementById("userEmail");
-const params = new URLSearchParams(window.location.search);
-const fromApp = params.get("source") === "app";
-
-const continueBtn = document.getElementById("continueBtn");
-
-/* STATE LISTENER */
 auth.onAuthStateChanged(user => {
+  const mainUI = document.getElementById("mainUI");
+  const successCard = document.getElementById("successCard");
+  const displayEmail = document.getElementById("displayEmail");
+
   if (user) {
-    authUI.style.display = "none";
-    signedInUI.style.display = "block";
-    title.textContent = "Signed In";
-    subtitle.textContent = "You are signed in as:";
-    userEmail.textContent = user.email;
-
-    if (fromApp) {
-  continueBtn.textContent = "Return to ROMetrics App";
-  continueBtn.onclick = () => {
-    window.location.href = "rometrics://auth";
-  };
-} else {
-  continueBtn.textContent = "Continue to ROMetrics";
-  continueBtn.onclick = () => {
-    window.location.href = "/";
-  };
-}
-
+    mainUI.style.display = "none";
+    successCard.style.display = "flex";
+    displayEmail.textContent = user.email;
   } else {
-    authUI.style.display = "block";
-    signedInUI.style.display = "none";
-    title.textContent = "Sign In";
-    subtitle.textContent = "Sign in or create an account to continue.";
+    mainUI.style.display = "flex";
+    successCard.style.display = "none";
   }
 });
 
-/* GOOGLE */
-document.getElementById("googleSignIn").onclick = () => {
-  auth.signInWithPopup(new firebase.auth.GoogleAuthProvider())
-    .catch(e => alert(e.message));
+document.getElementById("doLogin").onclick = () => {
+  const e = document.getElementById("loginEmail").value;
+  const p = document.getElementById("loginPass").value;
+  auth.signInWithEmailAndPassword(e, p).catch(err => alert(err.message));
 };
 
-/* EMAIL */
-document.getElementById("emailSignIn").onclick = () => {
-  const email = document.getElementById("emailInput").value;
-  const password = document.getElementById("passwordInput").value;
+document.getElementById("doRegister").onclick = async () => {
+  const name = document.getElementById("regName").value;
+  const email = document.getElementById("regEmail").value;
+  const pass = document.getElementById("regPass").value;
+  const confirm = document.getElementById("regConfirm").value;
+  const errorEl = document.getElementById("regError");
 
-  if (!email || !password) {
-    alert("Enter email and password");
+  // Reset error state
+  errorEl.style.display = "none";
+
+  // Password matching logic
+  if (pass !== confirm) {
+    errorEl.textContent = "Passwords do not match.";
+    errorEl.style.display = "block";
     return;
   }
 
-  auth.signInWithEmailAndPassword(email, password)
-    .catch(() =>
-      auth.createUserWithEmailAndPassword(email, password)
-        .catch(err => alert(err.message))
-    );
+  if (pass.length < 6) {
+    errorEl.textContent = "Password must be at least 6 characters.";
+    errorEl.style.display = "block";
+    return;
+  }
+
+  try {
+    const cred = await auth.createUserWithEmailAndPassword(email, pass);
+    await db.collection("users").doc(cred.user.uid).set({
+      fullName: name,
+      email: email,
+      createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+      accessExpiry: new Date(0) 
+    });
+  } catch(err) { 
+    errorEl.textContent = err.message;
+    errorEl.style.display = "block";
+  }
 };
 
-/* SIGN OUT */
-document.getElementById("signOutBtn").onclick = () => {
-  auth.signOut();
+document.getElementById("googleLogin").onclick = () => {
+  auth.signInWithPopup(new firebase.auth.GoogleAuthProvider());
+};
+
+document.getElementById("logoutBtn").onclick = () => auth.signOut();
+
+document.getElementById("returnBtn").onclick = () => {
+  const params = new URLSearchParams(window.location.search);
+  if (params.get("source") === "app") {
+    window.location.href = "rometrics://auth";
+  } else {
+    window.location.href = "/simulated-evaluations/index.html";
+  }
 };
 </script>
 </body>
