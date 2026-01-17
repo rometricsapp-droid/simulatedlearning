@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>ROMetrics | Account Authentication</title>
+<title>ROMetrics | Account Access</title>
 
 <style>
 :root {
@@ -14,7 +14,6 @@
   --text-muted: #94a3b8;
   --border: #334155;
   --error: #fb7185;
-  --success: #10b981;
 }
 
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -39,7 +38,7 @@ body {
 }
 
 @media (max-width: 768px) {
-  .auth-container { flex-direction: column; align-items: center; }
+  .auth-container { flex-direction: column; }
 }
 
 .auth-card {
@@ -49,17 +48,14 @@ body {
   border-radius: 24px;
   padding: 40px 32px;
   box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-  display: flex;
-  flex-direction: column;
 }
 
-.logo-header { text-align: center; margin-bottom: 24px; width: 100%; }
+.logo-header { text-align: center; margin-bottom: 24px; }
 .logo { height: 42px; margin-bottom: 12px; }
 
-h1 { font-size: 1.4rem; font-weight: 800; text-align: center; margin: 0 0 8px; letter-spacing: -0.02em; }
-p { font-size: 0.85rem; color: var(--text-muted); text-align: center; margin: 0 0 24px; line-height: 1.5; }
+h1 { font-size: 1.4rem; font-weight: 800; text-align: center; margin: 0 0 8px; }
+p { font-size: 0.85rem; color: var(--text-muted); text-align: center; margin: 0 0 24px; }
 
-/* In-App Console Message Bar */
 .console-msg {
   background: #0f172a;
   border: 1px solid var(--border);
@@ -69,13 +65,13 @@ p { font-size: 0.85rem; color: var(--text-muted); text-align: center; margin: 0 
   font-weight: 600;
   text-align: center;
   margin-bottom: 20px;
-  display: none; /* Hidden by default */
+  display: none;
 }
 .console-error { border-color: var(--error); color: var(--error); }
 .console-info { border-color: var(--primary); color: var(--primary); }
 
 .input-group { margin-bottom: 16px; }
-.input-label { font-size: 10px; font-weight: 700; text-transform: uppercase; color: var(--primary); margin-bottom: 6px; display: block; letter-spacing: 0.05em; }
+.input-label { font-size: 10px; font-weight: 700; text-transform: uppercase; color: var(--primary); margin-bottom: 6px; display: block; }
 input {
   width: 100%;
   background: #0f172a;
@@ -83,26 +79,31 @@ input {
   border-radius: 12px;
   padding: 12px 16px;
   color: #fff;
-  font-size: 14px;
 }
-input:focus { outline: none; border-color: var(--primary); }
 
 .btn {
   width: 100%;
   padding: 14px;
   border-radius: 12px;
   font-weight: 700;
-  font-size: 14px;
   cursor: pointer;
   border: none;
-  transition: all 0.2s;
 }
 .btn-primary { background: var(--primary); color: #0b1120; margin-bottom: 12px; }
 .btn-outline { background: transparent; color: var(--text); border: 1px solid var(--border); }
 
-.divider { text-align: center; margin: 16px 0; font-size: 10px; color: var(--text-muted); font-weight: 700; text-transform: uppercase; }
+.forgot-btn {
+  background: none;
+  border: none;
+  color: var(--primary);
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  width: 100%;
+  margin-top: 8px;
+}
 
-#successCard { width: 100%; max-width: 480px; text-align: center; }
+#successCard { width: 100%; max-width: 480px; text-align: center; margin: 0 auto; }
 .user-badge { background: #0f172a; padding: 14px; border-radius: 12px; font-weight: 700; color: var(--primary); margin-bottom: 24px; font-family: monospace; }
 </style>
 </head>
@@ -113,9 +114,9 @@ input:focus { outline: none; border-color: var(--primary); }
   
   <div class="auth-card">
     <div class="logo-header">
-      <img src="rometrics-logo.png" class="logo" alt="ROMetrics Logo">
+      <img src="rometrics-logo.png" class="logo" alt="ROMetrics">
       <h1>Sign In</h1>
-      <p>Access your account.</p>
+      <p>Returning users.</p>
     </div>
     
     <div id="loginConsole" class="console-msg"></div>
@@ -129,17 +130,16 @@ input:focus { outline: none; border-color: var(--primary); }
       <input id="loginPass" type="password" placeholder="••••••••">
     </div>
     <button class="btn btn-primary" id="doLogin">Sign In</button>
-    <div style="text-align:center; margin-top:10px;"><a id="forgotPass" style="font-size:11px; color:var(--primary); cursor:pointer;">Forgot Password?</a></div>
-    
-    <div class="divider">or</div>
+    <button class="forgot-btn" id="doForgot">Forgot Password?</button>
+    <div style="text-align:center; margin: 16px 0; font-size: 10px; color: var(--text-muted); font-weight: 700;">OR</div>
     <button class="btn btn-outline" id="googleLogin">Continue with Google</button>
   </div>
 
   <div class="auth-card" style="border-top: 4px solid var(--primary);">
     <div class="logo-header">
-      <img src="rometrics-logo.png" class="logo" alt="ROMetrics Logo">
+      <img src="rometrics-logo.png" class="logo" alt="ROMetrics">
       <h1>Register</h1>
-      <p>Use .edu for student discounts.</p>
+      <p>Use .edu for student discount.</p>
     </div>
     
     <div id="regConsole" class="console-msg"></div>
@@ -166,18 +166,19 @@ input:focus { outline: none; border-color: var(--primary); }
 
 <div id="successCard" class="auth-card" style="display:none">
   <div class="logo-header">
-    <img src="rometrics-logo.png" class="logo" alt="ROMetrics Logo">
-    <h1 id="successTitle">Authentication Verified</h1>
+    <img src="rometrics-logo.png" class="logo" alt="ROMetrics">
+    <h1 id="statTitle">Verified</h1>
   </div>
   <div class="user-badge" id="displayEmail"></div>
-  <p id="successMsg">Your session is active. You may now return to the ROMetrics environment.</p>
+  <p id="statMsg">Session active. Return to the app to continue.</p>
   
-  <div id="verifyActions" style="display:none; flex-direction:column; gap:10px;">
-    <button class="btn btn-primary" onclick="window.location.reload()">I've Clicked the Email Link</button>
+  <div id="eduGate" style="display:none; flex-direction:column; gap:10px;">
+    <button class="btn btn-primary" onclick="window.location.reload()">I've Clicked the Link</button>
+    <p style="font-size: 11px; color: var(--error);">Note: .edu accounts must be verified via the email link before access is granted.</p>
   </div>
   
   <button class="btn btn-primary" id="returnBtn">Return to App</button>
-  <button class="btn btn-outline" id="logoutBtn" style="margin-top:12px; font-size:12px;">Sign Out / Switch Account</button>
+  <button class="btn btn-outline" id="logoutBtn" style="margin-top:12px; font-size:12px;">Sign Out</button>
 </div>
 
 <script src="https://www.gstatic.com/firebasejs/10.12.4/firebase-app-compat.js"></script>
@@ -195,10 +196,9 @@ firebase.initializeApp({
 const auth = firebase.auth();
 const db = firebase.firestore();
 
-// Console Messenger instead of window.alert
-const postToConsole = (elementId, message, type = "error") => {
-  const el = document.getElementById(elementId);
-  el.textContent = message;
+const msg = (id, text, type = "error") => {
+  const el = document.getElementById(id);
+  el.textContent = text;
   el.className = `console-msg console-${type}`;
   el.style.display = "block";
 };
@@ -209,75 +209,71 @@ auth.onAuthStateChanged(user => {
   const displayEmail = document.getElementById("displayEmail");
 
   if (user) {
-    // .edu Verification Gate
+    // If it's a .edu user, they MUST be verified
     if (user.email.toLowerCase().endsWith('.edu') && !user.emailVerified) {
       mainUI.style.display = "none";
       successCard.style.display = "flex";
       displayEmail.textContent = user.email;
-      document.getElementById("successTitle").textContent = "Verification Required";
-      document.getElementById("successMsg").innerHTML = "A link was sent to your .edu email. <br>Click that link and return here to continue.";
+      document.getElementById("statTitle").textContent = "Email Link Sent";
+      document.getElementById("statMsg").textContent = "Check your .edu inbox. Click the link and then refresh this page.";
       document.getElementById("returnBtn").style.display = "none";
-      document.getElementById("verifyActions").style.display = "flex";
+      document.getElementById("eduGate").style.display = "flex";
       return;
     }
 
     mainUI.style.display = "none";
     successCard.style.display = "flex";
     displayEmail.textContent = user.email;
-    document.getElementById("successTitle").textContent = "Authentication Verified";
+    document.getElementById("statTitle").textContent = "Authenticated";
     document.getElementById("returnBtn").style.display = "block";
-    document.getElementById("verifyActions").style.display = "none";
+    document.getElementById("eduGate").style.display = "none";
   } else {
     mainUI.style.display = "flex";
     successCard.style.display = "none";
   }
 });
 
-// LOGIN ACTION
 document.getElementById("doLogin").onclick = () => {
-  const email = document.getElementById("loginEmail").value;
-  const pass = document.getElementById("loginPass").value;
-  if (!email || !pass) return postToConsole("loginConsole", "Missing credentials.");
-  
-  auth.signInWithEmailAndPassword(email, pass).catch(err => {
-    let msg = "Invalid credentials.";
-    if (err.code === 'auth/user-not-found') msg = "Account not found. Please register.";
-    postToConsole("loginConsole", msg);
+  const e = document.getElementById("loginEmail").value;
+  const p = document.getElementById("loginPass").value;
+  if (!e || !p) return msg("loginConsole", "Missing email or password.");
+  auth.signInWithEmailAndPassword(e, p).catch(err => {
+    let text = "Invalid credentials.";
+    if (err.code === 'auth/user-not-found') text = "No account found. Please register.";
+    msg("loginConsole", text);
   });
 };
 
-// REGISTER ACTION
+document.getElementById("doForgot").onclick = () => {
+  const e = document.getElementById("loginEmail").value;
+  if (!e) return msg("loginConsole", "Enter your email first.");
+  auth.sendPasswordResetEmail(e)
+    .then(() => msg("loginConsole", "Reset link sent to your inbox.", "info"))
+    .catch(err => msg("loginConsole", err.message));
+};
+
 document.getElementById("doRegister").onclick = async () => {
   const name = document.getElementById("regName").value;
   const email = document.getElementById("regEmail").value;
   const pass = document.getElementById("regPass").value;
   const confirm = document.getElementById("regConfirm").value;
 
-  if (pass !== confirm) return postToConsole("regConsole", "Passwords do not match.");
-  if (pass.length < 6) return postToConsole("regConsole", "Password too short (min 6 chars).");
-
+  if (pass !== confirm) return msg("regConsole", "Passwords do not match.");
+  
   try {
     const cred = await auth.createUserWithEmailAndPassword(email, pass);
     if (email.toLowerCase().endsWith('.edu')) {
       await cred.user.sendEmailVerification();
     }
+    // Write the "New User" record to Firestore
     await db.collection("users").doc(cred.user.uid).set({
       fullName: name, email: email, createdAt: firebase.firestore.FieldValue.serverTimestamp(), accessExpiry: new Date(0) 
     });
-  } catch(err) { postToConsole("regConsole", err.message); }
-};
-
-document.getElementById("forgotPass").onclick = () => {
-  const email = document.getElementById("loginEmail").value;
-  if (!email) return postToConsole("loginConsole", "Enter email first.");
-  auth.sendPasswordResetEmail(email)
-    .then(() => postToConsole("loginConsole", "Reset link sent to your inbox.", "info"))
-    .catch(err => postToConsole("loginConsole", err.message));
+  } catch(err) { msg("regConsole", err.message); }
 };
 
 document.getElementById("googleLogin").onclick = () => auth.signInWithPopup(new firebase.auth.GoogleAuthProvider());
 document.getElementById("logoutBtn").onclick = () => auth.signOut();
-
 document.getElementById("returnBtn").onclick = () => {
   const params = new URLSearchParams(window.location.search);
   window.location.href = (params.get("source") === "app") ? "rometrics://auth" : "https://rometrics.app";
