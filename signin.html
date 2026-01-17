@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>ROMetrics | Clinical Authentication</title>
+<title>ROMetrics | Account Authentication</title>
 
 <style>
 :root {
@@ -100,7 +100,6 @@ input:focus { outline: none; border-color: var(--primary); }
 #successCard { width: 100%; max-width: 480px; text-align: center; }
 .user-badge { background: #0f172a; padding: 14px; border-radius: 12px; font-weight: 700; color: var(--primary); margin-bottom: 24px; font-family: monospace; }
 
-/* Error Message Styling */
 .error-msg {
   color: var(--error);
   font-size: 12px;
@@ -108,6 +107,16 @@ input:focus { outline: none; border-color: var(--primary); }
   text-align: center;
   margin-bottom: 16px;
   display: none;
+}
+
+.forgot-link {
+  display: block;
+  text-align: center;
+  margin-top: 10px;
+  font-size: 11px;
+  color: var(--primary);
+  cursor: pointer;
+  text-decoration: none;
 }
 </style>
 </head>
@@ -120,18 +129,21 @@ input:focus { outline: none; border-color: var(--primary); }
     <div class="logo-header">
       <img src="rometrics-logo.png" class="logo" alt="ROMetrics Logo">
       <h1>Sign In</h1>
-      <p>Returning users and clinical instructors.</p>
+      <p>Access your existing account.</p>
     </div>
     
+    <div id="loginError" class="error-msg"></div>
+
     <div class="input-group">
-      <span class="input-label">Clinical Email</span>
+      <span class="input-label">Email</span>
       <input id="loginEmail" type="email" placeholder="name@domain.com">
     </div>
     <div class="input-group">
       <span class="input-label">Password</span>
       <input id="loginPass" type="password" placeholder="••••••••">
     </div>
-    <button class="btn btn-primary" id="doLogin">Secure Sign In</button>
+    <button class="btn btn-primary" id="doLogin">Sign In</button>
+    <a class="forgot-link" id="forgotPass">Forgot Password?</a>
     
     <div class="divider">or</div>
     <button class="btn btn-outline" id="googleLogin">Continue with Google</button>
@@ -141,28 +153,28 @@ input:focus { outline: none; border-color: var(--primary); }
     <div class="logo-header">
       <img src="rometrics-logo.png" class="logo" alt="ROMetrics Logo">
       <h1>Register</h1>
-      <p>New student enrollment and educator access.</p>
+      <p>Create a new account to get started.</p>
     </div>
     
-    <div id="regError" class="error-msg">Passwords do not match.</div>
+    <div id="regError" class="error-msg"></div>
 
     <div class="input-group">
-      <span class="input-label">Full Legal Name</span>
+      <span class="input-label">Full Name</span>
       <input id="regName" type="text" placeholder="Jane Smith">
     </div>
     <div class="input-group">
-      <span class="input-label">Academic Email</span>
-      <input id="regEmail" type="email" placeholder="student@university.edu">
+      <span class="input-label">Email</span>
+      <input id="regEmail" type="email" placeholder="use .edu for discount">
     </div>
     <div class="input-group">
-      <span class="input-label">Create Password</span>
+      <span class="input-label">Password</span>
       <input id="regPass" type="password" placeholder="Min. 6 characters">
     </div>
     <div class="input-group">
       <span class="input-label">Confirm Password</span>
       <input id="regConfirm" type="password" placeholder="Repeat password">
     </div>
-    <button class="btn btn-primary" id="doRegister">Create Clinical Account</button>
+    <button class="btn btn-primary" id="doRegister">Create Account</button>
   </div>
 </div>
 
@@ -172,7 +184,7 @@ input:focus { outline: none; border-color: var(--primary); }
     <h1>Authentication Verified</h1>
   </div>
   <div class="user-badge" id="displayEmail"></div>
-  <p>Security clearance confirmed. You may now return to the ROMetrics clinical simulation environment to continue your evaluation.</p>
+  <p>Your session is active. You may now return to the ROMetrics environment.</p>
   <button class="btn btn-primary" id="returnBtn">Return to App</button>
   <button class="btn btn-outline" id="logoutBtn" style="margin-top:12px; font-size:12px;">Sign Out / Switch Account</button>
 </div>
@@ -192,11 +204,26 @@ firebase.initializeApp({
 const auth = firebase.auth();
 const db = firebase.firestore();
 
+// Professional Error Handler
+const handleAuthError = (error, elementId) => {
+  const errorEl = document.getElementById(elementId);
+  let message = "An error occurred.";
+  switch (error.code) {
+    case 'auth/user-not-found': message = "No account found with this email."; break;
+    case 'auth/wrong-password': 
+    case 'auth/invalid-credential': message = "Invalid email or password."; break;
+    case 'auth/email-already-in-use': message = "This email is already registered."; break;
+    case 'auth/weak-password': message = "Password must be at least 6 characters."; break;
+    default: message = error.message;
+  }
+  errorEl.textContent = message;
+  errorEl.style.display = "block";
+};
+
 auth.onAuthStateChanged(user => {
   const mainUI = document.getElementById("mainUI");
   const successCard = document.getElementById("successCard");
   const displayEmail = document.getElementById("displayEmail");
-
   if (user) {
     mainUI.style.display = "none";
     successCard.style.display = "flex";
@@ -208,9 +235,18 @@ auth.onAuthStateChanged(user => {
 });
 
 document.getElementById("doLogin").onclick = () => {
-  const e = document.getElementById("loginEmail").value;
-  const p = document.getElementById("loginPass").value;
-  auth.signInWithEmailAndPassword(e, p).catch(err => alert(err.message));
+  const email = document.getElementById("loginEmail").value;
+  const pass = document.getElementById("loginPass").value;
+  document.getElementById("loginError").style.display = "none";
+  auth.signInWithEmailAndPassword(email, pass).catch(err => handleAuthError(err, "loginError"));
+};
+
+document.getElementById("forgotPass").onclick = () => {
+  const email = document.getElementById("loginEmail").value;
+  if (!email) return alert("Enter your email address first.");
+  auth.sendPasswordResetEmail(email)
+    .then(() => alert("Password reset link sent to your email."))
+    .catch(err => alert(err.message));
 };
 
 document.getElementById("doRegister").onclick = async () => {
@@ -219,35 +255,31 @@ document.getElementById("doRegister").onclick = async () => {
   const pass = document.getElementById("regPass").value;
   const confirm = document.getElementById("regConfirm").value;
   const errorEl = document.getElementById("regError");
-
-  // Reset error state
   errorEl.style.display = "none";
 
-  // Password matching logic
   if (pass !== confirm) {
     errorEl.textContent = "Passwords do not match.";
     errorEl.style.display = "block";
     return;
   }
 
-  if (pass.length < 6) {
-    errorEl.textContent = "Password must be at least 6 characters.";
-    errorEl.style.display = "block";
-    return;
-  }
-
   try {
     const cred = await auth.createUserWithEmailAndPassword(email, pass);
+    
+    // Trigger .edu verification if applicable
+    if (email.toLowerCase().endsWith('.edu')) {
+      await cred.user.sendEmailVerification();
+      alert("A verification link has been sent to your .edu email. Please validate your account to secure the student discount.");
+    }
+
     await db.collection("users").doc(cred.user.uid).set({
       fullName: name,
       email: email,
+      isEdu: email.toLowerCase().endsWith('.edu'),
       createdAt: firebase.firestore.FieldValue.serverTimestamp(),
       accessExpiry: new Date(0) 
     });
-  } catch(err) { 
-    errorEl.textContent = err.message;
-    errorEl.style.display = "block";
-  }
+  } catch(err) { handleAuthError(err, "regError"); }
 };
 
 document.getElementById("googleLogin").onclick = () => {
@@ -258,12 +290,9 @@ document.getElementById("logoutBtn").onclick = () => auth.signOut();
 
 document.getElementById("returnBtn").onclick = () => {
   const params = new URLSearchParams(window.location.search);
-  
   if (params.get("source") === "app") {
-    // Returns control to the Android app
     window.location.href = "rometrics://auth";
   } else {
-    // Redirects to the live production home page
     window.location.href = "https://rometrics.app";
   }
 };
