@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ROMetrics | Portal</title>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    
+    <style>
+        :root { --bg: #0f172a; --card: #1e293b; --text: #f8fafc; --accent: #38bdf8; }
+        body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
+        /* Centered container to prevent the "messy" layout */
+        .container { background: var(--card); padding: 2.5rem; border-radius: 1rem; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); width: 100%; max-width: 400px; text-align: center; box-sizing: border-box; }
+        .logo { width: 70px; margin-bottom: 1rem; }
+        input { width: 100%; padding: 0.8rem; margin: 0.6rem 0; border-radius: 0.5rem; border: 1px solid #334155; background: #0f172a; color: white; box-sizing: border-box; font-size: 1rem; }
+        button { width: 100%; padding: 0.8rem; background: var(--accent); border: none; border-radius: 0.5rem; color: #0f172a; font-weight: bold; cursor: pointer; margin-top: 1rem; font-size: 1rem; }
+        .console-bar { background: #020617; color: #94a3b8; padding: 1rem; border-radius: 0.5rem; margin-top: 1.5rem; font-family: monospace; font-size: 0.85rem; min-height: 20px; line-height: 1.4; word-wrap: break-word; }
+        .hidden { display: none; }
+        .link { color: var(--accent); font-size: 0.9rem; cursor: pointer; text-decoration: none; display: block; margin-top: 1.2rem; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <img src="https://rometrics.app/logo.png" alt="ROMetrics" class="logo">
+    <h2 id="form-title">Student Sign In</h2>
+    
+    <div id="login-form">
+        <input type="email" id="login-email" placeholder="University Email (.edu)">
+        <input type="password" id="login-password" placeholder="Password">
+        <button onclick="login()">Sign In</button>
+        <a class="link" onclick="resetPassword()">Forgot Password?</a>
+        <a class="link" onclick="toggleForm()">Need an account? Register</a>
+    </div>
+
+    <div id="register-form" class="hidden">
+        <input type="email" id="reg-email" placeholder="University Email (.edu)">
+        <input type="password" id="reg-password" placeholder="Create Password">
+        <button onclick="register()">Create Account</button>
+        <a class="link" onclick="toggleForm()">Already have an account? Sign In</a>
+    </div>
+
+    <div id="console" class="console-bar">System Ready</div>
+</div>
+
+<script>
+    firebase.initializeApp({
+        apiKey: "AIzaSyAxMFW5gguPiiaomPbuoMc7suxHmgPEhRg",
+        authDomain: "rometricsapp-1444e.firebaseapp.com",
+        projectId: "rometricsapp-1444e",
+        appId: "1:1016564998048:web:1d4c7e4780de0323664ec5"
+    });
+
+    const auth = firebase.auth();
+
+    function log(msg, isError = false) {
+        const c = document.getElementById('console');
+        c.innerText = msg;
+        c.style.color = isError ? '#f87171' : '#4ade80';
+    }
+
+    function toggleForm() {
+        document.getElementById('login-form').classList.toggle('hidden');
+        document.getElementById('register-form').classList.toggle('hidden');
+        document.getElementById('form-title').innerText = 
+            document.getElementById('login-form').classList.contains('hidden') ? 'Student Registration' : 'Student Sign In';
+    }
+
+    function login() {
+        const email = document.getElementById('login-email').value;
+        const pass = document.getElementById('login-password').value;
+        auth.signInWithEmailAndPassword(email, pass).catch(err => log(err.message, true));
+    }
+
+    function register() {
+        const email = document.getElementById('reg-email').value;
+        const pass = document.getElementById('reg-password').value;
+        if(!email.endsWith('.edu')) return log("Error: Must use a .edu email", true);
+        
+        auth.createUserWithEmailAndPassword(email, pass)
+            .then(u => {
+                u.user.sendEmailVerification();
+                log("Verification link sent! Check your email.");
+            })
+            .catch(err => log(err.message, true));
+    }
+
+    function resetPassword() {
+        const email = document.getElementById('login-email').value;
+        if(!email) return log("Enter your email first", true);
+        auth.sendPasswordResetEmail(email)
+            .then(() => log("Reset link sent! Check your inbox/junk."))
+            .catch(err => log(err.message, true));
+    }
+
+    // AUTH LISTENER - No Android buttons, straight redirect
+    auth.onAuthStateChanged(user => {
+        if (user) {
+            if (user.emailVerified) {
+                log("Redirecting to Home...");
+                window.location.href = "/"; // This returns them to your homepage
+            } else {
+                log("Account found. Please verify your email.");
+            }
+        }
+    });
+</script>
+</body>
+</html>

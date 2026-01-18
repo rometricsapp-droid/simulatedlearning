@@ -1,0 +1,262 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=1280, initial-scale=0.3, maximum-scale=1.0, user-scalable=yes">
+  <title>Settings — ROMetrics</title>
+
+  <style>
+    :root {
+      --bg-dark: #121212;
+      --card-dark: #1e1e1e;
+      --text-main: #ffffff;
+      --text-muted: #9ca3af;
+      --accent: #bef264; /* Lime accent like the image */
+      --border: #2d2d2d;
+    }
+
+    * { box-sizing: border-box; }
+    
+    body {
+      margin: 0;
+      width: 1280px !important;
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      background: var(--bg-dark);
+      color: var(--text-main);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding-top: 40px;
+    }
+
+    /* 🧭 TOP NAV BAR (Matches Image) */
+    .settings-nav {
+      background: #1a1a1a;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      display: flex;
+      padding: 6px;
+      gap: 4px;
+      margin-bottom: 60px;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+      text-decoration: none;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      font-weight: 600;
+      border-radius: 8px;
+      transition: 0.2s;
+    }
+
+    .nav-item svg { width: 16px; height: 16px; fill: currentColor; }
+    
+    .nav-item.active {
+      color: var(--accent);
+    }
+
+    .nav-item:hover:not(.active) {
+      background: #252525;
+      color: #fff;
+    }
+
+    /* 📄 CONTENT AREA */
+    .content-wrapper {
+      width: 900px;
+      text-align: left;
+    }
+
+    h1 {
+      font-size: 2.8rem;
+      font-weight: 800;
+      margin: 0 0 10px 0;
+      letter-spacing: -0.02em;
+    }
+
+    .description {
+      font-size: 1.1rem;
+      color: var(--text-muted);
+      margin-bottom: 40px;
+    }
+
+    hr {
+      border: 0;
+      border-top: 1px solid var(--border);
+      margin-bottom: 50px;
+    }
+
+    h2 {
+      font-size: 1.8rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 30px;
+    }
+
+    .help-icon {
+      width: 18px;
+      height: 18px;
+      border: 1.5px solid var(--text-muted);
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      color: var(--text-muted);
+      cursor: help;
+    }
+
+    /* 💳 STATUS BOX */
+    .status-card {
+      background: var(--card-dark);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .status-info div { font-size: 1.2rem; font-weight: 700; }
+    .status-info span { color: var(--text-muted); font-size: 0.9rem; }
+
+    .btn-upgrade {
+      background: var(--accent);
+      color: #000;
+      text-decoration: none;
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-weight: 800;
+      font-size: 0.9rem;
+    }
+
+    .billing-history {
+      margin-top: 60px;
+    }
+
+    .billing-history table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+
+    .billing-history th { text-align: left; color: var(--text-muted); font-size: 0.8rem; padding: 12px; border-bottom: 1px solid var(--border); }
+    .billing-history td { padding: 16px 12px; border-bottom: 1px solid #1a1a1a; font-size: 0.95rem; }
+
+    .back-link { position: absolute; top: 40px; left: 40px; color: var(--accent); text-decoration: none; font-weight: 700; }
+
+  </style>
+</head>
+<body>
+
+  <a href="index.html" class="back-link">← Return to App</a>
+
+  <div class="settings-nav">
+    <a href="profile.html" class="nav-item">
+      <svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+      Profile
+    </a>
+    <a href="#" class="nav-item active">
+      <svg viewBox="0 0 24 24"><path d="M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm16-4H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-1 9h-4v4h-2v-4H9V9h4V5h2v4h4v2z"/></svg>
+      Subscription
+    </a>
+    <a href="billing.html" class="nav-item">
+      <svg viewBox="0 0 24 24"><path d="M20 4H4c-1.11 0-1.99.89-1.99 2L2 18c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4V10h16v8zm0-12H4V4h16v2z"/></svg>
+      Billing
+    </a>
+  </div>
+
+  <div class="content-wrapper">
+    <h1>Subscription</h1>
+    <p class="description">Manage your subscription plan and track your billing history.</p>
+    
+    <hr>
+
+    <h2>Current plan <span class="help-icon">?</span></h2>
+
+    <div class="status-card">
+      <div class="status-info">
+        <div id="planTitle">ROMetrics Pro Trial</div>
+        <span id="expiryText">Renews on: ...</span>
+      </div>
+      <a href="#" id="upgradeBtn" class="btn-upgrade" style="display:none;">Upgrade Plan</a>
+    </div>
+
+    <div class="billing-history">
+      <h3>Recent Invoices</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Description</th>
+            <th>Amount</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody id="invoiceList">
+          </tbody>
+      </table>
+    </div>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/10.12.4/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.4/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore-compat.js"></script>
+
+  <script>
+    firebase.initializeApp({
+      apiKey: "AIzaSyAxMFW5gguPiiaomPbuoMc7suxHmgPEhRg",
+      authDomain: "rometricsapp-1444e.firebaseapp.com",
+      projectId: "rometricsapp-1444e",
+      appId: "1:1016564998048:web:1d4c7e4780de0323664ec5"
+    });
+
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+
+    auth.onAuthStateChanged(async user => {
+      if (!user) { window.location.href = "signin.html"; return; }
+
+      // 1. Check Pro Status
+      const userDoc = await db.collection("users").doc(user.uid).get();
+      if (userDoc.exists) {
+        const data = userDoc.data();
+        const expiry = data.accessExpiry.toDate();
+        const now = new Date();
+
+        document.getElementById('expiryText').textContent = "Next billing date: " + expiry.toLocaleDateString();
+
+        if (now > expiry) {
+          document.getElementById('planTitle').textContent = "Plan Expired";
+          document.getElementById('upgradeBtn').style.display = "block";
+          const baseUrl = user.email.toLowerCase().endsWith(".edu") ? "subscribe-edu" : "subscribe";
+          document.getElementById('upgradeBtn').href = `https://rometrics.app/${baseUrl}?uid=${user.uid}`;
+        }
+      }
+
+      // 2. Load Invoices ($0.00 receipts, etc)
+      const invSnap = await db.collection("invoices")
+        .where("userId", "==", user.uid)
+        .orderBy("date", "desc")
+        .get();
+
+      let rows = "";
+      invSnap.forEach(doc => {
+        const inv = doc.data();
+        rows += `<tr>
+          <td>${inv.date ? inv.date.toDate().toLocaleDateString() : 'N/A'}</td>
+          <td>${inv.description}</td>
+          <td>$${inv.amount}</td>
+          <td style="color:var(--accent); font-weight:800;">Paid</td>
+        </tr>`;
+      });
+      document.getElementById('invoiceList').innerHTML = rows || "<tr><td colspan='4'>No transaction history found.</td></tr>";
+    });
+  </script>
+</body>
+</html>
