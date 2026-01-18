@@ -13,6 +13,7 @@
   --text-main: #1e293b;
   --text-muted: #475569;
   --border: #eef2f6;
+  --card-bg: #ffffff;
 }
 
 @keyframes slideUpFade {
@@ -70,7 +71,6 @@ header {
   border: none;
 }
 
-/* Restored styling for secondary links */
 .header-actions .secondary-link {
   background: transparent;
   color: var(--text-main);
@@ -177,14 +177,43 @@ section { padding: 60px 20px; display: flex; justify-content: center; }
 .referral-text h2 { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--accent); margin-bottom: 1rem; }
 .referral-text h3 { font-size: 1.8rem; font-weight: 800; margin: 0 0 1rem; }
 
+/* PRODUCT MODULES GRID */
+.product-grid { 
+  display: grid; 
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); 
+  gap: 24px; 
+  padding-bottom: 60px;
+}
+.product-card {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 32px;
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.product-card:hover { transform: translateY(-5px); box-shadow: 0 10px 30px rgba(0,0,0,0.05); }
+.card-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  background: rgba(37, 99, 235, 0.1);
+  color: var(--accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  margin-bottom: 20px;
+}
+.product-card h2 { font-size: 1.4rem; margin: 0 0 12px 0; font-weight: 800; }
+.product-card h3 { font-size: 0.7rem; text-transform: uppercase; color: var(--accent); letter-spacing: 0.1em; margin-bottom: 8px; margin-top: 15px; }
+.product-card ul { padding-left: 18px; margin: 0; list-style-type: disc; }
+.product-card li { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 6px; line-height: 1.4; }
+.tagline { font-size: 0.75rem; font-weight: 700; color: var(--text-main); margin-top: auto; padding-top: 15px; border-top: 1px solid var(--border); }
+
 /* BUTTONS */
 .cta-btn { background: var(--accent); color: #fff; padding: 14px 28px; border-radius: 10px; font-size: 0.95rem; font-weight: 700; text-decoration: none; display: inline-block; margin-top: 1.5rem; text-align: center; }
-
-/* MODULE DOCK */
-.modules { background: #fff; border-top: 1px solid var(--border); padding: 40px 20px; }
-.module-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; max-width: 1200px; margin: 0 auto; }
-.module { padding: 20px 10px; border-radius: 12px; text-align: center; font-size: 0.8rem; font-weight: 700; background: var(--bg); border: 1px solid var(--border); }
-.module span { display: block; font-size: 0.65rem; font-weight: 800; text-transform: uppercase; color: var(--accent); margin-bottom: 8px; }
 
 /* MOBILE */
 @media (max-width: 850px) {
@@ -235,12 +264,88 @@ section { padding: 60px 20px; display: flex; justify-content: center; }
         <div class="copy">
           <h1>Measure. Train. <br>Analyze.</h1>
           <p>The unified workspace for goniometry training, motion lab analysis, and manual muscle testing. Designed for the rigorous demands of physical therapy and kinesiology education.</p>
-          <a href="product.html" class="cta-btn">Explore Details</a>
+          
+          <div style="margin-top: 20px; text-align: left;">
+            <h2 style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--accent); margin-bottom: 0.5rem;">App Purpose & Goal</h2>
+            <h3 style="font-size: 1.2rem; font-weight: 800; margin: 0 0 0.5rem;">Master your clinical skills.</h3>
+            <p style="font-size: 0.95rem; margin-top: 0;">ROMetrics is a dedicated training tool for students and early-career learners to refine biomechanical analysis. Signing in allows you to securely track personal progress in Goniometry and MMT simulations to identify areas for improvement.</p>
+          </div>
         </div>
         <div class="visual">
           <img src="Rometrics on laptop.png" class="laptop" alt="ROMetrics on laptop">
           <img src="Rometrics on phone.png" class="phone" alt="ROMetrics on phone">
         </div>
+    </div>
+  </section>
+
+  <section id="products" style="background: #fff; border-top: 1px solid var(--border);">
+    <div class="content-wrapper">
+      <div style="text-align: center; margin-bottom: 40px;">
+        <h2 style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--accent);">The Unified Workspace</h2>
+        <h3 style="font-size: 2rem; font-weight: 900; letter-spacing: -0.04em;">Comprehensive Training Modules</h3>
+      </div>
+
+      <div class="product-grid">
+        <div class="product-card">
+          <div class="card-icon">GT</div>
+          <h2>Goniometry Trainer</h2>
+          <h3>How it is used</h3>
+          <ul>
+            <li>Select model and body position (standing, supine, etc.)</li>
+            <li>Place fulcrum, stationary, and moving arms</li>
+            <li>Track joint action angles during real-time movement</li>
+          </ul>
+          <p class="tagline">Guided instructional learning for measurement techniques.</p>
+        </div>
+
+        <div class="product-card">
+          <div class="card-icon">MT</div>
+          <h2>Manual Muscle Testing</h2>
+          <h3>How it is used</h3>
+          <ul>
+            <li>Review test positions and movement directions</li>
+            <li>Apply interactive resistance using precision controls</li>
+            <li>Observe hold time and fatigue to assign grades (0-5)</li>
+          </ul>
+          <p class="tagline">Focuses on understanding grading logic and mechanics.</p>
+        </div>
+
+        <div class="product-card">
+          <div class="card-icon">ML</div>
+          <h2>Motion Lab</h2>
+          <h3>How it is used</h3>
+          <ul>
+            <li>Move joints manually or through predefined actions</li>
+            <li>Observe segment coordination and sequencing</li>
+            <li>Adjust posture and model orientation</li>
+          </ul>
+          <p class="tagline">Exploratory environment for foundational motion study.</p>
+        </div>
+
+        <div class="product-card">
+          <div class="card-icon">SE</div>
+          <h2>Simulated Evaluations</h2>
+          <h3>How they work</h3>
+          <ul>
+            <li>Given case context, clues, and patient history</li>
+            <li>Make clinical decisions without guided prompts</li>
+            <li>Practice identifying ROM and strength deficits</li>
+          </ul>
+          <p class="tagline">Application-based practice for exam preparation.</p>
+        </div>
+
+        <div class="product-card">
+          <div class="card-icon">FL</div>
+          <h2>Forensic Motion Lab</h2>
+          <h3>What it focuses on</h3>
+          <ul>
+            <li>Balance, stability, and compensatory strategies</li>
+            <li>Center of mass and base of support</li>
+            <li>Mechanical reasoning for task outcomes</li>
+          </ul>
+          <p class="tagline">Answers “why did this happen?” through physics.</p>
+        </div>
+      </div>
     </div>
   </section>
 
@@ -259,14 +364,7 @@ section { padding: 60px 20px; display: flex; justify-content: center; }
         </div>
     </div>
   </section>
-<div style="background: #fff; border: 1px solid var(--accent); padding: 15px; border-radius: 10px; margin-top: 20px; text-align: left;">
-                <h4 style="margin: 0 0 8px 0; font-size: 0.85rem; color: var(--accent);">App Purpose & Learning Goal</h4>
-                <p style="font-size: 0.8rem; margin: 0; line-height: 1.4; color: var(--text-main);">
-                    ROMetrics is a specialized training tool for <strong>students and early-career learners</strong> to master clinical techniques. 
-                    Signing in allows you to track your personal progress in <strong>Goniometry, MMT, and biomechanical analysis</strong>, 
-                    storing your simulation scores securely under your profile for personal skill-building.
-                </p>
-            </div>
+
   <section class="referral-section">
     <div class="content-wrapper referral-content">
         <div class="referral-text">
@@ -280,16 +378,6 @@ section { padding: 60px 20px; display: flex; justify-content: center; }
   </section>
 </main>
 
-<section class="modules">
-  <div class="module-row">
-    <div class="module"><span>Measure</span>Goniometry Trainer</div>
-    <div class="module"><span>Analyze</span>Motions Lab</div>
-    <div class="module"><span>Strength</span>Manual Muscle Tests</div>
-    <div class="module"><span>Simulate</span>Simulated Evaluations</div>
-    <div class="module"><span>Investigate</span>Motion Forensics</div>
-  </div>
-</section>
-
 <footer style="background: #f8fafc; border-top: 1px solid var(--border); padding: 40px 20px;">
   <div style="max-width: 1200px; margin: 0 auto; text-align: center;">
     <div style="margin-bottom: 20px;">
@@ -300,7 +388,6 @@ section { padding: 60px 20px; display: flex; justify-content: center; }
     <p style="color: #64748b; font-size: 0.75rem; margin: 0;">ROMetrics © 2026 | Physical Therapy Motion Analysis Platform</p>
   </div>
 </footer>
-
 
 <script src="https://www.gstatic.com/firebasejs/10.12.4/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.4/firebase-auth-compat.js"></script>
@@ -319,7 +406,6 @@ const profileWrapper = document.getElementById("profileWrapper");
 const userEmailDisplay = document.getElementById("userEmailDisplay");
 const profileDropdown = document.getElementById("profileDropdown");
 
-// AUTH LISTENER
 auth.onAuthStateChanged(user => {
   if (user) {
     signinLink.style.display = "none";
@@ -331,12 +417,10 @@ auth.onAuthStateChanged(user => {
   }
 });
 
-// UI TOGGLE
 function toggleDropdown() {
   profileDropdown.classList.toggle("show");
 }
 
-// Close dropdown if clicked outside
 window.onclick = function(event) {
   if (!event.target.matches('.profile-trigger')) {
     if (profileDropdown.classList.contains('show')) {
