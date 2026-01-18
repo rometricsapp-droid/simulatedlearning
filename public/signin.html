@@ -102,9 +102,6 @@ input {
   width: 100%;
   margin-top: 8px;
 }
-
-#successCard { width: 100%; max-width: 480px; text-align: center; margin: 0 auto; }
-.user-badge { background: #0f172a; padding: 14px; border-radius: 12px; font-weight: 700; color: var(--primary); margin-bottom: 24px; font-family: monospace; }
 </style>
 </head>
 
@@ -113,8 +110,8 @@ input {
 <div id="mainUI" class="auth-container">
 <div class="auth-card">
   <div class="logo-header">
-    <a href="index.html" style="display: inline-block; text-decoration: none;">
-      <img src="rometrics-logo.png" class="logo" alt="ROMetrics" style="cursor: pointer;">
+    <a href="index.html">
+      <img src="rometrics-logo.png" class="logo" alt="ROMetrics">
     </a>
     <h1>Sign In</h1>
     <p>Returning users.</p>
@@ -137,8 +134,8 @@ input {
 
 <div class="auth-card" style="border-top: 4px solid var(--primary);">
   <div class="logo-header">
-    <a href="index.html" style="display: inline-block;">
-      <img src="rometrics-logo.png" class="logo" alt="ROMetrics" style="cursor: pointer;">
+    <a href="index.html">
+      <img src="rometrics-logo.png" class="logo" alt="ROMetrics">
     </a>
     <h1>Register</h1>
     <p>Use .edu for student discount.</p>
@@ -165,23 +162,6 @@ input {
   </div>
 </div>
 
-<div id="successCard" class="auth-card" style="display:none">
-  <div class="logo-header">
-    <img src="rometrics-logo.png" class="logo" alt="ROMetrics">
-    <h1 id="statTitle">Verified</h1>
-  </div>
-  <div class="user-badge" id="displayEmail"></div>
-  <p id="statMsg">Session active. Return to the app to continue.</p>
-  
-  <div id="eduGate" style="display:none; flex-direction:column; gap:10px;">
-    <button class="btn btn-primary" onclick="window.location.reload()">I've Clicked the Link</button>
-    <p style="font-size: 11px; color: var(--error);">Note: .edu accounts must be verified via the email link before access is granted.</p>
-  </div>
-  
-  <button class="btn btn-primary" id="returnBtn">Return to App</button>
-  <button class="btn btn-outline" id="logoutBtn" style="margin-top:12px; font-size:12px;">Sign Out</button>
-</div>
-
 <script src="https://www.gstatic.com/firebasejs/10.12.4/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.4/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore-compat.js"></script>
@@ -205,32 +185,14 @@ const msg = (id, text, type = "error") => {
 };
 
 auth.onAuthStateChanged(user => {
-  const mainUI = document.getElementById("mainUI");
-  const successCard = document.getElementById("successCard");
-  const displayEmail = document.getElementById("displayEmail");
-
   if (user) {
-    // If it's a .edu user, they MUST be verified
+    // Handling .edu Verification for Web
     if (user.email.toLowerCase().endsWith('.edu') && !user.emailVerified) {
-      mainUI.style.display = "none";
-      successCard.style.display = "flex";
-      displayEmail.textContent = user.email;
-      document.getElementById("statTitle").textContent = "Email Link Sent";
-      document.getElementById("statMsg").textContent = "Check your .edu inbox. Click the link and then refresh this page.";
-      document.getElementById("returnBtn").style.display = "none";
-      document.getElementById("eduGate").style.display = "flex";
+      msg("loginConsole", "Email verification required. Please check your .edu inbox.", "info");
       return;
     }
-
-    mainUI.style.display = "none";
-    successCard.style.display = "flex";
-    displayEmail.textContent = user.email;
-    document.getElementById("statTitle").textContent = "Authenticated";
-    document.getElementById("returnBtn").style.display = "block";
-    document.getElementById("eduGate").style.display = "none";
-  } else {
-    mainUI.style.display = "flex";
-    successCard.style.display = "none";
+    // SUCCESS: Straight redirect to landing page, no "Return to App" button
+    window.location.href = "index.html"; 
   }
 });
 
@@ -239,9 +201,7 @@ document.getElementById("doLogin").onclick = () => {
   const p = document.getElementById("loginPass").value;
   if (!e || !p) return msg("loginConsole", "Missing email or password.");
   auth.signInWithEmailAndPassword(e, p).catch(err => {
-    let text = "Invalid credentials.";
-    if (err.code === 'auth/user-not-found') text = "No account found. Please register.";
-    msg("loginConsole", text);
+    msg("loginConsole", err.message);
   });
 };
 
@@ -265,20 +225,17 @@ document.getElementById("doRegister").onclick = async () => {
     const cred = await auth.createUserWithEmailAndPassword(email, pass);
     if (email.toLowerCase().endsWith('.edu')) {
       await cred.user.sendEmailVerification();
+      msg("regConsole", "Verification email sent. Please check your inbox.", "info");
     }
-    // Write the "New User" record to Firestore
     await db.collection("users").doc(cred.user.uid).set({
-      fullName: name, email: email, createdAt: firebase.firestore.FieldValue.serverTimestamp(), accessExpiry: new Date(0) 
+      fullName: name, 
+      email: email, 
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
     });
   } catch(err) { msg("regConsole", err.message); }
 };
 
 document.getElementById("googleLogin").onclick = () => auth.signInWithPopup(new firebase.auth.GoogleAuthProvider());
-document.getElementById("logoutBtn").onclick = () => auth.signOut();
-document.getElementById("returnBtn").onclick = () => {
-  const params = new URLSearchParams(window.location.search);
-  window.location.href = (params.get("source") === "app") ? "rometrics://auth" : "https://rometrics.app";
-};
 </script>
 </body>
 </html>
