@@ -179,19 +179,19 @@ const db = firebase.firestore();
 
 const msg = (id, text, type = "error") => {
   const el = document.getElementById(id);
-  el.textContent = text;
+  // Replaces any instance of "Firebase" with "Authentication" for customer-facing errors
+  const cleanText = text.replace(/Firebase/gi, "Authentication");
+  el.textContent = cleanText;
   el.className = `console-msg console-${type}`;
   el.style.display = "block";
 };
 
 auth.onAuthStateChanged(user => {
   if (user) {
-    // Handling .edu Verification for Web
     if (user.email.toLowerCase().endsWith('.edu') && !user.emailVerified) {
       msg("loginConsole", "Email verification required. Please check your .edu inbox.", "info");
       return;
     }
-    // SUCCESS: Straight redirect to landing page, no "Return to App" button
     window.location.href = "index.html"; 
   }
 });
