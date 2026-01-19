@@ -4,7 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>ROMetrics | Motion Analysis Platform</title>
-
+<!-- FAVICON -->
+<link rel="icon" type="image/png" sizes="192x192" href="favicon-192.png">
+<link rel="apple-touch-icon" sizes="192x192" href="favicon-192.png">
 <style>
 :root {
   --primary: #0f172a;
@@ -223,6 +225,35 @@ section { padding: 60px 20px; display: flex; justify-content: center; }
   .laptop { transform: none; }
   .phone { width: 80px; position: absolute; left: 15%; bottom: 10%; transform: none; }
 }
+.dropdown-menu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 12px;
+  width: 200px;
+  display: none;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+  z-index: 1000;
+  margin-top: 10px;
+}
+
+.user-info-header { padding: 4px 8px 8px; }
+
+.dropdown-item {
+  display: block;
+  padding: 10px 12px;
+  color: var(--text-muted);
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 600;
+  border-radius: 8px;
+  transition: 0.2s;
+}
+
+.dropdown-item:hover { background: #252525; color: #fff; }
 </style>
 </head>
 
@@ -244,17 +275,20 @@ section { padding: 60px 20px; display: flex; justify-content: center; }
     
     <a href="signin.html" id="signinLink">Sign In</a>
     
-    <div id="profileWrapper" style="display:none;">
-      <button class="profile-trigger" onclick="toggleDropdown()">Profile</button>
-      <div id="profileDropdown" class="dropdown-menu">
-        <div class="user-info-header">
-          <span>Logged in as</span>
-          <strong id="userEmailDisplay">user@example.com</strong>
-        </div>
-        <a href="settings.html" class="dropdown-item">Settings</a>
-        <button onclick="handleSignOut()" class="dropdown-item sign-out-item">Sign Out</button>
-      </div>
+
+<div id="profileWrapper" style="display:none; position: relative;">
+  <button class="profile-trigger" onclick="toggleDropdown(event)">Profile</button>
+  
+  <div id="profileDropdown" class="dropdown-menu">
+    <div class="user-info-header">
+      <span id="displayUsername" style="display:block; font-size: 14px; font-weight: 800; color: #fff;">@username</span>
+      <span id="displayStatus" style="display:block; font-size: 10px; font-weight: 700; text-transform: uppercase; margin-top: 4px;">Free Member</span>
     </div>
+    <div style="height: 1px; background: var(--border); margin: 8px 0;"></div>
+    <a href="settings.html" class="dropdown-item">Settings</a>
+    <button onclick="handleSignOut()" class="dropdown-item sign-out-item" style="color: var(--error); width: 100%; text-align: left; border: none; background: none; cursor: pointer;">Sign Out</button>
+  </div>
+</div>
   </div>
 </header>
 
@@ -417,22 +451,43 @@ auth.onAuthStateChanged(user => {
   }
 });
 
-function toggleDropdown() {
-  profileDropdown.classList.toggle("show");
+function toggleDropdown(event) {
+  event.stopPropagation();
+  const menu = document.getElementById('profileDropdown');
+  menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
 }
 
-window.onclick = function(event) {
-  if (!event.target.matches('.profile-trigger')) {
-    if (profileDropdown.classList.contains('show')) {
-      profileDropdown.classList.remove('show');
+// Close menu if user clicks anywhere else on the page
+window.onclick = () => {
+  document.getElementById('profileDropdown').style.display = 'none';
+};
+
+auth.onAuthStateChanged(async user => {
+  if (user) {
+    document.getElementById('profileWrapper').style.display = 'block';
+    
+    // Fetch user profile from Firestore
+    const userDoc = await db.collection("users").doc(user.uid).get();
+    if (userDoc.exists) {
+      const data = userDoc.data();
+      
+      // Update Username display
+      document.getElementById('displayUsername').textContent = "@" + (data.username || "User");
+
+      // Check for Pro vs Free status
+      const isPro = data.accessExpiry && data.accessExpiry.toDate() > new Date();
+      const statusEl = document.getElementById('displayStatus');
+      
+      statusEl.textContent = isPro ? "Pro Member" : "Free Member";
+      statusEl.style.color = isPro ? "var(--accent)" : "var(--primary)";
     }
+  } else {
+    document.getElementById('profileWrapper').style.display = 'none';
   }
-}
+});
 
 function handleSignOut() {
-  auth.signOut().then(() => {
-    window.location.reload();
-  });
+  auth.signOut().then(() => { window.location.href = "signin.html"; });
 }
 </script>
 

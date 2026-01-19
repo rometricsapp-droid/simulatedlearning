@@ -1,0 +1,13 @@
+{
+  "projects": {},
+  "targets": {
+    "rometricsapp-1444e": {
+      "hosting": {
+        "default": [
+          "rometricsapp-1444e"
+        ]
+      }
+    }
+  },
+  "etags": {}
+}

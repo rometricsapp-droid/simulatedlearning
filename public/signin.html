@@ -5,6 +5,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>ROMetrics | Account Access</title>
 
+<!-- FAVICON -->
+<link rel="icon" type="image/png" sizes="192x192" href="favicon-192.png">
+<link rel="apple-touch-icon" sizes="192x192" href="favicon-192.png">
+
 <style>
 :root {
   --bg: #0b1120; 
@@ -119,8 +123,8 @@ input {
     <div id="loginConsole" class="console-msg"></div>
 
     <div class="input-group">
-      <span class="input-label">Email</span>
-      <input id="loginEmail" type="email" placeholder="name@domain.com">
+      <span class="input-label">Username or Email</span>
+      <input id="loginIdentifier" type="text" placeholder="Username or Email">
     </div>
     <div class="input-group">
       <span class="input-label">Password</span>
@@ -138,13 +142,17 @@ input {
       <img src="rometrics-logo.png" class="logo" alt="ROMetrics">
     </a>
     <h1>Register</h1>
-    <p>Use .edu for student discount.</p>
+    <p>Your First Month of Premium is Free.</p>
   </div>
     <div id="regConsole" class="console-msg"></div>
 
     <div class="input-group">
       <span class="input-label">Full Name</span>
       <input id="regName" type="text" placeholder="Jane Smith">
+    </div>
+    <div class="input-group">
+      <span class="input-label">Username</span>
+      <input id="regUsername" type="text" placeholder="choose username" maxlength="9">
     </div>
     <div class="input-group">
       <span class="input-label">Email</span>
@@ -179,7 +187,6 @@ const db = firebase.firestore();
 
 const msg = (id, text, type = "error") => {
   const el = document.getElementById(id);
-  // Replaces any instance of "Firebase" with "Authentication" for customer-facing errors
   const cleanText = text.replace(/Firebase/gi, "Authentication");
   el.textContent = cleanText;
   el.className = `console-msg console-${type}`;
@@ -196,40 +203,52 @@ auth.onAuthStateChanged(user => {
   }
 });
 
-document.getElementById("doLogin").onclick = () => {
-  const e = document.getElementById("loginEmail").value;
+document.getElementById("doLogin").onclick = async () => {
+  let idInput = document.getElementById("loginIdentifier").value.trim().toLowerCase();
   const p = document.getElementById("loginPass").value;
-  if (!e || !p) return msg("loginConsole", "Missing email or password.");
-  auth.signInWithEmailAndPassword(e, p).catch(err => {
-    msg("loginConsole", err.message);
-  });
+  
+  if (!idInput || !p) return msg("loginConsole", "Missing credentials.");
+
+  try {
+    if (!idInput.includes('@')) {
+      const userSnap = await db.collection("users").where("username", "==", idInput).limit(1).get();
+      if (userSnap.empty) return msg("loginConsole", "Username not found.");
+      idInput = userSnap.docs[0].data().email;
+    }
+    await auth.signInWithEmailAndPassword(idInput, p);
+  } catch(err) { msg("loginConsole", err.message); }
 };
 
 document.getElementById("doForgot").onclick = () => {
-  const e = document.getElementById("loginEmail").value;
-  if (!e) return msg("loginConsole", "Enter your email first.");
+  const e = document.getElementById("loginIdentifier").value;
+  if (!e || !e.includes('@')) return msg("loginConsole", "Enter your email first.");
   auth.sendPasswordResetEmail(e)
     .then(() => msg("loginConsole", "Reset link sent to your inbox.", "info"))
     .catch(err => msg("loginConsole", err.message));
 };
 
 document.getElementById("doRegister").onclick = async () => {
-  const name = document.getElementById("regName").value;
-  const email = document.getElementById("regEmail").value;
+  const name = document.getElementById("regName").value.trim();
+  const user = document.getElementById("regUsername").value.trim().toLowerCase();
+  const email = document.getElementById("regEmail").value.trim().toLowerCase();
   const pass = document.getElementById("regPass").value;
   const confirm = document.getElementById("regConfirm").value;
 
+  if (!name || !user || !email || !pass) return msg("regConsole", "All fields are required.");
+  if (user.length > 9) return msg("regConsole", "Username max 9 characters.");
   if (pass !== confirm) return msg("regConsole", "Passwords do not match.");
   
   try {
+    const nameCheck = await db.collection("users").where("username", "==", user).limit(1).get();
+    if (!nameCheck.empty) return msg("regConsole", "Username is already taken.");
+
     const cred = await auth.createUserWithEmailAndPassword(email, pass);
-    if (email.toLowerCase().endsWith('.edu')) {
-      await cred.user.sendEmailVerification();
-      msg("regConsole", "Verification email sent. Please check your inbox.", "info");
-    }
+    if (email.endsWith('.edu')) await cred.user.sendEmailVerification();
+
     await db.collection("users").doc(cred.user.uid).set({
-      fullName: name, 
-      email: email, 
+      fullName: name,
+      username: user,
+      email: email,
       createdAt: firebase.firestore.FieldValue.serverTimestamp()
     });
   } catch(err) { msg("regConsole", err.message); }
