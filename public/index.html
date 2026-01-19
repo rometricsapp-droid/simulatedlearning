@@ -489,76 +489,82 @@ section { padding: 60px 20px; display: flex; justify-content: center; }
 
 <script src="https://www.gstatic.com/firebasejs/10.12.4/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.4/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore-compat.js"></script>
 
 <script>
 firebase.initializeApp({
   apiKey: "AIzaSyAxMFW5gguPiiaomPbuoMc7suxHmgPEhRg",
-  authDomain: "rometrics.app",
+  authDomain: "rometricsapp-1444e.firebaseapp.com",
   projectId: "rometricsapp-1444e",
   appId: "1:1016564998048:web:1d4c7e4780de0323664ec5"
 });
 
 const auth = firebase.auth();
-const db = firebase.firestore(); // Ensure Firestore is initialized
+const db = firebase.firestore();
 
 auth.onAuthStateChanged(async (user) => {
   const profileWrapper = document.getElementById('profileWrapper');
+  const signinLink = document.getElementById('signinLink'); // FIX 2: Target the sign-in link
   const displayUsername = document.getElementById('displayUsername');
   const statusBadge = document.getElementById('displayStatus');
 
   if (user) {
-    profileWrapper.style.display = 'block';
+    if (profileWrapper) profileWrapper.style.display = 'block';
+    if (signinLink) signinLink.style.display = 'none'; // FIX 2: Hide Sign In link when logged in
 
-    // 1. Check for email verification
     if (!user.emailVerified) {
-      displayUsername.textContent = "Verify Email";
-      statusBadge.textContent = "PENDING";
-      statusBadge.style.color = "#ff4444";
-      statusBadge.style.borderColor = "#ff4444";
+      if (displayUsername) displayUsername.textContent = "Verify Email";
+      if (statusBadge) {
+        statusBadge.textContent = "PENDING";
+        statusBadge.style.color = "#ff4444";
+      }
       return;
     }
 
-    // 2. Fetch User Data from Firestore
     try {
-      const userDoc = await db.collection("users").doc(user.uid).get();
-      let displayName = "";
-      let isPro = false;
+      const userRef = db.collection("users").doc(user.uid);
+      let userDoc = await userRef.get();
 
-      if (userDoc.exists) {
-        const data = userDoc.data();
-        displayName = data.username; // Pulls the 3-9 char username
-        isPro = data.accessExpiry && data.accessExpiry.toDate() > new Date();
+      // FIX 3: THE "FRESH START" CATCH
+      // Automatically creates your DB entry once you are verified
+      if (!userDoc.exists) {
+        const pending = JSON.parse(localStorage.getItem('pendingProfile')) || {};
+        await userRef.set({
+          fullName: pending.name || user.displayName || "User",
+          username: pending.user || user.email.split('@')[0],
+          email: user.email,
+          createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        userDoc = await userRef.get();
+        localStorage.removeItem('pendingProfile');
       }
 
-      // Fallback: Use email prefix if username field is missing in DB
-      if (!displayName) {
-        displayName = user.email.split('@')[0];
-      }
-
-      // 3. Update UI
-      displayUsername.textContent = "@" + displayName;
-      statusBadge.textContent = isPro ? "PRO" : "FREE";
+      const data = userDoc.data();
+      if (displayUsername) displayUsername.textContent = "@" + (data.username || "User");
       
-      const themeColor = isPro ? "var(--accent)" : "#9ca3af";
-      statusBadge.style.color = themeColor;
-      statusBadge.style.borderColor = themeColor;
+      const isPro = data.accessExpiry && data.accessExpiry.toDate() > new Date();
+      if (statusBadge) {
+        statusBadge.textContent = isPro ? "PRO" : "FREE";
+        const themeColor = isPro ? "var(--accent)" : "#9ca3af";
+        statusBadge.style.color = themeColor;
+        statusBadge.style.borderColor = themeColor;
+      }
 
     } catch (error) {
       console.error("Firestore Error:", error);
     }
   } else {
-    profileWrapper.style.display = 'none';
+    if (profileWrapper) profileWrapper.style.display = 'none';
+    if (signinLink) signinLink.style.display = 'block'; // Show Sign In if logged out
   }
 });
 
-// Dropdown Toggle Logic
 function toggleDropdown(event) {
   event.stopPropagation();
   const menu = document.getElementById('profileDropdown');
-  menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
+  if (menu) menu.style.display = (menu.style.display === 'block') ? 'none' : 'block';
 }
 
-// Close menu if user clicks anywhere else
 window.onclick = () => {
   const menu = document.getElementById('profileDropdown');
   if (menu) menu.style.display = 'none';
@@ -570,6 +576,5 @@ function handleSignOut() {
   });
 }
 </script>
-
 </body>
 </html>

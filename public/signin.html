@@ -188,7 +188,12 @@ firebase.initializeApp({
 const auth = firebase.auth();
 const db = firebase.firestore();
 
+// FIX: msg function now hides the opposite console to prevent mirroring
 const msg = (id, text, type = "error") => {
+  const otherId = id === "regConsole" ? "loginConsole" : "regConsole";
+  const otherEl = document.getElementById(otherId);
+  if (otherEl) otherEl.style.display = "none"; 
+
   const el = document.getElementById(id);
   const cleanText = text.replace(/Firebase/gi, "Authentication");
   el.textContent = cleanText;
@@ -196,15 +201,12 @@ const msg = (id, text, type = "error") => {
   el.style.display = "block";
 };
 
-/**
- * AUTH LISTENER
- * Only redirect to index.html if the email is verified.
- */
 auth.onAuthStateChanged(user => {
   if (user) {
     if (user.emailVerified) {
       window.location.href = "index.html"; 
     } else {
+      // Directs unverified users to the login side message
       msg("loginConsole", "Verify link sent to email to complete registration.", "info");
     }
   }
@@ -255,22 +257,25 @@ document.getElementById("doRegister").onclick = async () => {
   if (pass !== confirm) return msg("regConsole", "Passwords do not match.");
 
   try {
-    // 1. Check if username is taken
     const nameCheck = await db.collection("users").where("username", "==", user).limit(1).get();
     if (!nameCheck.empty) return msg("regConsole", "Username is already taken.");
 
-    // 2. Create Auth Account
     const cred = await auth.createUserWithEmailAndPassword(email, pass);
-    
-    // 3. Send Verification Email
     await cred.user.sendEmailVerification();
     
-    // 4. Temporarily store profile data
-    // Because your Firestore Rules block writes until email is verified, 
-    // we save this locally so index.html can finish the job later.
     localStorage.setItem('pendingProfile', JSON.stringify({ name, user }));
 
-    msg("regConsole", "Verify link sent! Please check your inbox and verify to complete registration.", "info");
+    // FIX: Replaces the form with a "Submitted" state message
+    const regCard = document.getElementById("doRegister").closest('.auth-card');
+    regCard.innerHTML = `
+      <div style="text-align:center; padding: 20px 0;">
+        <img src="rometrics-logo.png" class="logo" style="height:42px; margin-bottom:20px;">
+        <h1 style="color: var(--primary);">Verify Email</h1>
+        <p>A link has been sent to <strong>${email}</strong>.</p>
+        <p style="font-size: 0.85rem; margin-top: 15px;">Please check your inbox and click the link to activate your profile.</p>
+        <button class="btn btn-outline" style="margin-top: 25px;" onclick="location.reload()">Back to Sign In</button>
+      </div>
+    `;
   } catch(err) { msg("regConsole", err.message); }
 };
 
@@ -313,6 +318,7 @@ document.getElementById("googleLogin").onclick = async () => {
     window.location.href = "index.html";
   } catch (error) { msg("loginConsole", error.message); }
 };
+
 </script>
 </body>
 </html>
