@@ -289,7 +289,10 @@ document.getElementById("googleLogin").onclick = async () => {
   try {
     const provider = new firebase.auth.GoogleAuthProvider();
 
-    // 🔐 REQUIRED: Google OAuth via Firebase
+    // Optional but recommended: always let user choose account
+    provider.setCustomParameters({ prompt: "select_account" });
+
+    // 🔐 Google OAuth via Firebase
     const result = await firebase.auth().signInWithPopup(provider);
     const user = result.user;
 
@@ -302,15 +305,20 @@ document.getElementById("googleLogin").onclick = async () => {
 
     // 🆕 FIRST-TIME GOOGLE USER → AUTO-CREATE PROFILE
     if (!snap.exists) {
-      const username = user.email
-        .split("@")[0]          // ← FIRST PART ONLY
+      let username = user.email
+        .split("@")[0]            // ← FIRST PART ONLY
         .toLowerCase()
-        .replace(/[^a-z0-9]/g, ""); // normalize (no symbols)
+        .replace(/[^a-z0-9]/g, "");
+
+      // 🔒 Hard fallback (never allow empty username)
+      if (!username) {
+        username = `user${user.uid.slice(0, 6)}`;
+      }
 
       await userRef.set({
         uid: user.uid,
         email: user.email,
-        username: username,     // ← GUARANTEED NO DOMAIN
+        username: username,       // ← GUARANTEED NO DOMAIN
         provider: "google",
         createdAt: firebase.firestore.FieldValue.serverTimestamp()
       });
