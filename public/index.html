@@ -543,13 +543,14 @@ auth.onAuthStateChanged(async (user) => {
     let snap = await ref.get();
 
 if (!snap.exists) {
-  const derivedUsername =
-    user.displayName
-      ? user.displayName.replace(/\s+/g, "").toLowerCase()
-      : user.email.split("@")[0].toLowerCase();
+  const emailPrefix = user.email
+    .split("@")[0]
+    .replace(/[^a-z0-9]/gi, "")
+    .toLowerCase()
+    .slice(0, 9);
 
   await ref.set({
-    username: derivedUsername,
+    username: emailPrefix,
     email: user.email,
     createdAt: Date.now(),
     provider: user.providerData[0]?.providerId || "password"
