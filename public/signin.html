@@ -283,13 +283,14 @@ document.getElementById("doLogin").onclick = async () => {
 
 /* ===============================
    GOOGLE SIGN-IN (AUTO-REGISTER)
+   Username = email local-part ONLY
    =============================== */
 document.getElementById("googleLogin").onclick = async () => {
   try {
     const provider = new firebase.auth.GoogleAuthProvider();
 
-    // Firebase-required authentication step
-    const result = await auth.signInWithPopup(provider);
+    // 🔐 REQUIRED: Google OAuth via Firebase
+    const result = await firebase.auth().signInWithPopup(provider);
     const user = result.user;
 
     if (!user || !user.email) {
@@ -299,33 +300,31 @@ document.getElementById("googleLogin").onclick = async () => {
     const userRef = db.collection("users").doc(user.uid);
     const snap = await userRef.get();
 
-    // 🆕 FIRST-TIME GOOGLE SIGN-IN → AUTO REGISTER
+    // 🆕 FIRST-TIME GOOGLE USER → AUTO-CREATE PROFILE
     if (!snap.exists) {
-      const emailLocal = user.email.split("@")[0]
+      const username = user.email
+        .split("@")[0]          // ← FIRST PART ONLY
         .toLowerCase()
-        .replace(/[^a-z0-9]/g, "")
-        .slice(0, 9); // enforce username length limit if desired
+        .replace(/[^a-z0-9]/g, ""); // normalize (no symbols)
 
       await userRef.set({
         uid: user.uid,
         email: user.email,
-        username: emailLocal,
+        username: username,     // ← GUARANTEED NO DOMAIN
         provider: "google",
         createdAt: firebase.firestore.FieldValue.serverTimestamp()
       });
     }
 
-    // ✅ User is now authenticated + registered
-    setTimeout(() => {
-      window.location.href = "https://rometrics.app/";
-    }, 300);
+    // ✅ AUTH + PROFILE COMPLETE
+    window.location.href = "https://rometrics.app/";
 
-  }  catch (err) {
-  console.error("Google sign-in error:", err);
-  msg(err.message || "Google sign-in failed.", "error");
-}
-
+  } catch (err) {
+    console.error("Google sign-in error:", err);
+    msg(err.message || "Google sign-in failed.", "error");
+  }
 };
+
 
 </script>
 
