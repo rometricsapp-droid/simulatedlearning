@@ -155,20 +155,9 @@ const msg = (text, type = "error") => {
     el.style.display = "block";
   }
 };
-auth.onAuthStateChanged(async (user) => {
-  if (user) {
-    // Force Firebase to check the latest verification status from the server
-    await user.reload(); 
 
-    if (user.emailVerified) {
-      // If verified, send to the home page immediately
-      window.location.href = "https://rometrics.app/"; 
-    } else {
-      // If still not verified, show the message
-      msg("Please verify your email to complete registration. Check your inbox.", "info");
-    }
-  }
-});
+
+
 
 document.getElementById("doLogin").onclick = async () => {
   let idInput = document.getElementById("loginIdentifier").value.trim().toLowerCase();
@@ -185,9 +174,18 @@ document.getElementById("doLogin").onclick = async () => {
     }
     
     // Attempt sign in
-    await auth.signInWithEmailAndPassword(idInput, p);
     
-    // Note: onAuthStateChanged above will handle the redirect once verified
+const cred = await auth.signInWithEmailAndPassword(idInput, p);
+await cred.user.reload();
+
+if (!cred.user.emailVerified) {
+  await auth.signOut();
+  return msg("Please verify your email before signing in.", "info");
+}
+
+window.location.href = "https://rometrics.app/";
+
+    
   } catch(err) { 
     msg(err.message); 
   }
