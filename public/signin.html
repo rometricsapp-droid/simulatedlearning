@@ -172,7 +172,7 @@ input:focus { border-color: var(--primary); }
 </div>
 
   <div class="switch-link">
-    Don't have an account? <a href="register.html">Register</a>
+  Don't have an account? <a href="#" onclick="window.location.href='register.html' + window.location.search">Register</a>
   </div>
 </div>
 
@@ -195,18 +195,31 @@ if (!firebase.apps.length) {
 
 const auth = firebase.auth();
 const db   = firebase.firestore();
+
 async function handleRedirect(user) {
   const params = new URLSearchParams(window.location.search);
   const isAndroid = params.get("return") === "android";
 
   if (isAndroid) {
-    // Generate the token from Firebase
+    // 1. Show the choice modal
+    const modal = document.getElementById("choiceModal");
+    modal.style.display = "flex";
+
+    // 2. Prepare the App Token
     const token = await user.getIdToken();
-    // Redirect to the /auth path so the Android Manifest catches it
-    window.location.href = `https://rometrics.app/auth?token=${token}`;
+
+    // 3. Choice: Go to App (Handshake)
+    document.getElementById("goApp").onclick = () => {
+      window.location.href = `https://rometrics.app/auth?token=${token}`;
+    };
+
+    // 4. Choice: Stay on Web
+    document.getElementById("goWeb").onclick = () => {
+      window.location.href = "https://rometrics.app/";
+    };
   } else {
-    // Normal web users go to the homepage
-window.location.href = "https://rometrics.app/"; // ✅ Correct
+    // Standard web login (no modal)
+    window.location.href = "https://rometrics.app/";
   }
 }
 
@@ -445,6 +458,13 @@ document.getElementById("googleLogin").onclick = async () => {
 
 
 </script>
-
+<div id="choiceModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:10000; align-items:center; justify-content:center; padding:20px;">
+  <div style="background:var(--card); padding:30px; border-radius:24px; border:1px solid var(--border); text-align:center; max-width:400px; width:100%;">
+    <h2 style="margin-top:0;">Sign In Success!</h2>
+    <p>Where would you like to go?</p>
+    <button id="goApp" class="btn btn-primary">Return to ROMetrics App</button>
+    <button id="goWeb" class="btn btn-outline" style="margin-top:10px;">Stay on Website</button>
+  </div>
+</div>
 </body>
 </html>
