@@ -501,90 +501,69 @@ firebase.initializeApp({
 const auth = firebase.auth();
 const db = firebase.firestore();
 
-// 🔑 Ensure session persistence
+// Ensure persistence (no await)
 auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
 
-(async () => {
-  // ⏳ Wait for Firebase to finish restoring auth state
-  await new Promise(resolve => {
-    const unsub = auth.onAuthStateChanged(() => {
-      unsub();
-      resolve();
-    });
-  });
+auth.onAuthStateChanged(async (user) => {
+  const profileWrapper = document.getElementById("profileWrapper");
+  const signinLink = document.getElementById("signinLink");
+  const displayUsername = document.getElementById("displayUsername");
+  const statusBadge = document.getElementById("displayStatus");
 
-  const user = auth.currentUser;
-
-  const profileWrapper = document.getElementById('profileWrapper');
-  const signinLink = document.getElementById('signinLink');
-  const displayUsername = document.getElementById('displayUsername');
-  const statusBadge = document.getElementById('displayStatus');
-
-  // ===== NOT SIGNED IN =====
+  // NOT SIGNED IN
   if (!user) {
-    if (profileWrapper) profileWrapper.style.display = 'none';
-    if (signinLink) signinLink.style.display = 'block';
+    profileWrapper.style.display = "none";
+    signinLink.style.display = "block";
     return;
   }
 
-  // Show profile UI
-  if (profileWrapper) profileWrapper.style.display = 'block';
-  if (signinLink) signinLink.style.display = 'none';
+  // SIGNED IN
+  signinLink.style.display = "none";
+  profileWrapper.style.display = "block";
 
-  // 🔄 Force fresh auth data
+  // Refresh user
   await user.reload();
 
-  // ===== EMAIL NOT VERIFIED =====
+  // NOT VERIFIED
   if (!user.emailVerified) {
-    if (displayUsername) displayUsername.textContent = "Verify Email";
-    if (statusBadge) {
-      statusBadge.textContent = "PENDING";
-      statusBadge.style.color = "#ef4444";
-      statusBadge.style.borderColor = "#ef4444";
-    }
+    displayUsername.textContent = "Verify Email";
+    statusBadge.textContent = "PENDING";
+    statusBadge.style.color = "#ef4444";
+    statusBadge.style.borderColor = "#ef4444";
     return;
   }
 
-  // ===== VERIFIED USER =====
+  // VERIFIED → LOAD PROFILE
   try {
-    const userRef = db.collection("users").doc(user.uid);
-    let snap = await userRef.get();
+    const ref = db.collection("users").doc(user.uid);
+    let snap = await ref.get();
 
-    // Create Firestore profile once if missing
     if (!snap.exists) {
-      await userRef.set({
-        fullName: user.displayName || "User",
+      await ref.set({
         username: user.email.split("@")[0],
         email: user.email,
         createdAt: Date.now()
       });
-      snap = await userRef.get();
+      snap = await ref.get();
     }
 
     const data = snap.data();
+    displayUsername.textContent = "@" + data.username;
 
-    // Username
-    if (displayUsername) {
-      displayUsername.textContent = "@" + data.username;
-    }
-
-    // FREE vs PRO
     const isPro =
       data.accessExpiry &&
       data.accessExpiry.toMillis &&
       data.accessExpiry.toMillis() > Date.now();
 
-    if (statusBadge) {
-      statusBadge.textContent = isPro ? "PRO" : "FREE";
-      const c = isPro ? "var(--accent)" : "#9ca3af";
-      statusBadge.style.color = c;
-      statusBadge.style.borderColor = c;
-    }
+    statusBadge.textContent = isPro ? "PRO" : "FREE";
+    const c = isPro ? "var(--accent)" : "#9ca3af";
+    statusBadge.style.color = c;
+    statusBadge.style.borderColor = c;
 
-  } catch (err) {
-    console.error("Home auth/profile error:", err);
+  } catch (e) {
+    console.error("Profile load failed", e);
   }
-})();
+});
 
 
 </script>
