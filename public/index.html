@@ -501,10 +501,20 @@ firebase.initializeApp({
 const auth = firebase.auth();
 const db = firebase.firestore();
 
+// 🔑 Ensure session persistence
 auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
 
+(async () => {
+  // ⏳ Wait for Firebase to finish restoring auth state
+  await new Promise(resolve => {
+    const unsub = auth.onAuthStateChanged(() => {
+      unsub();
+      resolve();
+    });
+  });
 
-auth.onAuthStateChanged(async (user) => {
+  const user = auth.currentUser;
+
   const profileWrapper = document.getElementById('profileWrapper');
   const signinLink = document.getElementById('signinLink');
   const displayUsername = document.getElementById('displayUsername');
@@ -517,12 +527,12 @@ auth.onAuthStateChanged(async (user) => {
     return;
   }
 
-  // 🔑 Always refresh auth state
-  await user.reload();
-
   // Show profile UI
   if (profileWrapper) profileWrapper.style.display = 'block';
   if (signinLink) signinLink.style.display = 'none';
+
+  // 🔄 Force fresh auth data
+  await user.reload();
 
   // ===== EMAIL NOT VERIFIED =====
   if (!user.emailVerified) {
@@ -538,24 +548,24 @@ auth.onAuthStateChanged(async (user) => {
   // ===== VERIFIED USER =====
   try {
     const userRef = db.collection("users").doc(user.uid);
-    let userDoc = await userRef.get();
+    let snap = await userRef.get();
 
     // Create Firestore profile once if missing
-    if (!userDoc.exists) {
+    if (!snap.exists) {
       await userRef.set({
         fullName: user.displayName || "User",
         username: user.email.split("@")[0],
         email: user.email,
         createdAt: Date.now()
       });
-      userDoc = await userRef.get();
+      snap = await userRef.get();
     }
 
-    const data = userDoc.data();
+    const data = snap.data();
 
     // Username
     if (displayUsername) {
-      displayUsername.textContent = "@" + (data.username || "user");
+      displayUsername.textContent = "@" + data.username;
     }
 
     // FREE vs PRO
@@ -566,15 +576,16 @@ auth.onAuthStateChanged(async (user) => {
 
     if (statusBadge) {
       statusBadge.textContent = isPro ? "PRO" : "FREE";
-      const color = isPro ? "var(--accent)" : "#9ca3af";
-      statusBadge.style.color = color;
-      statusBadge.style.borderColor = color;
+      const c = isPro ? "var(--accent)" : "#9ca3af";
+      statusBadge.style.color = c;
+      statusBadge.style.borderColor = c;
     }
 
   } catch (err) {
-    console.error("Auth profile load error:", err);
+    console.error("Home auth/profile error:", err);
   }
-});
+})();
+
 
 </script>
 </body>

@@ -146,23 +146,20 @@ firebase.initializeApp({
 const auth = firebase.auth();
 const db = firebase.firestore();
 
+/* 🔑 SET PERSISTENCE ON LOAD (NO await) */
+auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
 
-
+/* ===============================
+   HANDLE EMAIL VERIFICATION LINK
+   =============================== */
 const params = new URLSearchParams(window.location.search);
 const mode = params.get("mode");
 const oobCode = params.get("oobCode");
 
 if (mode === "verifyEmail" && oobCode) {
   auth.applyActionCode(oobCode)
-    .then(async () => {
-      // Force refresh user state
-      if (auth.currentUser) {
-        await auth.currentUser.reload();
-      }
-
+    .then(() => {
       msg("Email verified successfully. Please sign in.", "info");
-
-      // Clean URL
       window.history.replaceState({}, document.title, "/signin.html");
     })
     .catch(() => {
@@ -170,8 +167,9 @@ if (mode === "verifyEmail" && oobCode) {
     });
 }
 
-
-
+/* ===============================
+   UI MESSAGE HELPER
+   =============================== */
 const msg = (text, type = "error") => {
   const el = document.getElementById("loginConsole");
   if (!el) return;
@@ -180,16 +178,19 @@ const msg = (text, type = "error") => {
   el.style.display = "block";
 };
 
+/* ===============================
+   EMAIL / USERNAME SIGN-IN
+   =============================== */
 document.getElementById("doLogin").onclick = async () => {
-  let idInput = document.getElementById("loginIdentifier").value.trim().toLowerCase();
-  const p = document.getElementById("loginPass").value;
+  let idInput = document
+    .getElementById("loginIdentifier")
+    .value.trim()
+    .toLowerCase();
 
+  const p = document.getElementById("loginPass").value;
   if (!idInput || !p) return msg("Missing credentials.");
 
   try {
-
-    await auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
-
     // Username → email lookup
     if (!idInput.includes("@")) {
       const snap = await db
@@ -209,17 +210,18 @@ document.getElementById("doLogin").onclick = async () => {
     const cred = await auth.signInWithEmailAndPassword(idInput, p);
     await cred.user.reload();
 
-    // Enforce email verification
+    // Enforce verification
     if (!cred.user.emailVerified) {
       await auth.signOut();
       return msg("Please verify your email before signing in.", "info");
     }
 
-    // Success
-    window.location.href = "https://rometrics.app/";
+    // ⏳ Allow persistence to commit before redirect
+    setTimeout(() => {
+      window.location.href = "https://rometrics.app/";
+    }, 300);
 
   } catch (err) {
-    // Human-readable auth errors
     if (
       err.code === "auth/user-not-found" ||
       err.code === "auth/invalid-credential"
@@ -233,15 +235,23 @@ document.getElementById("doLogin").onclick = async () => {
   }
 };
 
+/* ===============================
+   GOOGLE SIGN-IN
+   =============================== */
 document.getElementById("googleLogin").onclick = async () => {
   try {
     const provider = new firebase.auth.GoogleAuthProvider();
     await auth.signInWithPopup(provider);
-    window.location.href = "https://rometrics.app/";
+
+    setTimeout(() => {
+      window.location.href = "https://rometrics.app/";
+    }, 300);
+
   } catch (err) {
     msg(err.message);
   }
 };
+
 
 </script>
 </body>
