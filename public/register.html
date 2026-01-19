@@ -195,6 +195,8 @@ document.getElementById("doRegister").onclick = async () => {
     // 4. Send verification email
     // User is now in the DB, but locked out of signing in until verified
     await cred.user.sendEmailVerification();
+   await auth.signOut();
+
 
     // 5. Replace form with confirmation UI
     document.getElementById("regFormContainer").innerHTML = `
