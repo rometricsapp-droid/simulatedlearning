@@ -196,12 +196,6 @@ if (!firebase.apps.length) {
 const auth = firebase.auth();
 const db   = firebase.firestore();
 
-/* ===============================
-   EMAIL VERIFICATION RETURN
-   =============================== */
-const params = new URLSearchParams(window.location.search);
-const mode = params.get("mode");
-const oobCode = params.get("oobCode");
 
 /* ===============================
    EMAIL VERIFICATION RETURN
