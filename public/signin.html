@@ -366,9 +366,8 @@ document.getElementById("doLogin").onclick = async () => {
       });
     }
 
-// ✅ Redirect
-setTimeout(() => {
-  handleRedirect(cred.user);
+setTimeout(async () => {
+  await handleRedirect(cred.user);
 }, 300);
 
   } catch (err) {
