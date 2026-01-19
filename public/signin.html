@@ -146,6 +146,9 @@ firebase.initializeApp({
 const auth = firebase.auth();
 const db = firebase.firestore();
 
+await auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
+
+
 const params = new URLSearchParams(window.location.search);
 const mode = params.get("mode");
 const oobCode = params.get("oobCode");

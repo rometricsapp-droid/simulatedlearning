@@ -501,6 +501,9 @@ firebase.initializeApp({
 const auth = firebase.auth();
 const db = firebase.firestore();
 
+auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
+
+
 auth.onAuthStateChanged(async (user) => {
   const profileWrapper = document.getElementById('profileWrapper');
   const signinLink = document.getElementById('signinLink');
