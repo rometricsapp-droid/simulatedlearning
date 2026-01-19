@@ -205,7 +205,6 @@ auth.onAuthStateChanged(user => {
     if (user.emailVerified) {
       window.location.href = "index.html"; 
     } else {
-      // Stay on page and show verification info
       msg("loginConsole", "Verify link sent to email to complete registration.", "info");
     }
   }
@@ -266,16 +265,12 @@ document.getElementById("doRegister").onclick = async () => {
     // 3. Send Verification Email
     await cred.user.sendEmailVerification();
     
-    // 4. Save to Firestore (matches your robust security rules)
-    // Note: robust rules check email_verified, so this document is created via auth state.
-    await db.collection("users").doc(cred.user.uid).set({
-      fullName: name,
-      username: user,
-      email: email,
-      createdAt: firebase.firestore.FieldValue.serverTimestamp()
-    });
+    // 4. Temporarily store profile data
+    // Because your Firestore Rules block writes until email is verified, 
+    // we save this locally so index.html can finish the job later.
+    localStorage.setItem('pendingProfile', JSON.stringify({ name, user }));
 
-    msg("regConsole", "Verify link sent to email to complete reg.", "info");
+    msg("regConsole", "Verify link sent! Please check your inbox and verify to complete registration.", "info");
   } catch(err) { msg("regConsole", err.message); }
 };
 
