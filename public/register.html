@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>ROMetrics | Sign In</title>
+<title>ROMetrics | Create Account</title>
 
 <link rel="icon" type="image/png" sizes="192x192" href="favicon-192.png">
 <link rel="apple-touch-icon" sizes="192x192" href="favicon-192.png">
@@ -37,6 +37,7 @@ body {
   max-width: 450px;
   background: var(--card);
   border: 1px solid var(--border);
+  border-top: 4px solid var(--primary);
   border-radius: 24px;
   padding: 40px 32px;
   box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
@@ -86,7 +87,6 @@ input:focus { border-color: var(--primary); }
 }
 .btn:active { opacity: 0.8; }
 .btn-primary { background: var(--primary); color: #0b1120; margin-bottom: 12px; }
-.btn-outline { background: transparent; color: var(--text); border: 1px solid var(--border); }
 
 .switch-link {
   text-align: center;
@@ -100,34 +100,42 @@ input:focus { border-color: var(--primary); }
 
 <body>
 
-<div class="auth-card">
+<div class="auth-card" id="regFormContainer">
   <div class="logo-header">
     <a href="https://rometrics.app/">
       <img src="rometrics-logo.png" class="logo" alt="ROMetrics">
     </a>
-    <h1>Sign In</h1>
-    <p>Access your ROMetrics workspace.</p>
+    <h1>Create Account</h1>
+    <p>Your first month of Premium is free.</p>
   </div>
   
-  <div id="loginConsole" class="console-msg"></div>
+  <div id="regConsole" class="console-msg"></div>
 
   <div class="input-group">
-    <span class="input-label">Username or Email</span>
-    <input id="loginIdentifier" type="text" placeholder="Username or Email">
+    <span class="input-label">Full Name</span>
+    <input id="regName" type="text" placeholder="Jane Smith">
+  </div>
+  <div class="input-group">
+    <span class="input-label">Username</span>
+    <input id="regUsername" type="text" placeholder="choose username" maxlength="9">
+  </div>
+  <div class="input-group">
+    <span class="input-label">Email</span>
+    <input id="regEmail" type="email" placeholder="use .edu for discount">
   </div>
   <div class="input-group">
     <span class="input-label">Password</span>
-    <input id="loginPass" type="password" placeholder="••••••••">
+    <input id="regPass" type="password" placeholder="Min. 6 characters">
+  </div>
+  <div class="input-group">
+    <span class="input-label">Confirm Password</span>
+    <input id="regConfirm" type="password" placeholder="Repeat password">
   </div>
   
-  <button class="btn btn-primary" id="doLogin">Sign In</button>
-  
-  <div style="text-align:center; margin: 16px 0; font-size: 10px; color: var(--text-muted); font-weight: 700;">OR</div>
-  
-  <button class="btn btn-outline" id="googleLogin">Continue with Google</button>
+  <button class="btn btn-primary" id="doRegister">Create Account</button>
 
   <div class="switch-link">
-    Don't have an account? <a href="register.html">Register</a>
+    Already have an account? <a href="signin.html">Sign In</a>
   </div>
 </div>
 
@@ -147,7 +155,7 @@ const auth = firebase.auth();
 const db = firebase.firestore();
 
 const msg = (text, type = "error") => {
-  const el = document.getElementById("loginConsole");
+  const el = document.getElementById("regConsole");
   if (el) {
     const cleanText = text.replace(/Firebase/gi, "Authentication");
     el.textContent = cleanText;
@@ -156,36 +164,42 @@ const msg = (text, type = "error") => {
   }
 };
 
-auth.onAuthStateChanged(user => {
-  if (user) {
-    if (user.emailVerified) {
-      window.location.href = "https://rometrics.app/"; 
-    } else {
-      msg("Please verify your email to complete registration.", "info");
-    }
-  }
-});
+document.getElementById("doRegister").onclick = async () => {
+  const name = document.getElementById("regName").value.trim();
+  const user = document.getElementById("regUsername").value.trim().toLowerCase();
+  const email = document.getElementById("regEmail").value.trim().toLowerCase();
+  const pass = document.getElementById("regPass").value;
+  const confirm = document.getElementById("regConfirm").value;
 
-document.getElementById("doLogin").onclick = async () => {
-  let idInput = document.getElementById("loginIdentifier").value.trim().toLowerCase();
-  const p = document.getElementById("loginPass").value;
-  if (!idInput || !p) return msg("Missing credentials.");
+  if (!name || !user || !email || !pass) return msg("All fields are required.");
+  if (user.length > 9) return msg("Username max 9 characters.");
+  if (pass !== confirm) return msg("Passwords do not match.");
+
   try {
-    if (!idInput.includes('@')) {
-      const userSnap = await db.collection("users").where("username", "==", idInput).limit(1).get();
-      if (userSnap.empty) return msg("Username not found.");
-      idInput = userSnap.docs[0].data().email;
-    }
-    await auth.signInWithEmailAndPassword(idInput, p);
+    // 1. Check username availability
+    const nameCheck = await db.collection("users").where("username", "==", user).limit(1).get();
+    if (!nameCheck.empty) return msg("Username is already taken.");
+
+    // 2. Create Authentication account
+    const cred = await auth.createUserWithEmailAndPassword(email, pass);
+    
+    // 3. Send verification email
+    await cred.user.sendEmailVerification();
+    
+    // 4. Store profile data for index.html "Catch" logic
+    localStorage.setItem('pendingProfile', JSON.stringify({ name, user }));
+
+    // 5. Replace form with confirmation UI
+    document.getElementById("regFormContainer").innerHTML = `
+      <div style="text-align:center; padding: 20px 0;">
+        <img src="rometrics-logo.png" class="logo" style="height:42px; margin-bottom:20px;">
+        <h1 style="color: var(--primary);">Verify Email</h1>
+        <p>A link has been sent to <strong>${email}</strong>.</p>
+        <p style="font-size: 0.85rem; margin-top: 15px;">Please check your inbox and click the link to activate your profile.</p>
+        <button class="btn btn-primary" style="margin-top: 25px;" onclick="window.location.href='signin.html'">Back to Sign In</button>
+      </div>
+    `;
   } catch(err) { msg(err.message); }
-};
-
-document.getElementById("googleLogin").onclick = async () => {
-  try {
-    const provider = new firebase.auth.GoogleAuthProvider();
-    await auth.signInWithPopup(provider);
-    window.location.href = "https://rometrics.app/";
-  } catch (error) { msg(error.message); }
 };
 </script>
 </body>
