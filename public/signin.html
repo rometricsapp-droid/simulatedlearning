@@ -155,13 +155,17 @@ const msg = (text, type = "error") => {
     el.style.display = "block";
   }
 };
-
-auth.onAuthStateChanged(user => {
+auth.onAuthStateChanged(async (user) => {
   if (user) {
+    // Force Firebase to check the latest verification status from the server
+    await user.reload(); 
+
     if (user.emailVerified) {
+      // If verified, send to the home page immediately
       window.location.href = "https://rometrics.app/"; 
     } else {
-      msg("Please verify your email to complete registration.", "info");
+      // If still not verified, show the message
+      msg("Please verify your email to complete registration. Check your inbox.", "info");
     }
   }
 });
@@ -169,15 +173,24 @@ auth.onAuthStateChanged(user => {
 document.getElementById("doLogin").onclick = async () => {
   let idInput = document.getElementById("loginIdentifier").value.trim().toLowerCase();
   const p = document.getElementById("loginPass").value;
+  
   if (!idInput || !p) return msg("Missing credentials.");
+  
   try {
+    // Handle Username login
     if (!idInput.includes('@')) {
       const userSnap = await db.collection("users").where("username", "==", idInput).limit(1).get();
       if (userSnap.empty) return msg("Username not found.");
       idInput = userSnap.docs[0].data().email;
     }
+    
+    // Attempt sign in
     await auth.signInWithEmailAndPassword(idInput, p);
-  } catch(err) { msg(err.message); }
+    
+    // Note: onAuthStateChanged above will handle the redirect once verified
+  } catch(err) { 
+    msg(err.message); 
+  }
 };
 
 document.getElementById("googleLogin").onclick = async () => {
@@ -185,7 +198,9 @@ document.getElementById("googleLogin").onclick = async () => {
     const provider = new firebase.auth.GoogleAuthProvider();
     await auth.signInWithPopup(provider);
     window.location.href = "https://rometrics.app/";
-  } catch (error) { msg(error.message); }
+  } catch (error) { 
+    msg(error.message); 
+  }
 };
 </script>
 </body>

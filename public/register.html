@@ -183,19 +183,26 @@ document.getElementById("doRegister").onclick = async () => {
     // 2. Create Authentication account
     const cred = await auth.createUserWithEmailAndPassword(email, pass);
     
-    // 3. Send verification email
-    await cred.user.sendEmailVerification();
+    // 3. IMMEDIATE DATABASE WRITE
+    // This logs the user data to Firestore instantly before verification
+    await db.collection("users").doc(cred.user.uid).set({
+      fullName: name,
+      username: user,
+      email: email,
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
     
-    // 4. Store profile data for index.html "Catch" logic
-    localStorage.setItem('pendingProfile', JSON.stringify({ name, user }));
+    // 4. Send verification email
+    // User is now in the DB, but locked out of signing in until verified
+    await cred.user.sendEmailVerification();
 
     // 5. Replace form with confirmation UI
     document.getElementById("regFormContainer").innerHTML = `
       <div style="text-align:center; padding: 20px 0;">
         <img src="rometrics-logo.png" class="logo" style="height:42px; margin-bottom:20px;">
         <h1 style="color: var(--primary);">Verify Email</h1>
-        <p>A link has been sent to <strong>${email}</strong>.</p>
-        <p style="font-size: 0.85rem; margin-top: 15px;">Please check your inbox and click the link to activate your profile.</p>
+        <p>Account created! A link has been sent to <strong>${email}</strong>.</p>
+        <p style="font-size: 0.85rem; margin-top: 15px;">You must verify your email before you can sign in.</p>
         <button class="btn btn-primary" style="margin-top: 25px;" onclick="window.location.href='signin.html'">Back to Sign In</button>
       </div>
     `;
