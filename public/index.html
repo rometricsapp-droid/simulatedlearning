@@ -498,7 +498,6 @@ firebase.initializeApp({
   projectId: "rometricsapp-1444e",
   appId: "1:1016564998048:web:1d4c7e4780de0323664ec5"
 });
-
 const auth = firebase.auth();
 const db = firebase.firestore();
 
@@ -508,65 +507,72 @@ auth.onAuthStateChanged(async (user) => {
   const displayUsername = document.getElementById('displayUsername');
   const statusBadge = document.getElementById('displayStatus');
 
-auth.onAuthStateChanged(async (user) => {
-  const profileWrapper = document.getElementById('profileWrapper');
-  const signinLink = document.getElementById('signinLink');
-  const displayUsername = document.getElementById('displayUsername');
-  const statusBadge = document.getElementById('displayStatus');
-
-  if (user) {
-    if (profileWrapper) profileWrapper.style.display = 'block';
-    if (signinLink) signinLink.style.display = 'none';
-
-    // 1. If not verified, stop here
-    if (!user.emailVerified) {
-      if (displayUsername) displayUsername.textContent = "Verify Email";
-      if (statusBadge) {
-        statusBadge.textContent = "PENDING";
-        statusBadge.style.color = "#ff4444";
-      }
-      return;
-    }
-
-    try {
-      const userRef = db.collection("users").doc(user.uid);
-      let userDoc = await userRef.get();
-
-      // 2. THE CATCH: If DB is empty, create it now using localStorage
-      if (!userDoc.exists) {
-        const pending = JSON.parse(localStorage.getItem('pendingProfile')) || {};
-        
-        await userRef.set({
-          fullName: pending.name || user.displayName || "User",
-          username: pending.user || user.email.split('@')[0], 
-          email: user.email,
-          createdAt: firebase.firestore.FieldValue.serverTimestamp()
-        });
-        
-        userDoc = await userRef.get(); // Refresh to get the new data
-        localStorage.removeItem('pendingProfile'); // Clean up
-      }
-
-      // 3. Display actual data from Firestore
-      const data = userDoc.data();
-      if (displayUsername) displayUsername.textContent = "@" + (data.username || "User");
-      
-      const isPro = data.accessExpiry && data.accessExpiry.toDate() > new Date();
-      if (statusBadge) {
-        statusBadge.textContent = isPro ? "PRO" : "FREE";
-        const themeColor = isPro ? "var(--accent)" : "#9ca3af";
-        statusBadge.style.color = themeColor;
-        statusBadge.style.borderColor = themeColor;
-      }
-
-    } catch (error) {
-      console.error("Firestore Error:", error);
-    }
-  } else {
+  // ===== NOT SIGNED IN =====
+  if (!user) {
     if (profileWrapper) profileWrapper.style.display = 'none';
     if (signinLink) signinLink.style.display = 'block';
+    return;
+  }
+
+  // 🔑 Always refresh auth state
+  await user.reload();
+
+  // Show profile UI
+  if (profileWrapper) profileWrapper.style.display = 'block';
+  if (signinLink) signinLink.style.display = 'none';
+
+  // ===== EMAIL NOT VERIFIED =====
+  if (!user.emailVerified) {
+    if (displayUsername) displayUsername.textContent = "Verify Email";
+    if (statusBadge) {
+      statusBadge.textContent = "PENDING";
+      statusBadge.style.color = "#ef4444";
+      statusBadge.style.borderColor = "#ef4444";
+    }
+    return;
+  }
+
+  // ===== VERIFIED USER =====
+  try {
+    const userRef = db.collection("users").doc(user.uid);
+    let userDoc = await userRef.get();
+
+    // Create Firestore profile once if missing
+    if (!userDoc.exists) {
+      await userRef.set({
+        fullName: user.displayName || "User",
+        username: user.email.split("@")[0],
+        email: user.email,
+        createdAt: Date.now()
+      });
+      userDoc = await userRef.get();
+    }
+
+    const data = userDoc.data();
+
+    // Username
+    if (displayUsername) {
+      displayUsername.textContent = "@" + (data.username || "user");
+    }
+
+    // FREE vs PRO
+    const isPro =
+      data.accessExpiry &&
+      data.accessExpiry.toMillis &&
+      data.accessExpiry.toMillis() > Date.now();
+
+    if (statusBadge) {
+      statusBadge.textContent = isPro ? "PRO" : "FREE";
+      const color = isPro ? "var(--accent)" : "#9ca3af";
+      statusBadge.style.color = color;
+      statusBadge.style.borderColor = color;
+    }
+
+  } catch (err) {
+    console.error("Auth profile load error:", err);
   }
 });
+
 </script>
 </body>
 </html>
