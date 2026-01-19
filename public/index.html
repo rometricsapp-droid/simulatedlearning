@@ -508,10 +508,17 @@ auth.onAuthStateChanged(async (user) => {
   const displayUsername = document.getElementById('displayUsername');
   const statusBadge = document.getElementById('displayStatus');
 
+auth.onAuthStateChanged(async (user) => {
+  const profileWrapper = document.getElementById('profileWrapper');
+  const signinLink = document.getElementById('signinLink');
+  const displayUsername = document.getElementById('displayUsername');
+  const statusBadge = document.getElementById('displayStatus');
+
   if (user) {
     if (profileWrapper) profileWrapper.style.display = 'block';
     if (signinLink) signinLink.style.display = 'none';
 
+    // 1. If not verified, stop here
     if (!user.emailVerified) {
       if (displayUsername) displayUsername.textContent = "Verify Email";
       if (statusBadge) {
@@ -525,24 +532,23 @@ auth.onAuthStateChanged(async (user) => {
       const userRef = db.collection("users").doc(user.uid);
       let userDoc = await userRef.get();
 
-      // FIX: Creates DB record if it doesn't exist upon verification
+      // 2. THE CATCH: If DB is empty, create it now using localStorage
       if (!userDoc.exists) {
         const pending = JSON.parse(localStorage.getItem('pendingProfile')) || {};
         
         await userRef.set({
           fullName: pending.name || user.displayName || "User",
-          // FIX: Ensure this matches the 'user' key saved in signin.html
           username: pending.user || user.email.split('@')[0], 
           email: user.email,
           createdAt: firebase.firestore.FieldValue.serverTimestamp()
         });
         
-        userDoc = await userRef.get(); // Refresh doc to show correct name
-        localStorage.removeItem('pendingProfile');
+        userDoc = await userRef.get(); // Refresh to get the new data
+        localStorage.removeItem('pendingProfile'); // Clean up
       }
 
+      // 3. Display actual data from Firestore
       const data = userDoc.data();
-      // FIX: Displays actual username from Firestore
       if (displayUsername) displayUsername.textContent = "@" + (data.username || "User");
       
       const isPro = data.accessExpiry && data.accessExpiry.toDate() > new Date();
@@ -561,23 +567,6 @@ auth.onAuthStateChanged(async (user) => {
     if (signinLink) signinLink.style.display = 'block';
   }
 });
-
-function toggleDropdown(event) {
-  event.stopPropagation();
-  const menu = document.getElementById('profileDropdown');
-  if (menu) menu.style.display = (menu.style.display === 'block') ? 'none' : 'block';
-}
-
-window.onclick = () => {
-  const menu = document.getElementById('profileDropdown');
-  if (menu) menu.style.display = 'none';
-};
-
-function handleSignOut() {
-  auth.signOut().then(() => {
-    window.location.href = "signin.html";
-  });
-}
 </script>
 </body>
 </html>

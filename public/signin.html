@@ -189,7 +189,7 @@ const auth = firebase.auth();
 const db = firebase.firestore();
 
 const msg = (id, text, type = "error") => {
-  // Clear EVERY console message on the page first
+  // FIX: Clear ALL consoles before showing a new one
   document.querySelectorAll('.console-msg').forEach(el => {
     el.style.display = "none";
     el.textContent = "";
@@ -207,12 +207,13 @@ const msg = (id, text, type = "error") => {
 auth.onAuthStateChanged(user => {
   if (user) {
     if (user.emailVerified) {
-      // FIX: Use the full URL to ensure it redirects correctly
+      // FIX: Use full URL to guarantee redirect to home page
       window.location.href = "https://rometrics.app/index.html"; 
     } else {
-      // Only show this if the registration "Submitted" state hasn't replaced the form
-      const regContainer = document.getElementById("doRegister");
-      if (regContainer) {
+      // FIX: Only show auth listener message if the register form still exists
+      // If the "Verify Email" screen is visible, we stay quiet on the Sign In side
+      const regButton = document.getElementById("doRegister");
+      if (regButton) {
         msg("loginConsole", "Verify link sent to email to complete registration.", "info");
       }
     }
@@ -234,17 +235,6 @@ document.getElementById("doLogin").onclick = async () => {
     }
     await auth.signInWithEmailAndPassword(idInput, p);
   } catch(err) { msg("loginConsole", err.message); }
-};
-
-/**
- * FORGOT PASSWORD
- */
-document.getElementById("doForgot").onclick = () => {
-  const e = document.getElementById("loginIdentifier").value;
-  if (!e || !e.includes('@')) return msg("loginConsole", "Enter your email first.");
-  auth.sendPasswordResetEmail(e)
-    .then(() => msg("loginConsole", "Reset link sent to your inbox.", "info"))
-    .catch(err => msg("loginConsole", err.message));
 };
 
 /**
@@ -270,7 +260,7 @@ document.getElementById("doRegister").onclick = async () => {
     
     localStorage.setItem('pendingProfile', JSON.stringify({ name, user }));
 
-    // UI FIX: Wipe the form and show "Submitted" state
+    // FIX: Wipe the form and show "Submitted" state
     const regCard = document.getElementById("doRegister").closest('.auth-card');
     regCard.innerHTML = `
       <div style="text-align:center; padding: 20px 0;">
@@ -284,9 +274,6 @@ document.getElementById("doRegister").onclick = async () => {
   } catch(err) { msg("regConsole", err.message); }
 };
 
-/**
- * GOOGLE SIGN IN
- */
 document.getElementById("googleLogin").onclick = async () => {
   try {
     const provider = new firebase.auth.GoogleAuthProvider();
@@ -314,7 +301,7 @@ document.getElementById("googleLogin").onclick = async () => {
         createdAt: firebase.firestore.FieldValue.serverTimestamp()
       });
     }
-    window.location.href = "https://rometrics.app/index.html";
+window.location.href = "https://rometrics.app/";
   } catch (error) { msg("loginConsole", error.message); }
 };
 </script>
