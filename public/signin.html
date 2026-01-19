@@ -195,7 +195,20 @@ if (!firebase.apps.length) {
 
 const auth = firebase.auth();
 const db   = firebase.firestore();
+async function handleRedirect(user) {
+  const params = new URLSearchParams(window.location.search);
+  const isAndroid = params.get("return") === "android";
 
+  if (isAndroid) {
+    // Generate the token from Firebase
+    const token = await user.getIdToken();
+    // Redirect to the /auth path so the Android Manifest catches it
+    window.location.href = `https://rometrics.app/auth?token=${token}`;
+  } else {
+    // Normal web users go to the homepage
+window.location.href = "https://rometrics.app/"; // ✅ Correct
+  }
+}
 
 /* ===============================
    EMAIL VERIFICATION RETURN
@@ -353,10 +366,10 @@ document.getElementById("doLogin").onclick = async () => {
       });
     }
 
-    // ✅ Redirect
-    setTimeout(() => {
-      window.location.href = "https://rometrics.app/";
-    }, 300);
+// ✅ Redirect
+setTimeout(() => {
+  handleRedirect(cred.user);
+}, 300);
 
   } catch (err) {
     switch (err.code) {
@@ -423,7 +436,7 @@ document.getElementById("googleLogin").onclick = async () => {
       });
     }
 
-    window.location.href = "https://rometrics.app/";
+    handleRedirect(user);
 
   } catch (err) {
     console.error("Google sign-in error:", err);
