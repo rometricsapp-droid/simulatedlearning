@@ -176,40 +176,63 @@ document.getElementById("doRegister").onclick = async () => {
   if (pass !== confirm) return msg("Passwords do not match.");
 
   try {
-    // 1. Check username availability
-    const nameCheck = await db.collection("users").where("username", "==", user).limit(1).get();
-    if (!nameCheck.empty) return msg("Username is already taken.");
+    /* --------------------------------
+       1️⃣ CHECK USERNAME AVAILABILITY
+       (READ-ONLY — SAFE)
+       -------------------------------- */
+    const nameCheck = await db
+      .collection("users")
+      .where("username", "==", user)
+      .limit(1)
+      .get();
 
-    // 2. Create Authentication account
+    if (!nameCheck.empty) {
+      return msg("Username is already taken.");
+    }
+
+    /* --------------------------------
+       2️⃣ CREATE AUTH ACCOUNT ONLY
+       -------------------------------- */
     const cred = await auth.createUserWithEmailAndPassword(email, pass);
-    
-    // 3. IMMEDIATE DATABASE WRITE
-    // This logs the user data to Firestore instantly before verification
-    await db.collection("users").doc(cred.user.uid).set({
-      fullName: name,
-      username: user,
-      email: email,
-      createdAt: Date.now()
-    });
-    
-    // 4. Send verification email
-    // User is now in the DB, but locked out of signing in until verified
+
+    /* --------------------------------
+       3️⃣ SEND VERIFICATION EMAIL
+       (NO DATABASE TOUCH)
+       -------------------------------- */
     await cred.user.sendEmailVerification();
-   await auth.signOut();
 
+    /* --------------------------------
+       4️⃣ SIGN OUT (FOR CLEAN STATE)
+       -------------------------------- */
+    await auth.signOut();
 
-    // 5. Replace form with confirmation UI
+    /* --------------------------------
+       5️⃣ CONFIRMATION UI
+       -------------------------------- */
     document.getElementById("regFormContainer").innerHTML = `
       <div style="text-align:center; padding: 20px 0;">
         <img src="rometrics-logo.png" class="logo" style="height:42px; margin-bottom:20px;">
         <h1 style="color: var(--primary);">Verify Email</h1>
-        <p>Account created! A link has been sent to <strong>${email}</strong>.</p>
-        <p style="font-size: 0.85rem; margin-top: 15px;">You must verify your email before you can sign in.</p>
-        <button class="btn btn-primary" style="margin-top: 25px;" onclick="window.location.href='signin.html'">Back to Sign In</button>
+        <p>
+          A verification link has been sent to<br>
+          <strong>${email}</strong>
+        </p>
+        <p style="font-size:0.85rem; margin-top:15px;">
+          You must verify your email before signing in.
+        </p>
+        <button class="btn btn-primary"
+                style="margin-top:25px;"
+                onclick="window.location.href='signin.html'">
+          Back to Sign In
+        </button>
       </div>
     `;
-  } catch(err) { msg(err.message); }
+
+  } catch (err) {
+    msg(err.message || "Registration failed.");
+  }
 };
+
 </script>
 </body>
 </html>
