@@ -282,35 +282,50 @@ document.getElementById("doLogin").onclick = async () => {
 };
 
 /* ===============================
-   GOOGLE SIGN-IN (REGISTERED ONLY)
+   GOOGLE SIGN-IN (AUTO-REGISTER)
    =============================== */
 document.getElementById("googleLogin").onclick = async () => {
   try {
     const provider = new firebase.auth.GoogleAuthProvider();
+
+    // Firebase-required authentication step
     const result = await auth.signInWithPopup(provider);
     const user = result.user;
 
-    // 🔒 REQUIRE EXISTING FIRESTORE PROFILE
-    const snap = await db.collection("users").doc(user.uid).get();
-
-    if (!snap.exists) {
-      await auth.signOut();
-      return msg(
-        "This Google account is not registered. Please register first.",
-        "error"
-      );
+    if (!user || !user.email) {
+      throw new Error("Google authentication failed.");
     }
 
-    // ✅ Existing registered user
+    const userRef = db.collection("users").doc(user.uid);
+    const snap = await userRef.get();
+
+    // 🆕 FIRST-TIME GOOGLE SIGN-IN → AUTO REGISTER
+    if (!snap.exists) {
+      const emailLocal = user.email.split("@")[0]
+        .toLowerCase()
+        .replace(/[^a-z0-9]/g, "")
+        .slice(0, 9); // enforce username length limit if desired
+
+      await userRef.set({
+        uid: user.uid,
+        email: user.email,
+        username: emailLocal,
+        provider: "google",
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+    }
+
+    // ✅ User is now authenticated + registered
     setTimeout(() => {
       window.location.href = "https://rometrics.app/";
     }, 300);
 
   } catch (err) {
     console.error("Google sign-in error:", err);
-    msg("Google sign-in failed.");
+    msg("Google sign-in failed. Please try again.");
   }
 };
+
 </script>
 
 </body>
