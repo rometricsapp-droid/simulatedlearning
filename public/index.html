@@ -499,66 +499,74 @@ firebase.initializeApp({
 });
 
 const auth = firebase.auth();
-const signinLink = document.getElementById("signinLink");
-const profileWrapper = document.getElementById("profileWrapper");
-const userEmailDisplay = document.getElementById("userEmailDisplay");
-const profileDropdown = document.getElementById("profileDropdown");
+const db = firebase.firestore(); // Ensure Firestore is initialized
 
-auth.onAuthStateChanged(user => {
+auth.onAuthStateChanged(async (user) => {
+  const profileWrapper = document.getElementById('profileWrapper');
+  const displayUsername = document.getElementById('displayUsername');
+  const statusBadge = document.getElementById('displayStatus');
+
   if (user) {
-    signinLink.style.display = "none";
-    profileWrapper.style.display = "block";
-    userEmailDisplay.textContent = user.email;
+    profileWrapper.style.display = 'block';
+
+    // 1. Check for email verification
+    if (!user.emailVerified) {
+      displayUsername.textContent = "Verify Email";
+      statusBadge.textContent = "PENDING";
+      statusBadge.style.color = "#ff4444";
+      statusBadge.style.borderColor = "#ff4444";
+      return;
+    }
+
+    // 2. Fetch User Data from Firestore
+    try {
+      const userDoc = await db.collection("users").doc(user.uid).get();
+      let displayName = "";
+      let isPro = false;
+
+      if (userDoc.exists) {
+        const data = userDoc.data();
+        displayName = data.username; // Pulls the 3-9 char username
+        isPro = data.accessExpiry && data.accessExpiry.toDate() > new Date();
+      }
+
+      // Fallback: Use email prefix if username field is missing in DB
+      if (!displayName) {
+        displayName = user.email.split('@')[0];
+      }
+
+      // 3. Update UI
+      displayUsername.textContent = "@" + displayName;
+      statusBadge.textContent = isPro ? "PRO" : "FREE";
+      
+      const themeColor = isPro ? "var(--accent)" : "#9ca3af";
+      statusBadge.style.color = themeColor;
+      statusBadge.style.borderColor = themeColor;
+
+    } catch (error) {
+      console.error("Firestore Error:", error);
+    }
   } else {
-    signinLink.style.display = "inline-block";
-    profileWrapper.style.display = "none";
+    profileWrapper.style.display = 'none';
   }
 });
 
+// Dropdown Toggle Logic
 function toggleDropdown(event) {
   event.stopPropagation();
   const menu = document.getElementById('profileDropdown');
   menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
 }
 
-// Close menu if user clicks anywhere else on the page
+// Close menu if user clicks anywhere else
 window.onclick = () => {
-  document.getElementById('profileDropdown').style.display = 'none';
+  const menu = document.getElementById('profileDropdown');
+  if (menu) menu.style.display = 'none';
 };
 
-auth.onAuthStateChanged(async user => {
-  if (user) {
-    document.getElementById('profileWrapper').style.display = 'block';
-    const userDoc = await db.collection("users").doc(user.uid).get();
-    
-    let displayName = "";
-    let isPro = false;
-
-    if (userDoc.exists) {
-      const data = userDoc.data();
-      displayName = data.username; 
-      isPro = data.accessExpiry && data.accessExpiry.toDate() > new Date();
-    } 
-    
-    // Cleanup: if username is missing, use email prefix (jane.smith)
-    if (!displayName) {
-      displayName = user.email.split('@')[0];
-    }
-
-    document.getElementById('displayUsername').textContent = "@" + displayName;
-
-    const statusBadge = document.getElementById('displayStatus');
-    statusBadge.textContent = isPro ? "PRO" : "FREE";
-    statusBadge.style.color = isPro ? "var(--accent)" : "#9ca3af";
-    statusBadge.style.borderColor = isPro ? "var(--accent)" : "#9ca3af";
-  } else {
-    document.getElementById('profileWrapper').style.display = 'none';
-  }
-});
-
 function handleSignOut() {
-  auth.signOut().then(() => { 
-    window.location.href = "signin.html"; 
+  auth.signOut().then(() => {
+    window.location.href = "signin.html";
   });
 }
 </script>

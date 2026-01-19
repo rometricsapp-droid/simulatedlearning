@@ -232,28 +232,33 @@ document.getElementById("doRegister").onclick = async () => {
   const user = document.getElementById("regUsername").value.trim().toLowerCase();
   const email = document.getElementById("regEmail").value.trim().toLowerCase();
   const pass = document.getElementById("regPass").value;
-  const confirm = document.getElementById("regConfirm").value;
 
   if (!name || !user || !email || !pass) return msg("regConsole", "All fields are required.");
   if (user.length > 9) return msg("regConsole", "Username max 9 characters.");
-  if (pass !== confirm) return msg("regConsole", "Passwords do not match.");
-  
+
   try {
+    // 1. Check if username is taken
     const nameCheck = await db.collection("users").where("username", "==", user).limit(1).get();
     if (!nameCheck.empty) return msg("regConsole", "Username is already taken.");
 
+    // 2. Create Auth Account
     const cred = await auth.createUserWithEmailAndPassword(email, pass);
-    if (email.endsWith('.edu')) await cred.user.sendEmailVerification();
-
+    
+    // 3. Send Verification Email
+    await cred.user.sendEmailVerification();
+    
+    // 4. Save to Firestore immediately
     await db.collection("users").doc(cred.user.uid).set({
       fullName: name,
       username: user,
       email: email,
+      isVerified: false,
       createdAt: firebase.firestore.FieldValue.serverTimestamp()
     });
+
+    msg("regConsole", "Verification email sent! Please check your inbox.");
   } catch(err) { msg("regConsole", err.message); }
 };
-
 document.getElementById("googleLogin").onclick = async () => {
   try {
     const provider = new firebase.auth.GoogleAuthProvider();
