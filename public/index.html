@@ -492,115 +492,84 @@ section { padding: 60px 20px; display: flex; justify-content: center; }
 <script src="https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore-compat.js"></script>
 
 <script>
-firebase.initializeApp({
-  apiKey: "AIzaSyAxMFW5gguPiiaomPbuoMc7suxHmgPEhRg",
-  authDomain: "rometricsapp-1444e.firebaseapp.com",
-  projectId: "rometricsapp-1444e",
-  appId: "1:1016564998048:web:1d4c7e4780de0323664ec5"
-});
+// 🔑 SAFE Firebase init (prevents double-app bugs)
+if (!firebase.apps.length) {
+  firebase.initializeApp({
+    apiKey: "AIzaSyAxMFW5gguPiiaomPbuoMc7suxHmgPEhRg",
+    authDomain: "rometricsapp-1444e.firebaseapp.com",
+    projectId: "rometricsapp-1444e",
+    appId: "1:1016564998048:web:1d4c7e4780de0323664ec5"
+  });
+}
 
 const auth = firebase.auth();
 const db = firebase.firestore();
 
-/* 🔑 Persistence must be set once, immediately */
+// Persist session
 auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
 
-/* ===============================
-   MESSAGE HELPER
-   =============================== */
-const msg = (text, type = "error") => {
-  const el = document.getElementById("loginConsole");
-  if (!el) return;
-  el.textContent = text.replace(/Firebase/gi, "Authentication");
-  el.className = `console-msg console-${type}`;
-  el.style.display = "block";
-};
+// 🔐 READ auth state — do NOT sign in here
+auth.onAuthStateChanged(async (user) => {
+  const profileWrapper = document.getElementById("profileWrapper");
+  const signinLink = document.getElementById("signinLink");
+  const displayUsername = document.getElementById("displayUsername");
+  const statusBadge = document.getElementById("displayStatus");
 
-/* ===============================
-   SIGN IN HANDLER (EMAIL + USERNAME)
-   =============================== */
-document.getElementById("doLogin").onclick = async () => {
-  let input = document
-    .getElementById("loginIdentifier")
-    .value.trim()
-    .toLowerCase();
+  // NOT SIGNED IN
+  if (!user) {
+    if (profileWrapper) profileWrapper.style.display = "none";
+    if (signinLink) signinLink.style.display = "block";
+    return;
+  }
 
-  const password = document.getElementById("loginPass").value;
-  if (!input || !password) return msg("Missing credentials.");
+  // SIGNED IN
+  if (signinLink) signinLink.style.display = "none";
+  if (profileWrapper) profileWrapper.style.display = "block";
 
+  await user.reload();
+
+  // NOT VERIFIED
+  if (!user.emailVerified) {
+    displayUsername.textContent = "Verify Email";
+    statusBadge.textContent = "PENDING";
+    statusBadge.style.color = "#ef4444";
+    statusBadge.style.borderColor = "#ef4444";
+    return;
+  }
+
+  // VERIFIED USER → LOAD PROFILE
   try {
-    let email = input;
+    const ref = db.collection("users").doc(user.uid);
+    let snap = await ref.get();
 
-    // 🔍 Only resolve Firestore if this is clearly a username
-    if (!input.includes("@")) {
-      const snap = await db
-        .collection("users")
-        .where("username", "==", input)
-        .limit(1)
-        .get();
-
-      if (snap.empty) {
-        return msg("No account found. Please register first.");
-      }
-
-      email = snap.docs[0].data().email;
+    // Create profile once if missing
+    if (!snap.exists) {
+      await ref.set({
+        username: user.email.split("@")[0],
+        email: user.email,
+        createdAt: Date.now()
+      });
+      snap = await ref.get();
     }
 
-    // ✅ Firebase is ALWAYS asked to authenticate
-    const cred = await auth.signInWithEmailAndPassword(email, password);
-    await cred.user.reload();
+    const data = snap.data();
+    displayUsername.textContent = "@" + data.username;
 
-    // 🚫 Block unverified accounts
-    if (!cred.user.emailVerified) {
-      await auth.signOut();
-      return msg("Please verify your email before signing in.", "info");
-    }
+    const isPro =
+      data.accessExpiry &&
+      data.accessExpiry.toMillis &&
+      data.accessExpiry.toMillis() > Date.now();
 
-    // ⏳ Allow persistence to settle
-    setTimeout(() => {
-      window.location.href = "https://rometrics.app/";
-    }, 300);
+    statusBadge.textContent = isPro ? "PRO" : "FREE";
+    const c = isPro ? "var(--accent)" : "#9ca3af";
+    statusBadge.style.color = c;
+    statusBadge.style.borderColor = c;
 
   } catch (err) {
-    // 🔥 Truthful Firebase error handling
-    switch (err.code) {
-      case "auth/wrong-password":
-        msg("Incorrect password.");
-        break;
-      case "auth/user-not-found":
-        msg("No account found. Please register first.");
-        break;
-      case "auth/invalid-email":
-        msg("Invalid email address.");
-        break;
-      case "auth/invalid-credential":
-        msg("Invalid email or password.");
-        break;
-      case "auth/user-disabled":
-        msg("This account has been disabled.");
-        break;
-      default:
-        msg(err.message);
-    }
+    console.error("Home auth/profile error:", err);
   }
-};
+});
 
-/* ===============================
-   GOOGLE SIGN-IN
-   =============================== */
-document.getElementById("googleLogin").onclick = async () => {
-  try {
-    const provider = new firebase.auth.GoogleAuthProvider();
-    await auth.signInWithPopup(provider);
-
-    setTimeout(() => {
-      window.location.href = "https://rometrics.app/";
-    }, 300);
-
-  } catch (err) {
-    msg(err.message);
-  }
-};
 
 </script>
 </body>
