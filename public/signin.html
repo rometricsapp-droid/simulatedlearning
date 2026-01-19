@@ -146,6 +146,30 @@ firebase.initializeApp({
 const auth = firebase.auth();
 const db = firebase.firestore();
 
+const params = new URLSearchParams(window.location.search);
+const mode = params.get("mode");
+const oobCode = params.get("oobCode");
+
+if (mode === "verifyEmail" && oobCode) {
+  auth.applyActionCode(oobCode)
+    .then(async () => {
+      // Force refresh user state
+      if (auth.currentUser) {
+        await auth.currentUser.reload();
+      }
+
+      msg("Email verified successfully. Please sign in.", "info");
+
+      // Clean URL
+      window.history.replaceState({}, document.title, "/signin.html");
+    })
+    .catch(() => {
+      msg("Verification link is invalid or expired.", "error");
+    });
+}
+
+
+
 const msg = (text, type = "error") => {
   const el = document.getElementById("loginConsole");
   if (!el) return;
