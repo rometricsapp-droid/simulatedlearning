@@ -189,7 +189,7 @@ document.getElementById("doRegister").onclick = async () => {
       fullName: name,
       username: user,
       email: email,
-      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      createdAt: Date.now()
     });
     
     // 4. Send verification email

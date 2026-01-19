@@ -148,46 +148,59 @@ const db = firebase.firestore();
 
 const msg = (text, type = "error") => {
   const el = document.getElementById("loginConsole");
-  if (el) {
-    const cleanText = text.replace(/Firebase/gi, "Authentication");
-    el.textContent = cleanText;
-    el.className = `console-msg console-${type}`;
-    el.style.display = "block";
-  }
+  if (!el) return;
+  el.textContent = text.replace(/Firebase/gi, "Authentication");
+  el.className = `console-msg console-${type}`;
+  el.style.display = "block";
 };
-
-
-
 
 document.getElementById("doLogin").onclick = async () => {
   let idInput = document.getElementById("loginIdentifier").value.trim().toLowerCase();
   const p = document.getElementById("loginPass").value;
-  
+
   if (!idInput || !p) return msg("Missing credentials.");
-  
+
   try {
-    // Handle Username login
-    if (!idInput.includes('@')) {
-      const userSnap = await db.collection("users").where("username", "==", idInput).limit(1).get();
-      if (userSnap.empty) return msg("Username not found.");
-      idInput = userSnap.docs[0].data().email;
+    // Username → email lookup
+    if (!idInput.includes("@")) {
+      const snap = await db
+        .collection("users")
+        .where("username", "==", idInput)
+        .limit(1)
+        .get();
+
+      if (snap.empty) {
+        return msg("No account found. Please register first.");
+      }
+
+      idInput = snap.docs[0].data().email;
     }
-    
-    // Attempt sign in
-    
-const cred = await auth.signInWithEmailAndPassword(idInput, p);
-await cred.user.reload();
 
-if (!cred.user.emailVerified) {
-  await auth.signOut();
-  return msg("Please verify your email before signing in.", "info");
-}
+    // Sign in
+    const cred = await auth.signInWithEmailAndPassword(idInput, p);
+    await cred.user.reload();
 
-window.location.href = "https://rometrics.app/";
+    // Enforce email verification
+    if (!cred.user.emailVerified) {
+      await auth.signOut();
+      return msg("Please verify your email before signing in.", "info");
+    }
 
-    
-  } catch(err) { 
-    msg(err.message); 
+    // Success
+    window.location.href = "https://rometrics.app/";
+
+  } catch (err) {
+    // Human-readable auth errors
+    if (
+      err.code === "auth/user-not-found" ||
+      err.code === "auth/invalid-credential"
+    ) {
+      msg("No account found. Please register first.");
+    } else if (err.code === "auth/wrong-password") {
+      msg("Incorrect password.");
+    } else {
+      msg(err.message);
+    }
   }
 };
 
@@ -196,10 +209,11 @@ document.getElementById("googleLogin").onclick = async () => {
     const provider = new firebase.auth.GoogleAuthProvider();
     await auth.signInWithPopup(provider);
     window.location.href = "https://rometrics.app/";
-  } catch (error) { 
-    msg(error.message); 
+  } catch (err) {
+    msg(err.message);
   }
 };
+
 </script>
 </body>
 </html>
