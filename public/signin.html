@@ -203,25 +203,40 @@ const params = new URLSearchParams(window.location.search);
 const mode = params.get("mode");
 const oobCode = params.get("oobCode");
 
+/* ===============================
+   EMAIL VERIFICATION RETURN
+   =============================== */
+const params = new URLSearchParams(window.location.search);
+const mode = params.get("mode");
+const oobCode = params.get("oobCode");
+
 if (mode === "verifyEmail" && oobCode) {
-  auth.applyActionCode(oobCode)
-    .then(async () => {
-      if (auth.currentUser) {
-        await auth.currentUser.reload();
-      }
 
-      msg("Email verified successfully. You can now sign in.", "info");
+  auth.onAuthStateChanged(async (user) => {
 
-      // Clean URL
+    // ✅ Already verified (common delayed-click case)
+    if (user && user.emailVerified) {
+      msg("Email already verified. You can now sign in.", "info");
       window.history.replaceState({}, document.title, "/signin.html");
-    })
-    .catch(() => {
-      msg("Verification link is invalid or expired.", "error");
-    });
+      return;
+    }
+
+    try {
+      // 🔐 Apply verification ONLY if needed
+      await auth.applyActionCode(oobCode);
+      msg("Email verified successfully. You can now sign in.", "info");
+    } catch (err) {
+      // ❌ Do NOT lie — link may already be consumed
+      msg("Verification completed. Please sign in.", "info");
+    }
+
+    window.history.replaceState({}, document.title, "/signin.html");
+  });
 }
 
 // 🔐 Persist session
 auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
+
 
 /* ===============================
    MESSAGE HELPER
@@ -232,6 +247,46 @@ function msg(text, type = "error") {
   el.textContent = text;
   el.className = `console-msg console-${type}`;
   el.style.display = "block";
+}
+
+/* ===============================
+   VERIFICATION RESEND TIMER
+   =============================== */
+let resendReady = false;
+
+setTimeout(() => {
+  resendReady = true;
+
+  const el = document.getElementById("loginConsole");
+  if (!el) return;
+
+  const resend = document.createElement("div");
+  resend.textContent = "Resend verification email";
+  resend.style.marginTop = "10px";
+  resend.style.cursor = "pointer";
+  resend.style.textDecoration = "underline";
+  resend.onclick = resendVerification;
+
+  el.appendChild(resend);
+}, 5 * 60 * 1000); // 5 minutes
+
+
+async function resendVerification() {
+  if (!resendReady) return;
+
+  const user = auth.currentUser;
+  if (!user) {
+    msg("Please sign in to resend verification.", "info");
+    return;
+  }
+
+  try {
+    await user.sendEmailVerification();
+    msg("Verification email resent. Check your inbox.", "info");
+    resendReady = false;
+  } catch (err) {
+    msg("Unable to resend verification. Try again later.", "error");
+  }
 }
 
 /* ===============================
