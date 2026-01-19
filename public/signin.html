@@ -188,7 +188,6 @@ firebase.initializeApp({
 const auth = firebase.auth();
 const db = firebase.firestore();
 
-// FIX: msg function now hides the opposite console to prevent mirroring
 const msg = (id, text, type = "error") => {
   const otherId = id === "regConsole" ? "loginConsole" : "regConsole";
   const otherEl = document.getElementById(otherId);
@@ -206,21 +205,15 @@ auth.onAuthStateChanged(user => {
     if (user.emailVerified) {
       window.location.href = "index.html"; 
     } else {
-      // Directs unverified users to the login side message
       msg("loginConsole", "Verify link sent to email to complete registration.", "info");
     }
   }
 });
 
-/**
- * SIGN IN LOGIC
- */
 document.getElementById("doLogin").onclick = async () => {
   let idInput = document.getElementById("loginIdentifier").value.trim().toLowerCase();
   const p = document.getElementById("loginPass").value;
-  
   if (!idInput || !p) return msg("loginConsole", "Missing credentials.");
-
   try {
     if (!idInput.includes('@')) {
       const userSnap = await db.collection("users").where("username", "==", idInput).limit(1).get();
@@ -231,9 +224,6 @@ document.getElementById("doLogin").onclick = async () => {
   } catch(err) { msg("loginConsole", err.message); }
 };
 
-/**
- * FORGOT PASSWORD
- */
 document.getElementById("doForgot").onclick = () => {
   const e = document.getElementById("loginIdentifier").value;
   if (!e || !e.includes('@')) return msg("loginConsole", "Enter your email first.");
@@ -242,9 +232,6 @@ document.getElementById("doForgot").onclick = () => {
     .catch(err => msg("loginConsole", err.message));
 };
 
-/**
- * REGISTER LOGIC
- */
 document.getElementById("doRegister").onclick = async () => {
   const name = document.getElementById("regName").value.trim();
   const user = document.getElementById("regUsername").value.trim().toLowerCase();
@@ -263,9 +250,10 @@ document.getElementById("doRegister").onclick = async () => {
     const cred = await auth.createUserWithEmailAndPassword(email, pass);
     await cred.user.sendEmailVerification();
     
+    // Bridge data to index.html
     localStorage.setItem('pendingProfile', JSON.stringify({ name, user }));
 
-    // FIX: Replaces the form with a "Submitted" state message
+    // UI FIX: Wipe the form and show "Submitted" state
     const regCard = document.getElementById("doRegister").closest('.auth-card');
     regCard.innerHTML = `
       <div style="text-align:center; padding: 20px 0;">
@@ -279,35 +267,26 @@ document.getElementById("doRegister").onclick = async () => {
   } catch(err) { msg("regConsole", err.message); }
 };
 
-/**
- * GOOGLE SIGN IN
- */
 document.getElementById("googleLogin").onclick = async () => {
   try {
     const provider = new firebase.auth.GoogleAuthProvider();
     const result = await auth.signInWithPopup(provider);
     const user = result.user;
-
     const userDoc = await db.collection("users").doc(user.uid).get();
-
     if (!userDoc.exists) {
-      let chosenName = prompt("Choose a username (max 9 characters):");
-      
+      let chosenName = prompt("Choose a username (3-9 characters):");
       if (!chosenName || chosenName.length > 9 || chosenName.length < 3) {
-        alert("Invalid username (3-9 characters).");
+        alert("Invalid username.");
         await user.delete(); 
         return;
       }
-
       chosenName = chosenName.toLowerCase().trim();
       const nameCheck = await db.collection("users").where("username", "==", chosenName).get();
-      
       if (!nameCheck.empty) {
         alert("Username taken.");
         await user.delete();
         return;
       }
-
       await db.collection("users").doc(user.uid).set({
         fullName: user.displayName,
         username: chosenName,
@@ -318,7 +297,6 @@ document.getElementById("googleLogin").onclick = async () => {
     window.location.href = "index.html";
   } catch (error) { msg("loginConsole", error.message); }
 };
-
 </script>
 </body>
 </html>
