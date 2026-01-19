@@ -320,7 +320,7 @@ document.getElementById("googleLogin").onclick = async () => {
       window.location.href = "https://rometrics.app/";
     }, 300);
 
- catch (err) {
+  }  catch (err) {
   console.error("Google sign-in error:", err);
   msg(err.message || "Google sign-in failed.", "error");
 }
