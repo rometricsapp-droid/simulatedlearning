@@ -529,25 +529,28 @@ window.onclick = () => {
 auth.onAuthStateChanged(async user => {
   if (user) {
     document.getElementById('profileWrapper').style.display = 'block';
-    
     const userDoc = await db.collection("users").doc(user.uid).get();
+    
+    let displayName = "";
+    let isPro = false;
+
     if (userDoc.exists) {
       const data = userDoc.data();
-      
-      // Update Username
-      document.getElementById('displayUsername').textContent = "@" + (data.username || "User");
-
-      // Professional Pro vs Free logic
-      const isPro = data.accessExpiry && data.accessExpiry.toDate() > new Date();
-      const statusBadge = document.getElementById('displayStatus');
-      
-      statusBadge.textContent = isPro ? "PRO" : "FREE";
-      
-      // Dynamic color matching for the badge
-      const activeColor = isPro ? "var(--accent)" : "#9ca3af";
-      statusBadge.style.borderColor = activeColor;
-      statusBadge.style.color = activeColor;
+      displayName = data.username; 
+      isPro = data.accessExpiry && data.accessExpiry.toDate() > new Date();
+    } 
+    
+    // Cleanup: if username is missing, use email prefix (jane.smith)
+    if (!displayName) {
+      displayName = user.email.split('@')[0];
     }
+
+    document.getElementById('displayUsername').textContent = "@" + displayName;
+
+    const statusBadge = document.getElementById('displayStatus');
+    statusBadge.textContent = isPro ? "PRO" : "FREE";
+    statusBadge.style.color = isPro ? "var(--accent)" : "#9ca3af";
+    statusBadge.style.borderColor = isPro ? "var(--accent)" : "#9ca3af";
   } else {
     document.getElementById('profileWrapper').style.display = 'none';
   }

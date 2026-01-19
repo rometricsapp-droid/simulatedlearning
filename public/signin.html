@@ -254,7 +254,42 @@ document.getElementById("doRegister").onclick = async () => {
   } catch(err) { msg("regConsole", err.message); }
 };
 
-document.getElementById("googleLogin").onclick = () => auth.signInWithPopup(new firebase.auth.GoogleAuthProvider());
+document.getElementById("googleLogin").onclick = async () => {
+  try {
+    const provider = new firebase.auth.GoogleAuthProvider();
+    const result = await auth.signInWithPopup(provider);
+    const user = result.user;
+
+    const userDoc = await db.collection("users").doc(user.uid).get();
+
+    if (!userDoc.exists) {
+      let chosenName = prompt("Choose a username (max 9 characters):");
+      
+      if (!chosenName || chosenName.length > 9 || chosenName.length < 3) {
+        alert("Invalid username (3-9 characters).");
+        await user.delete(); 
+        return;
+      }
+
+      chosenName = chosenName.toLowerCase().trim();
+      const nameCheck = await db.collection("users").where("username", "==", chosenName).get();
+      
+      if (!nameCheck.empty) {
+        alert("Username taken.");
+        await user.delete();
+        return;
+      }
+
+      await db.collection("users").doc(user.uid).set({
+        fullName: user.displayName,
+        username: chosenName,
+        email: user.email,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+    }
+    window.location.href = "index.html";
+  } catch (error) { msg("loginConsole", error.message); }
+};
 </script>
 </body>
 </html>
