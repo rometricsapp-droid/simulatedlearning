@@ -146,7 +146,6 @@ firebase.initializeApp({
 const auth = firebase.auth();
 const db = firebase.firestore();
 
-await auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
 
 
 const params = new URLSearchParams(window.location.search);
@@ -188,6 +187,9 @@ document.getElementById("doLogin").onclick = async () => {
   if (!idInput || !p) return msg("Missing credentials.");
 
   try {
+
+    await auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
+
     // Username → email lookup
     if (!idInput.includes("@")) {
       const snap = await db
