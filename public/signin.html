@@ -189,27 +189,39 @@ const auth = firebase.auth();
 const db = firebase.firestore();
 
 const msg = (id, text, type = "error") => {
-  const otherId = id === "regConsole" ? "loginConsole" : "regConsole";
-  const otherEl = document.getElementById(otherId);
-  if (otherEl) otherEl.style.display = "none"; 
+  // Clear EVERY console message on the page first
+  document.querySelectorAll('.console-msg').forEach(el => {
+    el.style.display = "none";
+    el.textContent = "";
+  });
 
   const el = document.getElementById(id);
-  const cleanText = text.replace(/Firebase/gi, "Authentication");
-  el.textContent = cleanText;
-  el.className = `console-msg console-${type}`;
-  el.style.display = "block";
+  if (el) {
+    const cleanText = text.replace(/Firebase/gi, "Authentication");
+    el.textContent = cleanText;
+    el.className = `console-msg console-${type}`;
+    el.style.display = "block";
+  }
 };
 
 auth.onAuthStateChanged(user => {
   if (user) {
     if (user.emailVerified) {
-      window.location.href = "index.html"; 
+      // FIX: Use the full URL to ensure it redirects correctly
+      window.location.href = "https://rometrics.app/index.html"; 
     } else {
-      msg("loginConsole", "Verify link sent to email to complete registration.", "info");
+      // Only show this if the registration "Submitted" state hasn't replaced the form
+      const regContainer = document.getElementById("doRegister");
+      if (regContainer) {
+        msg("loginConsole", "Verify link sent to email to complete registration.", "info");
+      }
     }
   }
 });
 
+/**
+ * SIGN IN LOGIC
+ */
 document.getElementById("doLogin").onclick = async () => {
   let idInput = document.getElementById("loginIdentifier").value.trim().toLowerCase();
   const p = document.getElementById("loginPass").value;
@@ -224,6 +236,9 @@ document.getElementById("doLogin").onclick = async () => {
   } catch(err) { msg("loginConsole", err.message); }
 };
 
+/**
+ * FORGOT PASSWORD
+ */
 document.getElementById("doForgot").onclick = () => {
   const e = document.getElementById("loginIdentifier").value;
   if (!e || !e.includes('@')) return msg("loginConsole", "Enter your email first.");
@@ -232,6 +247,9 @@ document.getElementById("doForgot").onclick = () => {
     .catch(err => msg("loginConsole", err.message));
 };
 
+/**
+ * REGISTER LOGIC
+ */
 document.getElementById("doRegister").onclick = async () => {
   const name = document.getElementById("regName").value.trim();
   const user = document.getElementById("regUsername").value.trim().toLowerCase();
@@ -250,7 +268,6 @@ document.getElementById("doRegister").onclick = async () => {
     const cred = await auth.createUserWithEmailAndPassword(email, pass);
     await cred.user.sendEmailVerification();
     
-    // Bridge data to index.html
     localStorage.setItem('pendingProfile', JSON.stringify({ name, user }));
 
     // UI FIX: Wipe the form and show "Submitted" state
@@ -267,6 +284,9 @@ document.getElementById("doRegister").onclick = async () => {
   } catch(err) { msg("regConsole", err.message); }
 };
 
+/**
+ * GOOGLE SIGN IN
+ */
 document.getElementById("googleLogin").onclick = async () => {
   try {
     const provider = new firebase.auth.GoogleAuthProvider();
@@ -294,7 +314,7 @@ document.getElementById("googleLogin").onclick = async () => {
         createdAt: firebase.firestore.FieldValue.serverTimestamp()
       });
     }
-    window.location.href = "index.html";
+    window.location.href = "https://rometrics.app/index.html";
   } catch (error) { msg("loginConsole", error.message); }
 };
 </script>

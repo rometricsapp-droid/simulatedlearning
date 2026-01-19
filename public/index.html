@@ -504,13 +504,13 @@ const db = firebase.firestore();
 
 auth.onAuthStateChanged(async (user) => {
   const profileWrapper = document.getElementById('profileWrapper');
-  const signinLink = document.getElementById('signinLink'); // FIX 2: Target the sign-in link
+  const signinLink = document.getElementById('signinLink');
   const displayUsername = document.getElementById('displayUsername');
   const statusBadge = document.getElementById('displayStatus');
 
   if (user) {
     if (profileWrapper) profileWrapper.style.display = 'block';
-    if (signinLink) signinLink.style.display = 'none'; // FIX 2: Hide Sign In link when logged in
+    if (signinLink) signinLink.style.display = 'none';
 
     if (!user.emailVerified) {
       if (displayUsername) displayUsername.textContent = "Verify Email";
@@ -525,21 +525,24 @@ auth.onAuthStateChanged(async (user) => {
       const userRef = db.collection("users").doc(user.uid);
       let userDoc = await userRef.get();
 
-      // FIX 3: THE "FRESH START" CATCH
-      // Automatically creates your DB entry once you are verified
+      // FIX: Creates DB record if it doesn't exist upon verification
       if (!userDoc.exists) {
         const pending = JSON.parse(localStorage.getItem('pendingProfile')) || {};
+        
         await userRef.set({
           fullName: pending.name || user.displayName || "User",
-          username: pending.user || user.email.split('@')[0],
+          // FIX: Ensure this matches the 'user' key saved in signin.html
+          username: pending.user || user.email.split('@')[0], 
           email: user.email,
           createdAt: firebase.firestore.FieldValue.serverTimestamp()
         });
-        userDoc = await userRef.get();
+        
+        userDoc = await userRef.get(); // Refresh doc to show correct name
         localStorage.removeItem('pendingProfile');
       }
 
       const data = userDoc.data();
+      // FIX: Displays actual username from Firestore
       if (displayUsername) displayUsername.textContent = "@" + (data.username || "User");
       
       const isPro = data.accessExpiry && data.accessExpiry.toDate() > new Date();
@@ -555,7 +558,7 @@ auth.onAuthStateChanged(async (user) => {
     }
   } else {
     if (profileWrapper) profileWrapper.style.display = 'none';
-    if (signinLink) signinLink.style.display = 'block'; // Show Sign In if logged out
+    if (signinLink) signinLink.style.display = 'block';
   }
 });
 
