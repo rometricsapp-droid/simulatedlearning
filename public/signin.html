@@ -321,11 +321,21 @@ handleRedirect(cred.user);
    GOOGLE SIGN-IN
    =============================== */
 document.getElementById("googleLogin").onclick = async () => {
+  let user;
+
+  // 1️⃣ AUTHENTICATE (ONLY THIS CAN FAIL SIGN-IN)
   try {
     const provider = new firebase.auth.GoogleAuthProvider();
     const result = await auth.signInWithPopup(provider);
-    const user = result.user;
+    user = result.user;
+  } catch (err) {
+    console.error("Google auth failed:", err);
+    msg("Google sign-in failed. Please try again.");
+    return;
+  }
 
+  // 2️⃣ CREATE PROFILE (FAILURE HERE MUST NOT BLOCK LOGIN)
+  try {
     const ref = db.collection("users").doc(user.uid);
     const snap = await ref.get();
 
@@ -348,14 +358,15 @@ document.getElementById("googleLogin").onclick = async () => {
         createdAt: firebase.firestore.FieldValue.serverTimestamp()
       });
     }
-
-    handleRedirect(user);
-
   } catch (err) {
-    console.error("Google sign-in failed:", err);
-    msg("Google sign-in failed. Please try again.");
+    console.error("Profile creation failed:", err);
+    // ❗ DO NOT BLOCK LOGIN
   }
+
+  // 3️⃣ ALWAYS REDIRECT AFTER AUTH
+  handleRedirect(user);
 };
+
 
 </script>
 
