@@ -293,10 +293,13 @@ document.getElementById("doLogin").onclick = async () => {
     const cred = await auth.signInWithEmailAndPassword(email, password);
     await cred.user.reload();
 
-    if (!cred.user.emailVerified) {
-      await auth.signOut();
-      return msg("Please verify your email before signing in.", "info");
-    }
+   if (!cred.user.emailVerified) {
+  msg("Please verify your email before signing in.", "info");
+  return;
+}
+
+handleRedirect(cred.user);
+
 
     const ref = db.collection("users").doc(cred.user.uid);
     const snap = await ref.get();

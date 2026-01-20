@@ -539,9 +539,17 @@ auth.onAuthStateChanged(async (user) => {
   }
 
   // VERIFIED USER → LOAD PROFILE
-  try {
-    const ref = db.collection("users").doc(user.uid);
-    let snap = await ref.get();
+ 
+await user.reload();
+
+// detect provider
+const isGoogleUser = user.providerData.some(
+  p => p.providerId === "google.com"
+);
+
+// 🔹 ALWAYS ensure Firestore profile exists
+const ref = db.collection("users").doc(user.uid);
+let snap = await ref.get();
 
 if (!snap.exists) {
   const emailPrefix = user.email
@@ -551,33 +559,39 @@ if (!snap.exists) {
     .slice(0, 9);
 
   await ref.set({
-    username: emailPrefix,
     email: user.email,
-    createdAt: Date.now(),
-    provider: user.providerData[0]?.providerId || "password"
+    username: emailPrefix || `user${user.uid.slice(0, 6)}`,
+    fullName: user.displayName || null,
+    provider: isGoogleUser ? "google" : "password",
+    createdAt: firebase.firestore.FieldValue.serverTimestamp()
   });
 
   snap = await ref.get();
 }
 
+// 🔒 EMAIL/PASSWORD USERS MUST VERIFY BEFORE ACCESS
+if (!isGoogleUser && !user.emailVerified) {
+  displayUsername.textContent = "Verify Email";
+  statusBadge.textContent = "PENDING";
+  statusBadge.style.color = "#ef4444";
+  statusBadge.style.borderColor = "#ef4444";
+  return;
+}
 
-    const data = snap.data();
-    displayUsername.textContent = "@" + data.username;
+// ✅ PROFILE IS GUARANTEED TO EXIST HERE
+const data = snap.data();
+displayUsername.textContent = "@" + data.username;
 
-    const isPro =
-      data.accessExpiry &&
-      data.accessExpiry.toMillis &&
-      data.accessExpiry.toMillis() > Date.now();
+const isPro =
+  data.accessExpiry &&
+  data.accessExpiry.toMillis &&
+  data.accessExpiry.toMillis() > Date.now();
 
-    statusBadge.textContent = isPro ? "PRO" : "FREE";
-    const c = isPro ? "var(--accent)" : "#9ca3af";
-    statusBadge.style.color = c;
-    statusBadge.style.borderColor = c;
+statusBadge.textContent = isPro ? "PRO" : "FREE";
+const c = isPro ? "var(--accent)" : "#9ca3af";
+statusBadge.style.color = c;
+statusBadge.style.borderColor = c;
 
-  } catch (err) {
-    console.error("Home auth/profile error:", err);
-  }
-});
 
 // ===============================
 // PROFILE DROPDOWN TOGGLE
