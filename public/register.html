@@ -128,12 +128,23 @@ document.addEventListener("DOMContentLoaded", () => {
   const auth = firebase.auth();
   const db   = firebase.firestore();
 
+  const VERIFY_DELAY = 3 * 60 * 1000;
+
   const msg = (text, type="error") => {
     const el = document.getElementById("regConsole");
     el.textContent = text;
     el.className = `console-msg console-${type}`;
     el.style.display = "block";
   };
+
+  const markSent = () =>
+    localStorage.setItem("verifySentAt", Date.now().toString());
+
+  const remaining = () =>
+    Math.max(0, VERIFY_DELAY - (Date.now() - Number(localStorage.getItem("verifySentAt") || 0)));
+
+  const format = ms =>
+    `${String(Math.floor(ms/60000)).padStart(2,"0")}:${String(Math.floor(ms%60000/1000)).padStart(2,"0")}`;
 
   document.getElementById("doRegister").onclick = async () => {
     const fullName = regName.value.trim();
@@ -150,7 +161,6 @@ document.addEventListener("DOMContentLoaded", () => {
       return msg("Passwords do not match.");
 
     try {
-      // 1️⃣ Username availability check (PUBLIC READ)
       const check = await db.collection("users")
         .where("username","==",username)
         .limit(1)
@@ -159,34 +169,61 @@ document.addEventListener("DOMContentLoaded", () => {
       if (!check.empty)
         return msg("Username is already taken.");
 
-      // 2️⃣ Create Auth account
       const cred = await auth.createUserWithEmailAndPassword(email, pass);
 
-      // 3️⃣ Create Firestore profile (REQUIRED)
       await db.collection("users").doc(cred.user.uid).set({
-        email,
-        username,
-        fullName,
-        provider: "password",
+        email, username, fullName,
+        provider:"password",
         createdAt: firebase.firestore.FieldValue.serverTimestamp()
       });
 
-      // 4️⃣ Send verification email
       await cred.user.sendEmailVerification();
+      markSent();
 
-      // 5️⃣ Success UI
       regFormContainer.innerHTML = `
         <div style="text-align:center">
           <img src="rometrics-logo.png" class="logo">
           <h1 style="color:var(--primary)">Verify Email</h1>
           <p>A verification link has been sent to<br><b>${email}</b></p>
-          <p style="font-size:.85rem">You must verify before signing in.</p>
-          <button class="btn btn-primary"
+
+          <p id="verifyTimer" style="font-size:.85rem;margin-top:8px"></p>
+
+          <button id="resendBtn" class="btn btn-primary"
+            style="margin-top:12px;opacity:.5;pointer-events:none">
+            Resend Verification Email
+          </button>
+
+          <button class="btn" style="margin-top:14px;background:#0f172a;color:#94a3b8"
             onclick="window.location.href='signin.html'">
-            Go to Sign In
+            Back to Sign In
           </button>
         </div>
       `;
+
+      const timerEl = document.getElementById("verifyTimer");
+      const resend  = document.getElementById("resendBtn");
+
+      const tick = async () => {
+        const wait = remaining();
+        if (wait > 0) {
+          timerEl.textContent = `Resend available in ${format(wait)}`;
+          resend.style.opacity = ".5";
+          resend.style.pointerEvents = "none";
+        } else {
+          timerEl.textContent = "Didn’t receive the email?";
+          resend.style.opacity = "1";
+          resend.style.pointerEvents = "auto";
+        }
+      };
+
+      resend.onclick = async () => {
+        await auth.currentUser.sendEmailVerification();
+        markSent();
+        tick();
+      };
+
+      tick();
+      setInterval(tick, 1000);
 
     } catch (err) {
       console.error(err);
