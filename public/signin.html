@@ -201,20 +201,18 @@ const db   = firebase.firestore();
    AUTH STATE GUARD (FIXED)
    =============================== */
 auth.onAuthStateChanged(async (user) => {
-  if (!user) return; 
+  if (!user) return;
 
-  // Force a refresh from Firebase to check if they JUST verified
-  await user.reload();
+  // IMPORTANT: Force a refresh to see if they just clicked the email link
+  await user.reload(); 
   const refreshedUser = firebase.auth().currentUser;
 
-  // Check verification
   if (refreshedUser.providerData[0]?.providerId === "password" && !refreshedUser.emailVerified) {
-    msg("Please verify your email. Check your inbox.", "info");
-    // await auth.signOut(); // DISABLED: This was causing your redirect loop
-    return;
+    msg("Please verify your email before signing in.", "info");
+    // Only sign out if they are truly not verified after the reload
+    return; 
   }
 
-  // ✅ VALID SIGN IN
   await handleRedirect(refreshedUser);
 });
 
