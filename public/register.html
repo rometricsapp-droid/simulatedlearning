@@ -179,72 +179,59 @@ document.addEventListener("DOMContentLoaded", () => {
 
       await cred.user.sendEmailVerification();
       markSent();
-
       regFormContainer.innerHTML = `
         <div style="text-align:center">
           <img src="rometrics-logo.png" class="logo">
           <h1 style="color:var(--primary)">Verify Email</h1>
           <p>A verification link has been sent to<br><b>${email}</b></p>
 
-          <p id="verifyTimer" style="font-size:.85rem;margin-top:8px"></p>
+          <p id="verifyCountdown"
+             style="font-size:.8rem; margin-top:8px; color:var(--text-muted)">
+          </p>
 
-         
-<div style="margin-top:16px; text-align:left">
-  <div style="
-    height:8px;
-    background:#0f172a;
-    border-radius:6px;
-    overflow:hidden;
-    margin-bottom:8px;
-  ">
-    <div id="resendProgress" style="
-      height:100%;
-      width:0%;
-      background:var(--primary);
-      transition:width 1s linear;
-    "></div>
-  </div>
+          <div style="margin-top:16px; text-align:left">
+            <div style="
+              height:8px;
+              background:#0f172a;
+              border-radius:6px;
+              overflow:hidden;
+              margin-bottom:8px;
+            ">
+              <div id="resendProgress" style="
+                height:100%;
+                width:0%;
+                background:var(--primary);
+                transition:width 1s linear;
+              "></div>
+            </div>
 
-  <button id="resendBtn" class="btn btn-primary"
-    style="opacity:.5; pointer-events:none;">
-    Resend Verification Email
-  </button>
-
-  <p id="verifyTimer"
-     style="font-size:.8rem; margin-top:6px; color:var(--text-muted)">
-    Please wait…
-  </p>
-</div>
-
-
-          <button class="btn" style="margin-top:14px;background:#0f172a;color:#94a3b8"
-            onclick="window.location.href='signin.html'">
-            Back to Sign In
-          </button>
+            <button id="resendBtn" class="btn btn-primary"
+              style="opacity:.5; pointer-events:none;">
+              Resend Verification Email
+            </button>
+          </div>
         </div>
       `;
 
-      const timerEl = document.getElementById("verifyTimer");
-      const resend  = document.getElementById("resendBtn");
+      const timerEl  = document.getElementById("verifyCountdown");
+      const resend   = document.getElementById("resendBtn");
       const progress = document.getElementById("resendProgress");
 
-      const tick = async () => {
+      const tick = () => {
         const wait = remaining();
         const percent = 100 - (wait / VERIFY_DELAY) * 100;
 
-        if (progress) {
-          progress.style.width = `${percent}%`;
-        }
+        progress.style.width = `${percent}%`;
 
         if (wait > 0) {
-          timerEl.textContent = `Resend available in ${format(wait)}`;
+          timerEl.textContent =
+            `Resend available in ${format(wait)}. Please check your email.`;
           resend.style.opacity = ".5";
           resend.style.pointerEvents = "none";
         } else {
-          if (progress) {
-            progress.style.width = "100%";
-          }
-          timerEl.textContent = "You can now request another verification email.";
+          progress.style.width = "100%";
+          timerEl.textContent =
+            "Didn’t receive the email? You can resend it now.";
           resend.style.opacity = "1";
           resend.style.pointerEvents = "auto";
         }
@@ -258,6 +245,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       tick();
       setInterval(tick, 1000);
+
 
     } catch (err) {
       console.error(err);
