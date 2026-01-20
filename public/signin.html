@@ -210,7 +210,8 @@ async function handleRedirect(user) {
 
     // 3. Choice: Go to App (Handshake)
     document.getElementById("goApp").onclick = () => {
-      window.location.href = `https://rometrics.app/auth?token=${token}`;
+    window.location.href = `rometrics://auth?token=${token}`;
+
     };
 
     // 4. Choice: Stay on Web
@@ -416,7 +417,9 @@ document.getElementById("googleLogin").onclick = async () => {
     const provider = new firebase.auth.GoogleAuthProvider();
     provider.setCustomParameters({ prompt: "select_account" });
 
-    const result = await auth.signInWithPopup(provider);
+    await auth.signInWithRedirect(provider);
+return;
+
     const user = result.user;
 
     if (!user || !user.email) {
