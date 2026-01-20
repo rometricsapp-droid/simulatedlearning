@@ -529,8 +529,37 @@ auth.onAuthStateChanged(async (user) => {
 
   await user.reload();
 
-  // NOT VERIFIED
-  if (!user.emailVerified) {
+  // detect provider
+  const isGoogleUser = user.providerData.some(
+    p => p.providerId === "google.com"
+  );
+
+  // 🔹 ALWAYS ensure Firestore profile exists
+  const ref = db.collection("users").doc(user.uid);
+  let snap = await ref.get();
+
+  if (!snap.exists) {
+    const username =
+      user.email
+        ?.split("@")[0]
+        .replace(/[^a-z0-9]/gi, "")
+        .toLowerCase()
+        .slice(0, 9) ||
+      `user${user.uid.slice(0, 6)}`;
+
+    await ref.set({
+      email: user.email,
+      username,
+      fullName: user.displayName || null,
+      provider: isGoogleUser ? "google" : "password",
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+
+    snap = await ref.get();
+  }
+
+  // 🔒 EMAIL/PASSWORD USERS MUST VERIFY (DO NOT SIGN OUT)
+  if (!isGoogleUser && !user.emailVerified) {
     displayUsername.textContent = "Verify Email";
     statusBadge.textContent = "PENDING";
     statusBadge.style.color = "#ef4444";
@@ -538,60 +567,20 @@ auth.onAuthStateChanged(async (user) => {
     return;
   }
 
-  // VERIFIED USER → LOAD PROFILE
- 
-await user.reload();
+  // ✅ PROFILE IS GUARANTEED TO EXIST HERE
+  const data = snap.data();
+  displayUsername.textContent = "@" + data.username;
 
-// detect provider
-const isGoogleUser = user.providerData.some(
-  p => p.providerId === "google.com"
-);
+  const isPro =
+    data.accessExpiry &&
+    data.accessExpiry.toMillis &&
+    data.accessExpiry.toMillis() > Date.now();
 
-// 🔹 ALWAYS ensure Firestore profile exists
-const ref = db.collection("users").doc(user.uid);
-let snap = await ref.get();
-
-if (!snap.exists) {
-  const emailPrefix = user.email
-    .split("@")[0]
-    .replace(/[^a-z0-9]/gi, "")
-    .toLowerCase()
-    .slice(0, 9);
-
-  await ref.set({
-    email: user.email,
-    username: emailPrefix || `user${user.uid.slice(0, 6)}`,
-    fullName: user.displayName || null,
-    provider: isGoogleUser ? "google" : "password",
-    createdAt: firebase.firestore.FieldValue.serverTimestamp()
-  });
-
-  snap = await ref.get();
-}
-
-// 🔒 EMAIL/PASSWORD USERS MUST VERIFY BEFORE ACCESS
-if (!isGoogleUser && !user.emailVerified) {
-  displayUsername.textContent = "Verify Email";
-  statusBadge.textContent = "PENDING";
-  statusBadge.style.color = "#ef4444";
-  statusBadge.style.borderColor = "#ef4444";
-  return;
-}
-
-// ✅ PROFILE IS GUARANTEED TO EXIST HERE
-const data = snap.data();
-displayUsername.textContent = "@" + data.username;
-
-const isPro =
-  data.accessExpiry &&
-  data.accessExpiry.toMillis &&
-  data.accessExpiry.toMillis() > Date.now();
-
-statusBadge.textContent = isPro ? "PRO" : "FREE";
-const c = isPro ? "var(--accent)" : "#9ca3af";
-statusBadge.style.color = c;
-statusBadge.style.borderColor = c;
-
+  statusBadge.textContent = isPro ? "PRO" : "FREE";
+  const c = isPro ? "var(--accent)" : "#9ca3af";
+  statusBadge.style.color = c;
+  statusBadge.style.borderColor = c;
+});
 
 // ===============================
 // PROFILE DROPDOWN TOGGLE
@@ -600,7 +589,6 @@ function toggleDropdown(e) {
   e.stopPropagation();
   const menu = document.getElementById("profileDropdown");
   if (!menu) return;
-
   menu.classList.toggle("show");
 }
 
