@@ -197,26 +197,6 @@ if (!firebase.apps.length) {
 const auth = firebase.auth();
 const db   = firebase.firestore();
 
-/* ===============================
-   AUTH STATE GUARD (FIXED)
-   =============================== */
-auth.onAuthStateChanged(async (user) => {
-  if (!user) return;
-
-  // 1. REFRESH the user data from the server
-  await user.reload();
-  const freshUser = firebase.auth().currentUser;
-
-  // 2. CHECK VERIFICATION (only for email/password users)
-  const isPasswordUser = freshUser.providerData.some(p => p.providerId === 'password');
-  
-  if (isPasswordUser && !freshUser.emailVerified) {
-    msg("Please verify your email first.", "info");
-    // We DON'T call signOut() here anymore—it causes the loop.
-    // Instead, we just stop the redirect.
-    return;
-  }
-
   // 3. SUCCESS - Go to the app
   console.log("Login successful:", freshUser.email);
   handleRedirect(freshUser);
@@ -237,24 +217,21 @@ auth.getRedirectResult()
     const ref = db.collection("users").doc(user.uid);
     const snap = await ref.get();
 
-    if (!snap.exists) {
-      let username = user.email
-        .split("@")[0]
-        .toLowerCase()
-        .replace(/[^a-z0-9]/g, "")
-        .slice(0, 9);
+  if (!snap.exists) {
+  let username = user.email
+    .split("@")[0]
+    .toLowerCase()
+    .replace(/[^a-z0-9]/g, "")
+    .slice(0, 9);
 
-      if (!username) {
-        username = `user${user.uid.slice(0, 6)}`;
-      }
+  await ref.set({
+    email: user.email,
+    username,
+    provider: "google",
+    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+  });
+}
 
-      await ref.set({
-        email: user.email,
-        username,
-        provider: "google",
-        createdAt: firebase.firestore.FieldValue.serverTimestamp()
-      });
-    }
 
     await handleRedirect(user);
   })
@@ -375,7 +352,7 @@ document.getElementById("doLogin").onclick = async () => {
       });
     }
 
-    setTimeout(() => handleRedirect(cred.user), 300);
+handleRedirect(cred.user);
 
   } catch (err) {
     msg("Sign-in failed. Please try again.");
@@ -389,7 +366,7 @@ document.getElementById("googleLogin").onclick = async () => {
   try {
     const provider = new firebase.auth.GoogleAuthProvider();
     provider.setCustomParameters({ prompt: "select_account" });
-    await auth.signInWithRedirect(provider);
+    await auth.signInWithPopup(provider);
   } catch {
     msg("Google sign-in failed. Please try again.");
   }
