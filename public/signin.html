@@ -1,353 +1,397 @@
-settings.html
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=1280, initial-scale=0.3, maximum-scale=1.0, user-scalable=yes">
-  <title>Settings — ROMetrics</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ROMetrics | Sign In</title>
 
-  <style>
-    :root {
-      --bg-dark: #121212;
-      --card-dark: #1e1e1e;
-      --text-main: #ffffff;
-      --text-muted: #9ca3af;
-      --accent: #bef264;
-      --border: #2d2d2d;
-      --danger: #fb7185;
-    }
+<link rel="icon" type="image/png" sizes="192x192" href="favicon-192.png">
+<link rel="apple-touch-icon" sizes="192x192" href="favicon-192.png">
 
-    * { box-sizing: border-box; }
-    
-    body {
-      margin: 0;
-      width: 1280px !important;
-      font-family: 'Inter', system-ui, -apple-system, sans-serif;
-      background: var(--bg-dark);
-      color: var(--text-main);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding-top: 40px;
-    }
+<style>
+:root {
+  --bg: #0b1120; 
+  --card: #1e293b;
+  --primary: #38bdf8; 
+  --text: #f8fafc;
+  --text-muted: #94a3b8;
+  --border: #334155;
+  --error: #fb7185;
+}
 
-    /* TOP NAV BAR */
-    .settings-nav {
-      background: #1a1a1a;
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      display: flex;
-      padding: 6px;
-      gap: 4px;
-      margin-bottom: 60px;
-    }
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
 
-    .nav-item {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      padding: 8px 16px;
-      text-decoration: none;
-      color: var(--text-muted);
-      font-size: 0.85rem;
-      font-weight: 600;
-      border-radius: 8px;
-      transition: 0.2s;
-      cursor: pointer;
-      border: none;
-      background: none;
-    }
+.auth-card {
+  width: 100%;
+  max-width: 450px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 24px;
+  padding: 40px 32px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+}
 
-    .nav-item svg { width: 16px; height: 16px; fill: currentColor; }
-    
-    .nav-item.active {
-      color: var(--accent);
-      background: #252525;
-    }
+.logo-header { text-align: center; margin-bottom: 24px; }
+.logo { height: 42px; margin-bottom: 12px; }
 
-    .nav-item:hover:not(.active) {
-      background: #252525;
-      color: #fff;
-    }
+h1 { font-size: 1.4rem; font-weight: 800; text-align: center; margin: 0 0 8px; }
+p { font-size: 0.85rem; color: var(--text-muted); text-align: center; margin: 0 0 24px; }
 
-    /*  CONTENT AREA */
-    .content-wrapper {
-      width: 900px;
-      text-align: left;
-    }
+.console-msg {
+  background: #0f172a;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  text-align: center;
+  margin-bottom: 20px;
+  display: none;
+}
+.console-error { border-color: var(--error); color: var(--error); }
+.console-info { border-color: var(--primary); color: var(--primary); }
 
-    .settings-view { display: none; animation: fadeIn 0.3s ease; }
-    .settings-view.active { display: block; }
+.input-group { margin-bottom: 16px; }
+.input-label { font-size: 10px; font-weight: 700; text-transform: uppercase; color: var(--primary); margin-bottom: 6px; display: block; }
+input {
+  width: 100%;
+  background: #0f172a;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 12px 16px;
+  color: #fff;
+  outline: none;
+}
+input:focus { border-color: var(--primary); }
 
-    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+.btn {
+  width: 100%;
+  padding: 14px;
+  border-radius: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  border: none;
+  transition: opacity 0.2s;
+}
+.btn:active { opacity: 0.8; }
+.btn-primary { background: var(--primary); color: #0b1120; margin-bottom: 12px; }
+.btn-outline { background: transparent; color: var(--text); border: 1px solid var(--border); }
 
-    h1 { font-size: 2.8rem; font-weight: 800; margin: 0 0 10px 0; letter-spacing: -0.02em; }
-    .description { font-size: 1.1rem; color: var(--text-muted); margin-bottom: 40px; }
-    hr { border: 0; border-top: 1px solid var(--border); margin-bottom: 50px; }
-    h2 { font-size: 1.8rem; font-weight: 700; margin-bottom: 30px; }
+.switch-link {
+  text-align: center;
+  margin-top: 24px;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+.switch-link a { color: var(--primary); text-decoration: none; font-weight: 700; }
+/* ---------- GOOGLE SIGN-IN BUTTON ---------- */
+.btn-google {
+  background: #ffffff;
+  color: #1f2937;
+  border: 1px solid #e5e7eb;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  font-weight: 700;
+}
 
-    .status-card {
-      background: var(--card-dark);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 30px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 20px;
-    }
+.btn-google img {
+  width: 18px;
+  height: 18px;
+}
 
-    .status-info div { font-size: 1.2rem; font-weight: 700; }
-    .status-info span { color: var(--text-muted); font-size: 0.9rem; display: block; margin-top: 4px; }
+.btn-google:hover {
+  background: #f9fafb;
+}
 
-    .btn-upgrade {
-      background: var(--accent);
-      color: #000;
-      text-decoration: none;
-      padding: 12px 24px;
-      border-radius: 8px;
-      font-weight: 800;
-      font-size: 0.9rem;
-    }
+/* ---------- GOOGLE DISCLAIMER ---------- */
+.google-disclaimer {
+  margin-top: 12px;
+  font-size: 11px;
+  color: var(--text-muted);
+  text-align: center;
+  line-height: 1.4;
+}
 
-    .btn-outline {
-      background: transparent;
-      color: var(--text-main);
-      border: 1px solid var(--border);
-      padding: 10px 20px;
-      border-radius: 8px;
-      font-weight: 700;
-      cursor: pointer;
-      transition: 0.2s;
-    }
-    .btn-outline:hover { border-color: var(--accent); color: var(--accent); }
+.google-disclaimer a {
+  color: var(--primary);
+  text-decoration: none;
+  font-weight: 600;
+}
 
-    .billing-history table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 20px;
-    }
-
-    .billing-history th { text-align: left; color: var(--text-muted); font-size: 0.8rem; padding: 12px; border-bottom: 1px solid var(--border); }
-    .billing-history td { padding: 16px 12px; border-bottom: 1px solid #1a1a1a; font-size: 0.95rem; }
-
-    /* DANGER ZONE */
-    .danger-zone {
-      margin-top: 80px;
-      border: 1px solid #442727;
-      padding: 30px;
-      border-radius: 16px;
-      background: #1a1414;
-    }
-
-    .btn-delete {
-      background: var(--danger);
-      color: white;
-      border: none;
-      padding: 12px 20px;
-      border-radius: 8px;
-      font-weight: 700;
-      cursor: pointer;
-      margin-top: 20px;
-    }
-
-    .back-link { position: absolute; top: 40px; left: 40px; color: var(--accent); text-decoration: none; font-weight: 700; }
-  </style>
+</style>
 </head>
+
 <body>
 
-  <a href="index.html" class="back-link">← Return to App</a>
-
-  <div class="settings-nav">
-    <button class="nav-item active" onclick="showView('subscriptionView', this)">
-      <svg viewBox="0 0 24 24"><path d="M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm16-4H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-1 9h-4v4h-2v-4H9V9h4V5h2v4h4v2z"/></svg>
-      Subscription
-    </button>
-    <button class="nav-item" onclick="showView('profileView', this)">
-      <svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
-      Profile
-    </button>
-    <button class="nav-item" onclick="showView('billingView', this)">
-      <svg viewBox="0 0 24 24"><path d="M20 4H4c-1.11 0-1.99.89-1.99 2L2 18c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4V10h16v8zm0-12H4V4h16v2z"/></svg>
-      Billing
-    </button>
+<div class="auth-card">
+  <div class="logo-header">
+    <a href="https://rometrics.app/">
+      <img src="rometrics-logo.png" class="logo" alt="ROMetrics">
+    </a>
+    <h1>Sign In</h1>
+    <p>Access your ROMetrics workspace.</p>
   </div>
+  
+  <div id="loginConsole" class="console-msg"></div>
 
-  <div class="content-wrapper">
-    
-    <div id="subscriptionView" class="settings-view active">
-      <h1>Subscription</h1>
-      <p class="description">Manage your plan and billing cycles.</p>
-      <hr>
-      <h2>Current plan</h2>
-      <div class="status-card">
-        <div class="status-info">
-          <div id="planTitle">Checking Plan...</div>
-          <span id="expiryText">Verifying status...</span>
-        </div>
-        <a href="#" id="upgradeBtn" class="btn-upgrade" style="display:none;">Upgrade Plan</a>
-      </div>
-    </div>
-
-    <div id="profileView" class="settings-view">
-      <h1>Profile</h1>
-      <p class="description">Your personal account details and security settings.</p>
-      <hr>
-      <div class="status-card">
-        <div class="status-info">
-          <div id="userNameDisplay">Loading Name...</div>
-          <span id="userEmailDisplay">...</span>
-        </div>
-      </div>
-
-      <h2>Security</h2>
-      <div class="status-card">
-        <div class="status-info">
-          <div>Password Management</div>
-          <span>Update your account security via email.</span>
-        </div>
-        <button onclick="changePassword()" class="btn-outline">Reset Password</button>
-      </div>
-      
-      <div class="danger-zone">
-        <h3>Danger Zone</h3>
-        <p style="color: var(--text-muted); font-size: 0.9rem;">Once you delete your account, all clinical simulation data, MMT scores, and goniometry progress will be permanently removed.</p>
-        <button onclick="deleteAccount()" class="btn-delete">Delete Account Forever</button>
-      </div>
-    </div>
-
-    <div id="billingView" class="settings-view">
-      <h1>Billing History</h1>
-      <p class="description">View and track your transaction history.</p>
-      <hr>
-      <div class="billing-history">
-        <table>
-          <thead>
-            <tr>
-              <th>Date</th>
-              <th>Description</th>
-              <th>Amount</th>
-              <th>Status</th>
-            </tr>
-          </thead>
-          <tbody id="invoiceList"></tbody>
-        </table>
-      </div>
-    </div>
-
+  <div class="input-group">
+    <span class="input-label">Username</span>
+    <input id="loginIdentifier" type="text" placeholder="Username or Email">
   </div>
+  <div class="input-group">
+    <span class="input-label">Password</span>
+    <input id="loginPass" type="password" placeholder="••••••••">
+  </div>
+  
+  <button class="btn btn-primary" id="doLogin">Sign In</button>
+  
+  <div style="text-align:center; margin: 16px 0; font-size: 10px; color: var(--text-muted); font-weight: 700;">OR</div>
+  
+<button class="btn btn-google" id="googleLogin">
+  <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="">
+  Continue with Google
+</button>
 
-  <script src="https://www.gstatic.com/firebasejs/10.12.4/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.4/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore-compat.js"></script>
+<div class="google-disclaimer">
+  By continuing, you agree to our
+  <a href="/terms.html" target="_blank">Terms of Use</a> and
+  <a href="/privacy.html" target="_blank">Privacy Policy</a>.
+</div>
 
-  <script>
-    firebase.initializeApp({
-      apiKey: "AIzaSyAxMFW5gguPiiaomPbuoMc7suxHmgPEhRg",
-      authDomain: "rometricsapp-1444e.firebaseapp.com",
-      projectId: "rometricsapp-1444e",
-      appId: "1:1016564998048:web:1d4c7e4780de0323664ec5"
-    });
+  <div class="switch-link">
+  Don't have an account? <a href="#" onclick="window.location.href='register.html' + window.location.search">Register</a>
+  </div>
+</div>
 
-    const auth = firebase.auth();
-    const db = firebase.firestore();
+<script src="https://www.gstatic.com/firebasejs/10.12.4/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.4/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore-compat.js"></script>
 
-    function showView(viewId, btn) {
-      document.querySelectorAll('.settings-view').forEach(v => v.classList.remove('active'));
-      document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
-      document.getElementById(viewId).classList.add('active');
-      btn.classList.add('active');
-    }
+<script>
+/* ===============================
+   FIREBASE INIT (ONCE ONLY)
+   =============================== */
+if (!firebase.apps.length) {
+  firebase.initializeApp({
+    apiKey: "AIzaSyAxMFW5gguPiiaomPbuoMc7suxHmgPEhRg",
+      authDomain:"rometricsapp-1444e.firebaseapp.com",
 
-    auth.onAuthStateChanged(async user => {
-      if (!user) { window.location.href = "signin.html"; return; }
+    projectId: "rometricsapp-1444e",
+    appId: "1:1016564998048:web:1d4c7e4780de0323664ec5"
+  });
+}
 
-      // 1. Detect Rate Type (.edu check)
-      const isStudent = user.email.toLowerCase().endsWith('.edu');
-      const rateLabel = isStudent ? "Student Rate" : "Standard Rate";
+const auth = firebase.auth();
+const db   = firebase.firestore();
 
-      // 2. Load User Profile
-      const userDoc = await db.collection("users").doc(user.uid).get();
-      if (userDoc.exists) {
-        const data = userDoc.data();
-        
-        // Show Username if available
-        document.getElementById('userNameDisplay').textContent = data.username || data.fullName || "User";
-        document.getElementById('userEmailDisplay').textContent = user.email;
+/* ===============================
+   AUTH STATE GUARD (FIXED)
+   =============================== */
+auth.onAuthStateChanged(async (user) => {
+  if (!user) return; 
 
-        // 3. Handle Subscription Logic
-        if(data.accessExpiry) {
-          const expiry = data.accessExpiry.toDate();
-          if (new Date() > expiry) {
-            document.getElementById('planTitle').textContent = `Plan Expired (${rateLabel})`;
-            document.getElementById('upgradeBtn').style.display = "block";
-            const target = isStudent ? "subscribe-edu.html" : "subscribe.html";
-            document.getElementById('upgradeBtn').href = target + "?uid=" + user.uid;
-            document.getElementById('expiryText').textContent = "Access ended on " + expiry.toLocaleDateString();
-          } else {
-            document.getElementById('planTitle').textContent = `ROMetrics Pro (${rateLabel})`;
-            document.getElementById('expiryText').textContent = "Next billing date: " + expiry.toLocaleDateString();
-          }
-        } else {
-            // Initial Trial State
-            document.getElementById('planTitle').textContent = `Trial Mode (${rateLabel})`;
-            document.getElementById('upgradeBtn').style.display = "block";
-            const target = isStudent ? "subscribe-edu.html" : "subscribe.html";
-            document.getElementById('upgradeBtn').href = target + "?uid=" + user.uid;
-            document.getElementById('expiryText').textContent = "Upgrade to unlock full features.";
-        }
+  // Force a refresh from Firebase to check if they JUST verified
+  await user.reload();
+  const refreshedUser = firebase.auth().currentUser;
+
+  // Check verification
+  if (refreshedUser.providerData[0]?.providerId === "password" && !refreshedUser.emailVerified) {
+    msg("Please verify your email. Check your inbox.", "info");
+    // await auth.signOut(); // DISABLED: This was causing your redirect loop
+    return;
+  }
+
+  // ✅ VALID SIGN IN
+  await handleRedirect(refreshedUser);
+});
+
+/* ===============================
+   REDIRECT RESULT HANDLER
+   =============================== */
+auth.getRedirectResult()
+  .then(async (result) => {
+    if (!result || !result.user) return;
+
+    const user = result.user;
+
+    /* -------------------------------
+       CREATE PROFILE IF MISSING
+       (GOOGLE USERS)
+       ------------------------------- */
+    const ref = db.collection("users").doc(user.uid);
+    const snap = await ref.get();
+
+    if (!snap.exists) {
+      let username = user.email
+        .split("@")[0]
+        .toLowerCase()
+        .replace(/[^a-z0-9]/g, "")
+        .slice(0, 9);
+
+      if (!username) {
+        username = `user${user.uid.slice(0, 6)}`;
       }
 
-      // LOAD BILLING HISTORY
-      const invSnap = await db.collection("invoices")
-        .where("userId", "==", user.uid)
-        .orderBy("date", "desc")
+      await ref.set({
+        email: user.email,
+        username,
+        provider: "google",
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+    }
+
+    await handleRedirect(user);
+  })
+  .catch(err => {
+    console.error("Redirect result error:", err);
+    msg("Sign-in failed. Please try again.");
+  });
+
+/* ===============================
+   HANDLE REDIRECT
+   =============================== */
+async function handleRedirect(user) {
+  const params = new URLSearchParams(window.location.search);
+  const isAndroid = params.get("return") === "android";
+
+  if (isAndroid) {
+    const modal = document.getElementById("choiceModal");
+    modal.style.display = "flex";
+
+    const token = await user.getIdToken();
+
+    document.getElementById("goApp").onclick = () => {
+      window.location.href = `rometrics://auth?token=${token}`;
+    };
+
+    document.getElementById("goWeb").onclick = () => {
+      window.location.href = "https://rometrics.app/";
+    };
+  } else {
+    window.location.href = "https://rometrics.app/";
+  }
+}
+
+/* ===============================
+   EMAIL VERIFICATION RETURN
+   =============================== */
+const params = new URLSearchParams(window.location.search);
+const mode = params.get("mode");
+const oobCode = params.get("oobCode");
+
+if (mode === "verifyEmail" && oobCode) {
+  auth.onAuthStateChanged(async (user) => {
+    if (user && user.emailVerified) {
+      msg("Email already verified. You can now sign in.", "info");
+      window.history.replaceState({}, document.title, "/signin.html");
+      return;
+    }
+
+    try {
+      await auth.applyActionCode(oobCode);
+      msg("Email verified successfully. You can now sign in.", "info");
+    } catch {
+      msg("Verification completed. Please sign in.", "info");
+    }
+
+    window.history.replaceState({}, document.title, "/signin.html");
+  });
+}
+
+// 🔐 Persist session
+auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
+
+/* ===============================
+   MESSAGE HELPER
+   =============================== */
+function msg(text, type = "error") {
+  const el = document.getElementById("loginConsole");
+  if (!el) return;
+  el.textContent = text;
+  el.className = `console-msg console-${type}`;
+  el.style.display = "block";
+}
+
+/* ===============================
+   EMAIL / USERNAME SIGN IN
+   =============================== */
+document.getElementById("doLogin").onclick = async () => {
+  const raw = document.getElementById("loginIdentifier").value.trim().toLowerCase();
+  const password = document.getElementById("loginPass").value;
+
+  if (!raw || !password) return msg("Missing credentials.");
+
+  let email = raw;
+
+  try {
+    if (!raw.includes("@")) {
+      const snap = await db.collection("users")
+        .where("username", "==", raw)
+        .limit(1)
         .get();
 
-      let rows = "";
-      invSnap.forEach(doc => {
-        const inv = doc.data();
-        rows += `<tr>
-          <td>${inv.date ? inv.date.toDate().toLocaleDateString() : 'N/A'}</td>
-          <td>${inv.description}</td>
-          <td>$${inv.amount}</td>
-          <td style="color:var(--accent); font-weight:800;">Paid</td>
-        </tr>`;
+      if (snap.empty) return msg("No account found. Please register first.");
+      email = snap.docs[0].data().email;
+    }
+
+    const cred = await auth.signInWithEmailAndPassword(email, password);
+    await cred.user.reload();
+
+    if (!cred.user.emailVerified) {
+      await auth.signOut();
+      return msg("Please verify your email before signing in.", "info");
+    }
+
+    const ref = db.collection("users").doc(cred.user.uid);
+    const snap = await ref.get();
+
+    if (!snap.exists) {
+      const username = email.split("@")[0]
+        .replace(/[^a-z0-9]/gi, "")
+        .toLowerCase()
+        .slice(0, 9);
+
+      await ref.set({
+        email: cred.user.email,
+        username,
+        provider: "password",
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
       });
-      document.getElementById('invoiceList').innerHTML = rows || "<tr><td colspan='4'>No transaction history found.</td></tr>";
-    });
-
-    // PASSWORD RESET LOGIC
-    function changePassword() {
-      const user = auth.currentUser;
-      if (confirm("Send a password reset link to " + user.email + "?")) {
-        auth.sendPasswordResetEmail(user.email).then(() => {
-          alert("Security link sent to your inbox.");
-        }).catch(err => alert(err.message));
-      }
     }
 
-    // ACCOUNT DELETION
-    async function deleteAccount() {
-      const user = auth.currentUser;
-      if (confirm("Are you absolutely sure? All progress and clinical data will be deleted forever.")) {
-        try {
-          await db.collection("users").doc(user.uid).delete();
-          await user.delete();
-          alert("Account successfully deleted.");
-          window.location.href = "index.html";
-        } catch (error) {
-          if (error.code === 'auth/requires-recent-login') {
-            alert("Security Check: Please Sign Out and Sign back in once more to verify ownership before deletion.");
-            auth.signOut().then(() => { window.location.href = "signin.html"; });
-          } else {
-            alert("Error: " + error.message);
-          }
-        }
-      }
-    }
+    setTimeout(() => handleRedirect(cred.user), 300);
 
-//Test update 2//
-  </script>
+  } catch (err) {
+    msg("Sign-in failed. Please try again.");
+  }
+};
+
+/* ===============================
+   GOOGLE SIGN-IN
+   =============================== */
+document.getElementById("googleLogin").onclick = async () => {
+  try {
+    const provider = new firebase.auth.GoogleAuthProvider();
+    provider.setCustomParameters({ prompt: "select_account" });
+    await auth.signInWithRedirect(provider);
+  } catch {
+    msg("Google sign-in failed. Please try again.");
+  }
+};
+</script>
+
 </body>
 </html>
