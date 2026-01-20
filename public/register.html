@@ -10,85 +10,55 @@
 
 <style>
 :root {
-  --bg: #0b1120; 
-  --card: #1e293b;
-  --primary: #38bdf8; 
-  --text: #f8fafc;
-  --text-muted: #94a3b8;
-  --border: #334155;
-  --error: #fb7185;
+  --bg:#0b1120;
+  --card:#1e293b;
+  --primary:#38bdf8;
+  --text:#f8fafc;
+  --text-muted:#94a3b8;
+  --border:#334155;
+  --error:#fb7185;
 }
-* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-body {
-  margin: 0;
-  min-height: 100vh;
-  font-family: system-ui, -apple-system, sans-serif;
-  background: var(--bg);
-  color: var(--text);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 20px;
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{
+  margin:0;min-height:100vh;
+  font-family:system-ui,-apple-system,sans-serif;
+  background:var(--bg);color:var(--text);
+  display:flex;align-items:center;justify-content:center;padding:20px;
 }
-.auth-card {
-  width: 100%;
-  max-width: 450px;
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-top: 4px solid var(--primary);
-  border-radius: 24px;
-  padding: 40px 32px;
+.auth-card{
+  width:100%;max-width:450px;
+  background:var(--card);
+  border:1px solid var(--border);
+  border-top:4px solid var(--primary);
+  border-radius:24px;padding:40px 32px;
 }
-.logo-header { text-align: center; margin-bottom: 24px; }
-.logo { height: 42px; margin-bottom: 12px; }
-h1 { font-size: 1.4rem; font-weight: 800; margin: 0 0 8px; }
-p { font-size: 0.85rem; color: var(--text-muted); margin: 0 0 24px; }
-.console-msg {
-  background: #0f172a;
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 12px;
-  font-size: 12px;
-  font-weight: 600;
-  text-align: center;
-  margin-bottom: 20px;
-  display: none;
+.logo-header{text-align:center;margin-bottom:24px}
+.logo{height:42px;margin-bottom:12px}
+h1{font-size:1.4rem;font-weight:800;margin:0 0 8px}
+p{font-size:.85rem;color:var(--text-muted);margin:0 0 24px}
+.console-msg{
+  background:#0f172a;border:1px solid var(--border);
+  border-radius:12px;padding:12px;font-size:12px;
+  font-weight:600;text-align:center;margin-bottom:20px;display:none
 }
-.console-error { border-color: var(--error); color: var(--error); }
-.console-info { border-color: var(--primary); color: var(--primary); }
-.input-group { margin-bottom: 16px; }
-.input-label {
-  font-size: 10px;
-  font-weight: 700;
-  text-transform: uppercase;
-  color: var(--primary);
-  margin-bottom: 6px;
-  display: block;
+.console-error{border-color:var(--error);color:var(--error)}
+.console-info{border-color:var(--primary);color:var(--primary)}
+.input-group{margin-bottom:16px}
+.input-label{
+  font-size:10px;font-weight:700;text-transform:uppercase;
+  color:var(--primary);margin-bottom:6px;display:block
 }
-input {
-  width: 100%;
-  background: #0f172a;
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 12px 16px;
-  color: #fff;
+input{
+  width:100%;background:#0f172a;border:1px solid var(--border);
+  border-radius:12px;padding:12px 16px;color:#fff
 }
-.btn {
-  width: 100%;
-  padding: 14px;
-  border-radius: 12px;
-  font-weight: 700;
-  cursor: pointer;
-  border: none;
+.btn{
+  width:100%;padding:14px;border-radius:12px;
+  font-weight:700;cursor:pointer;border:none
 }
-.btn-primary { background: var(--primary); color: #0b1120; }
-.switch-link {
-  text-align: center;
-  margin-top: 24px;
-  font-size: 0.85rem;
-  color: var(--text-muted);
-}
-.switch-link a { color: var(--primary); text-decoration: none; font-weight: 700; }
+.btn-primary{background:var(--primary);color:#0b1120}
+.switch-link{text-align:center;margin-top:24px;font-size:.85rem;color:var(--text-muted)}
+.switch-link a{color:var(--primary);text-decoration:none;font-weight:700}
 </style>
 </head>
 
@@ -130,7 +100,9 @@ input {
     <input id="regConfirm" type="password">
   </div>
 
-  <button class="btn btn-primary" id="doRegister" type="button">Create Account</button>
+  <button class="btn btn-primary" id="doRegister" type="button">
+    Create Account
+  </button>
 
   <div class="switch-link">
     Already have an account? <a href="signin.html">Sign In</a>
@@ -156,9 +128,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const auth = firebase.auth();
   const db   = firebase.firestore();
 
-  const msg = (text, type = "error") => {
+  const msg = (text, type="error") => {
     const el = document.getElementById("regConsole");
-    if (!el) return;
     el.textContent = text;
     el.className = `console-msg console-${type}`;
     el.style.display = "block";
@@ -179,19 +150,19 @@ document.addEventListener("DOMContentLoaded", () => {
       return msg("Passwords do not match.");
 
     try {
-      // Check username uniqueness
-      const existing = await db.collection("users")
-        .where("username", "==", username)
+      // 1️⃣ Username availability check (PUBLIC READ)
+      const check = await db.collection("users")
+        .where("username","==",username)
         .limit(1)
         .get();
 
-      if (!existing.empty)
+      if (!check.empty)
         return msg("Username is already taken.");
 
-      // Create Auth user
+      // 2️⃣ Create Auth account
       const cred = await auth.createUserWithEmailAndPassword(email, pass);
 
-      // Create Firestore profile IMMEDIATELY
+      // 3️⃣ Create Firestore profile (REQUIRED)
       await db.collection("users").doc(cred.user.uid).set({
         email,
         username,
@@ -200,16 +171,16 @@ document.addEventListener("DOMContentLoaded", () => {
         createdAt: firebase.firestore.FieldValue.serverTimestamp()
       });
 
-      // Send verification email
+      // 4️⃣ Send verification email
       await cred.user.sendEmailVerification();
 
-      // Stay signed in but block access elsewhere
-      document.getElementById("regFormContainer").innerHTML = `
+      // 5️⃣ Success UI
+      regFormContainer.innerHTML = `
         <div style="text-align:center">
           <img src="rometrics-logo.png" class="logo">
           <h1 style="color:var(--primary)">Verify Email</h1>
           <p>A verification link has been sent to<br><b>${email}</b></p>
-          <p style="font-size:0.85rem">You must verify before signing in.</p>
+          <p style="font-size:.85rem">You must verify before signing in.</p>
           <button class="btn btn-primary"
             onclick="window.location.href='signin.html'">
             Go to Sign In
