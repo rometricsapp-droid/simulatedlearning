@@ -196,6 +196,21 @@ if (!firebase.apps.length) {
 const auth = firebase.auth();
 const db   = firebase.firestore();
 
+/* ===============================
+   REDIRECT RESULT HANDLER
+   =============================== */
+auth.getRedirectResult()
+  .then(async (result) => {
+    if (result && result.user) {
+      await handleRedirect(result.user);
+    }
+  })
+  .catch(err => {
+    console.error("Redirect result error:", err);
+    msg("Sign-in failed. Please try again.");
+  });
+
+
 async function handleRedirect(user) {
   const params = new URLSearchParams(window.location.search);
   const isAndroid = params.get("return") === "android";
@@ -412,19 +427,25 @@ setTimeout(async () => {
    GOOGLE SIGN-IN
    (Google users are already verified)
    =============================== */
+
 document.getElementById("googleLogin").onclick = async () => {
   try {
     const provider = new firebase.auth.GoogleAuthProvider();
     provider.setCustomParameters({ prompt: "select_account" });
 
+    // 🔁 Redirect-based sign-in (result handled on return)
     await auth.signInWithRedirect(provider);
-return;
 
-    const user = result.user;
+    // ⛔ Do NOT add any logic after this
+    // Firebase will reload the page and auth.getRedirectResult()
+    // will handle the signed-in user
 
-    if (!user || !user.email) {
-      throw new Error("Google authentication failed.");
-    }
+  } catch (err) {
+    console.error("Google sign-in error:", err);
+    msg("Google sign-in failed. Please try again.");
+  }
+};
+
 
     /* -------------------------------
        CREATE PROFILE IF MISSING
