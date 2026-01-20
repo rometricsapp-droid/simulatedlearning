@@ -197,6 +197,23 @@ const auth = firebase.auth();
 const db   = firebase.firestore();
 
 /* ===============================
+   AUTH STATE GUARD (CRITICAL)
+   =============================== */
+auth.onAuthStateChanged(async (user) => {
+  if (!user) return; // not signed in → stay on page
+
+  // Email/password users must be verified
+  if (user.providerData[0]?.providerId === "password" && !user.emailVerified) {
+    await auth.signOut();
+    return;
+  }
+
+  // ✅ USER IS VALIDLY SIGNED IN
+  await handleRedirect(user);
+});
+
+
+/* ===============================
    REDIRECT RESULT HANDLER
    =============================== */
 auth.getRedirectResult()
