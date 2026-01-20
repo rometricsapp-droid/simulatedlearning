@@ -492,124 +492,133 @@ section { padding: 60px 20px; display: flex; justify-content: center; }
 <script src="https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore-compat.js"></script>
 
 <script>
-// 🔑 SAFE Firebase init (prevents double-app bugs)
-if (!firebase.apps.length) {
-  firebase.initializeApp({
-    apiKey: "AIzaSyAxMFW5gguPiiaomPbuoMc7suxHmgPEhRg",
-      authDomain:"rometricsapp-1444e.firebaseapp.com",
+document.addEventListener("DOMContentLoaded", () => {
 
-    projectId: "rometricsapp-1444e",
-    appId: "1:1016564998048:web:1d4c7e4780de0323664ec5"
-  });
-}
-
-const auth = firebase.auth();
-const db = firebase.firestore();
-
-// Persist session
-auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
-
-// 🔐 READ auth state — do NOT sign in here
-auth.onAuthStateChanged(async (user) => {
-  const profileWrapper = document.getElementById("profileWrapper");
-  const signinLink = document.getElementById("signinLink");
-  const displayUsername = document.getElementById("displayUsername");
-  const statusBadge = document.getElementById("displayStatus");
-
-  // NOT SIGNED IN
-  if (!user) {
-    if (profileWrapper) profileWrapper.style.display = "none";
-    if (signinLink) signinLink.style.display = "block";
-    return;
-  }
-
-  // SIGNED IN
-  if (signinLink) signinLink.style.display = "none";
-  if (profileWrapper) profileWrapper.style.display = "block";
-
-  await user.reload();
-
-  // detect provider
-  const isGoogleUser = user.providerData.some(
-    p => p.providerId === "google.com"
-  );
-
-  // 🔹 ALWAYS ensure Firestore profile exists
-  const ref = db.collection("users").doc(user.uid);
-  let snap = await ref.get();
-
-  if (!snap.exists) {
-    const username =
-      user.email
-        ?.split("@")[0]
-        .replace(/[^a-z0-9]/gi, "")
-        .toLowerCase()
-        .slice(0, 9) ||
-      `user${user.uid.slice(0, 6)}`;
-
-    await ref.set({
-      email: user.email,
-      username,
-      fullName: user.displayName || null,
-      provider: isGoogleUser ? "google" : "password",
-      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+  // 🔑 SAFE Firebase init (prevents double-app bugs)
+  if (!firebase.apps.length) {
+    firebase.initializeApp({
+      apiKey: "AIzaSyAxMFW5gguPiiaomPbuoMc7suxHmgPEhRg",
+      authDomain: "rometricsapp-1444e.firebaseapp.com",
+      projectId: "rometricsapp-1444e",
+      appId: "1:1016564998048:web:1d4c7e4780de0323664ec5"
     });
-
-    snap = await ref.get();
   }
 
-  // 🔒 EMAIL/PASSWORD USERS MUST VERIFY (DO NOT SIGN OUT)
-  if (!isGoogleUser && !user.emailVerified) {
-    displayUsername.textContent = "Verify Email";
-    statusBadge.textContent = "PENDING";
-    statusBadge.style.color = "#ef4444";
-    statusBadge.style.borderColor = "#ef4444";
-    return;
-  }
+  const auth = firebase.auth();
+  const db   = firebase.firestore();
 
-  // ✅ PROFILE IS GUARANTEED TO EXIST HERE
-  const data = snap.data();
-  displayUsername.textContent = "@" + data.username;
+  // Persist session
+  auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
 
-  const isPro =
-    data.accessExpiry &&
-    data.accessExpiry.toMillis &&
-    data.accessExpiry.toMillis() > Date.now();
+  // 🔐 READ auth state — do NOT sign in here
+  auth.onAuthStateChanged(async (user) => {
+    const profileWrapper  = document.getElementById("profileWrapper");
+    const signinLink      = document.getElementById("signinLink");
+    const displayUsername = document.getElementById("displayUsername");
+    const statusBadge     = document.getElementById("displayStatus");
 
-  statusBadge.textContent = isPro ? "PRO" : "FREE";
-  const c = isPro ? "var(--accent)" : "#9ca3af";
-  statusBadge.style.color = c;
-  statusBadge.style.borderColor = c;
+    // NOT SIGNED IN
+    if (!user) {
+      if (profileWrapper) profileWrapper.style.display = "none";
+      if (signinLink) signinLink.style.display = "block";
+      return;
+    }
+
+    // SIGNED IN (UI only)
+    if (signinLink) signinLink.style.display = "none";
+    if (profileWrapper) profileWrapper.style.display = "block";
+
+    await user.reload();
+
+    const isGoogleUser = user.providerData.some(
+      p => p.providerId === "google.com"
+    );
+
+    // 🔹 ALWAYS READ / ENSURE FIRESTORE PROFILE
+    const ref = db.collection("users").doc(user.uid);
+    let snap;
+
+    try {
+      snap = await ref.get();
+    } catch (err) {
+      console.error("Failed to read user profile:", err);
+      return;
+    }
+
+    if (!snap.exists) {
+      const username =
+        user.email
+          ?.split("@")[0]
+          .replace(/[^a-z0-9]/gi, "")
+          .toLowerCase()
+          .slice(0, 9) ||
+        `user${user.uid.slice(0, 6)}`;
+
+      await ref.set({
+        email: user.email,
+        username,
+        fullName: user.displayName || null,
+        provider: isGoogleUser ? "google" : "password",
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+
+      snap = await ref.get();
+    }
+
+    // 🔒 EMAIL/PASSWORD USERS MUST VERIFY (DO NOT SIGN OUT)
+    if (!isGoogleUser && !user.emailVerified) {
+      displayUsername.textContent = "Verify Email";
+      statusBadge.textContent = "PENDING";
+      statusBadge.style.color = "#ef4444";
+      statusBadge.style.borderColor = "#ef4444";
+      return;
+    }
+
+    // ✅ FIRESTORE IS SOURCE OF TRUTH FOR USERNAME
+    const data = snap.data();
+    displayUsername.textContent = "@" + data.username;
+
+    const isPro =
+      data.accessExpiry &&
+      data.accessExpiry.toMillis &&
+      data.accessExpiry.toMillis() > Date.now();
+
+    statusBadge.textContent = isPro ? "PRO" : "FREE";
+    const c = isPro ? "var(--accent)" : "#9ca3af";
+    statusBadge.style.color = c;
+    statusBadge.style.borderColor = c;
+  });
+
+  // ===============================
+  // PROFILE DROPDOWN TOGGLE
+  // ===============================
+  window.toggleDropdown = function (e) {
+    e.stopPropagation();
+    const menu = document.getElementById("profileDropdown");
+    if (!menu) return;
+    menu.classList.toggle("show");
+  };
+
+  // Close dropdown when clicking outside
+  document.addEventListener("click", () => {
+    const menu = document.getElementById("profileDropdown");
+    if (menu) menu.classList.remove("show");
+  });
+
+  // ===============================
+  // SIGN OUT HANDLER
+  // ===============================
+  window.handleSignOut = async function () {
+    try {
+      await firebase.auth().signOut();
+      window.location.href = "/signin.html";
+    } catch (err) {
+      console.error("Sign out failed:", err);
+    }
+  };
+
 });
-
-// ===============================
-// PROFILE DROPDOWN TOGGLE
-// ===============================
-function toggleDropdown(e) {
-  e.stopPropagation();
-  const menu = document.getElementById("profileDropdown");
-  if (!menu) return;
-  menu.classList.toggle("show");
-}
-
-// Close dropdown when clicking outside
-document.addEventListener("click", () => {
-  const menu = document.getElementById("profileDropdown");
-  if (menu) menu.classList.remove("show");
-});
-
-// ===============================
-// SIGN OUT HANDLER
-// ===============================
-async function handleSignOut() {
-  try {
-    await firebase.auth().signOut();
-    window.location.href = "/signin.html";
-  } catch (err) {
-    console.error("Sign out failed:", err);
-  }
-}
-
 </script>
+
 </body>
 </html>
