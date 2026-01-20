@@ -187,7 +187,8 @@ input:focus { border-color: var(--primary); }
 if (!firebase.apps.length) {
   firebase.initializeApp({
     apiKey: "AIzaSyAxMFW5gguPiiaomPbuoMc7suxHmgPEhRg",
-    authDomain: "rometrics.app",
+      authDomain:"rometricsapp-1444e.firebaseapp.com",
+
     projectId: "rometricsapp-1444e",
     appId: "1:1016564998048:web:1d4c7e4780de0323664ec5"
   });
@@ -197,21 +198,25 @@ const auth = firebase.auth();
 const db   = firebase.firestore();
 
 /* ===============================
-   AUTH STATE GUARD (CRITICAL)
+   AUTH STATE GUARD (FIXED)
    =============================== */
 auth.onAuthStateChanged(async (user) => {
-  if (!user) return; // not signed in → stay on page
+  if (!user) return; 
 
-  // Email/password users must be verified
-  if (user.providerData[0]?.providerId === "password" && !user.emailVerified) {
-    await auth.signOut();
+  // Force a refresh from Firebase to check if they JUST verified
+  await user.reload();
+  const refreshedUser = firebase.auth().currentUser;
+
+  // Check verification
+  if (refreshedUser.providerData[0]?.providerId === "password" && !refreshedUser.emailVerified) {
+    msg("Please verify your email. Check your inbox.", "info");
+    // await auth.signOut(); // DISABLED: This was causing your redirect loop
     return;
   }
 
-  // ✅ USER IS VALIDLY SIGNED IN
-  await handleRedirect(user);
+  // ✅ VALID SIGN IN
+  await handleRedirect(refreshedUser);
 });
-
 
 /* ===============================
    REDIRECT RESULT HANDLER
