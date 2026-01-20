@@ -510,6 +510,17 @@ document.addEventListener("DOMContentLoaded", () => {
   // Persist session
   auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
 
+  // 🔁 Canonical username derivation (USE EVERYWHERE)
+  function deriveUsernameFromEmail(email, uid) {
+    const base = (email || "")
+      .split("@")[0]
+      .replace(/[^a-z0-9]/gi, "")
+      .toLowerCase()
+      .slice(0, 9);
+
+    return base || `user${uid.slice(0, 6)}`;
+  }
+
   // 🔐 READ auth state — do NOT sign in here
   auth.onAuthStateChanged(async (user) => {
     const profileWrapper  = document.getElementById("profileWrapper");
@@ -534,7 +545,7 @@ document.addEventListener("DOMContentLoaded", () => {
       p => p.providerId === "google.com"
     );
 
-    // 🔹 ALWAYS READ / ENSURE FIRESTORE PROFILE
+    // 🔹 ALWAYS ENSURE FIRESTORE PROFILE EXISTS
     const ref = db.collection("users").doc(user.uid);
     let snap;
 
@@ -545,14 +556,9 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
+    // FIRST-TIME GOOGLE (or missing doc) → CREATE PROFILE
     if (!snap.exists) {
-      const username =
-        user.email
-          ?.split("@")[0]
-          .replace(/[^a-z0-9]/gi, "")
-          .toLowerCase()
-          .slice(0, 9) ||
-        `user${user.uid.slice(0, 6)}`;
+      const username = deriveUsernameFromEmail(user.email, user.uid);
 
       await ref.set({
         email: user.email,
