@@ -203,19 +203,24 @@ const db   = firebase.firestore();
 auth.onAuthStateChanged(async (user) => {
   if (!user) return;
 
-  // IMPORTANT: Force a refresh to see if they just clicked the email link
-  await user.reload(); 
-  const refreshedUser = firebase.auth().currentUser;
+  // 1. REFRESH the user data from the server
+  await user.reload();
+  const freshUser = firebase.auth().currentUser;
 
-  if (refreshedUser.providerData[0]?.providerId === "password" && !refreshedUser.emailVerified) {
-    msg("Please verify your email before signing in.", "info");
-    // Only sign out if they are truly not verified after the reload
-    return; 
+  // 2. CHECK VERIFICATION (only for email/password users)
+  const isPasswordUser = freshUser.providerData.some(p => p.providerId === 'password');
+  
+  if (isPasswordUser && !freshUser.emailVerified) {
+    msg("Please verify your email first.", "info");
+    // We DON'T call signOut() here anymore—it causes the loop.
+    // Instead, we just stop the redirect.
+    return;
   }
 
-  await handleRedirect(refreshedUser);
+  // 3. SUCCESS - Go to the app
+  console.log("Login successful:", freshUser.email);
+  handleRedirect(freshUser);
 });
-
 /* ===============================
    REDIRECT RESULT HANDLER
    =============================== */
