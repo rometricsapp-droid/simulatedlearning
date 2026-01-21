@@ -180,10 +180,13 @@ document.addEventListener("DOMContentLoaded", () => {
       await cred.user.sendEmailVerification();
       markSent();
       regFormContainer.innerHTML = `
-        <div style="text-align:center">
-          <img src="rometrics-logo.png" class="logo">
-          <h1 style="color:var(--primary)">Verify Email</h1>
-          <p>A verification link has been sent to<br><b>${email}</b></p>
+       <div style="text-align:center">
+  <a href="https://rometrics.app/" style="display:inline-block">
+    <img src="rometrics-logo.png" class="logo" alt="ROMetrics Home">
+  </a>
+  <h1 style="color:var(--primary)">Verify Email</h1>
+  <p>A verification link has been sent to<br><b>${email}</b></p>
+
 
           <p id="verifyCountdown"
              style="font-size:.8rem; margin-top:8px; color:var(--text-muted)">
