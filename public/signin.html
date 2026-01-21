@@ -156,13 +156,17 @@ input:focus { border-color: var(--primary); }
     <input id="loginPass" type="password" placeholder="••••••••">
   </div>
   
-  <button class="btn btn-primary" id="doLogin">Sign In</button>
-  <div style="text-align:center; margin-top:14px; font-size:0.85rem;">
-  <a href="#" id="forgotPassword"
-     style="color:var(--primary); text-decoration:none; font-weight:600;">
-    Forgot password?
+<button class="btn btn-primary" id="doLogin">Sign In</button>
+
+<div style="text-align:center; margin-top:16px; font-size:0.85rem;">
+  <span style="color:var(--text-muted);">Trouble signing in?</span>
+  <br>
+  <a href="forgot.html"
+     style="color:var(--primary); text-decoration:none; font-weight:700;">
+    Reset your password
   </a>
 </div>
+
 
 
   
@@ -204,28 +208,6 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   const auth = firebase.auth();
-
-document.getElementById("forgotPassword").onclick = async (e) => {
-  e.preventDefault();
-
-  const raw = document.getElementById("loginIdentifier")?.value
-    ?.trim()
-    ?.toLowerCase();
-
-  if (!raw || !raw.includes("@")) {
-    msg("Enter your email above to reset your password.", "info");
-    return;
-  }
-
-  try {
-    await auth.sendPasswordResetEmail(raw);
-    msg("Password reset email sent. Check your inbox.", "info");
-  } catch (err) {
-    console.error(err);
-    msg("Unable to send reset email. Please try again.", "error");
-  }
-};
-
 
   const db   = firebase.firestore();
 
