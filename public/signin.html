@@ -256,18 +256,26 @@ document.addEventListener("DOMContentLoaded", () => {
   const mode = params.get("mode");
   const oobCode = params.get("oobCode");
 
-  if (mode === "verifyEmail" && oobCode) {
-    auth.applyActionCode(oobCode)
-      .then(() => {
-        msg("Email verified successfully. You can now sign in.", "info");
-      })
-      .catch(() => {
-        msg("Verification completed. Please sign in.", "info");
-      })
-      .finally(() => {
-        window.history.replaceState({}, document.title, "/signin.html");
-      });
-  }
+
+if (mode === "verifyEmail" && oobCode) {
+  auth.applyActionCode(oobCode)
+    .then(async () => {
+      // 🔑 force auth state refresh if user is already signed in
+      if (auth.currentUser) {
+        await auth.currentUser.reload();
+      }
+
+      msg("Email verified successfully. You can now sign in.", "info");
+    })
+    .catch(() => {
+      msg("Email verification completed. Please sign in.", "info");
+    })
+    .finally(() => {
+      // 🔐 REMOVE TOKENS SO LOGIN FLOW IS CLEAN
+      window.history.replaceState({}, document.title, "/signin.html");
+    });
+}
+
 
   /* ===============================
      EMAIL / USERNAME SIGN IN
@@ -296,11 +304,6 @@ document.addEventListener("DOMContentLoaded", () => {
       await user.reload();
 
 await user.reload(); // 🔑 force refresh after verification link
-
-if (!user.emailVerified) {
-  msg("Please verify your email before signing in.", "info");
-  return;
-}
 
 
       // Ensure profile exists
