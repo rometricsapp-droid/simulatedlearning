@@ -59,16 +59,6 @@ p {
   color:var(--muted);
 }
 
-input {
-  width:100%;
-  margin-top:14px;
-  background:#0f172a;
-  border:1px solid var(--border);
-  border-radius:12px;
-  padding:12px 16px;
-  color:#fff;
-}
-
 button {
   width:100%;
   margin-top:16px;
@@ -81,12 +71,11 @@ button {
   cursor:pointer;
 }
 
-.msg {
-  margin-top:16px;
-  font-size:.85rem;
+button.secondary {
+  background:#0f172a;
+  color:#fff;
+  border:1px solid var(--border);
 }
-.msg.error { color:var(--error); }
-.msg.info  { color:var(--primary); }
 </style>
 </head>
 
@@ -96,6 +85,7 @@ button {
   <a href="https://rometrics.app/">
     <img src="rometrics-logo.png" class="logo" alt="ROMetrics">
   </a>
+
   <div id="content"></div>
 </div>
 
@@ -103,9 +93,6 @@ button {
 <script src="https://www.gstatic.com/firebasejs/10.12.4/firebase-auth-compat.js"></script>
 
 <script>
-/* ===============================
-   FIREBASE INIT
-   =============================== */
 firebase.initializeApp({
   apiKey: "AIzaSyAxMFW5gguPiiaomPbuoMc7suxHmgPEhRg",
   authDomain: "rometricsapp-1444e.firebaseapp.com",
@@ -121,32 +108,43 @@ const isAndroid = qs.get("return") === "android";
 const box = document.getElementById("content");
 
 /* ===============================
-   HELPERS
+   ANDROID HANDOFF (NEW)
    =============================== */
-function continueToSignin() {
-  if (isAndroid) {
-    window.location.href = "signin.html?return=android";
-  } else {
-    window.location.href = "signin.html";
-  }
-}
+if (isAndroid) {
+  auth.onAuthStateChanged(async (user) => {
+    if (!user) {
+      location.href = "signin.html?return=android";
+      return;
+    }
 
-function render(title, message, showButton = true) {
-  box.innerHTML = `
-    <h1>${title}</h1>
-    <p>${message}</p>
-    ${showButton ? `<button onclick="continueToSignin()">Continue to Sign In</button>` : ``}
-  `;
+    const token = await user.getIdToken(true);
+
+    box.innerHTML = `
+      <h1>Signed In</h1>
+      <p>You are signed in successfully.</p>
+
+      <button onclick="location.href='rometrics://auth?token=${encodeURIComponent(token)}'">
+        Return to App
+      </button>
+
+      <button class="secondary" onclick="location.href='https://rometrics.app/'">
+        Stay on Web
+      </button>
+    `;
+  });
+
+  return;
 }
 
 /* ===============================
-   INVALID ACCESS
+   INVALID / DIRECT ACCESS (WEB)
    =============================== */
 if (!mode || !oobCode) {
-  render(
-    "Invalid Link",
-    "This link is invalid or has expired."
-  );
+  box.innerHTML = `
+    <h1>Invalid Link</h1>
+    <p>This link is invalid or has expired.</p>
+    <button onclick="location.href='signin.html'">Go to Sign In</button>
+  `;
 }
 
 /* ===============================
@@ -155,16 +153,22 @@ if (!mode || !oobCode) {
 else if (mode === "verifyEmail") {
   auth.applyActionCode(oobCode)
     .then(() => {
-      render(
-        "Email Verified",
-        "Your email has been successfully verified. Please sign in to continue."
-      );
+      box.innerHTML = `
+        <h1>Email Verified</h1>
+        <p>Your email has been successfully verified.</p>
+        <button onclick="location.href='signin.html'">
+          Continue to Sign In
+        </button>
+      `;
     })
     .catch(() => {
-      render(
-        "Verification Failed",
-        "This verification link is invalid or expired."
-      );
+      box.innerHTML = `
+        <h1>Verification Failed</h1>
+        <p>This verification link is invalid or expired.</p>
+        <button onclick="location.href='signin.html'">
+          Go to Sign In
+        </button>
+      `;
     });
 }
 
@@ -194,10 +198,13 @@ else if (mode === "resetPassword") {
 
     try {
       await auth.confirmPasswordReset(oobCode, pass);
-      render(
-        "Password Updated",
-        "Your password has been reset. Please sign in."
-      );
+      box.innerHTML = `
+        <h1>Password Updated</h1>
+        <p>Your password has been reset successfully.</p>
+        <button onclick="location.href='signin.html'">
+          Go to Sign In
+        </button>
+      `;
     } catch {
       msg.textContent = "This reset link is invalid or expired.";
       msg.className = "msg error";
@@ -209,10 +216,13 @@ else if (mode === "resetPassword") {
    OTHER MODES
    =============================== */
 else {
-  render(
-    "Action Not Supported",
-    "This account action is not supported."
-  );
+  box.innerHTML = `
+    <h1>Action Not Supported</h1>
+    <p>This account action is not supported.</p>
+    <button onclick="location.href='signin.html'">
+      Go to Sign In
+    </button>
+  `;
 }
 </script>
 
