@@ -316,6 +316,9 @@ section { padding: 60px 20px; display: flex; justify-content: center; }
 
   <nav class="module-nav">
     <a href="/coming-soon.html" style="text-decoration:none">Download App</a>
+<button id="returnToAppBtn" style="display:none; background:rgba(34,197,94,0.08); color:#166534; padding:6px 10px; border-radius:999px; font-size:0.65rem; font-weight:700; text-decoration:none; border:1px solid rgba(34,197,94,0.25); cursor:pointer; white-space:nowrap;">
+    Return to App
+  </button>
   </nav>
 
   <div class="header-actions">
@@ -538,6 +541,31 @@ document.addEventListener("DOMContentLoaded", () => {
     // SIGNED IN (UI only)
     if (signinLink) signinLink.style.display = "none";
     if (profileWrapper) profileWrapper.style.display = "block";
+
+// 1. Detect if this is an Android session
+    const params = new URLSearchParams(window.location.search);
+    const isAndroid = params.get("return") === "android" || sessionStorage.getItem("isAndroid") === "true";
+
+    if (isAndroid) {
+      // Save flag so it persists during navigation
+      if (params.get("return") === "android") sessionStorage.setItem("isAndroid", "true");
+      
+      const returnBtn = document.getElementById("returnToAppBtn");
+      if (returnBtn) {
+        // 2. Make the button visible
+        returnBtn.style.display = "inline-block"; 
+        
+        // 3. Handle the secure token hand-off
+        returnBtn.onclick = async () => {
+          try {
+            const token = await user.getIdToken(true);
+            window.location.href = "rometrics://auth?token=" + encodeURIComponent(token);
+          } catch (err) {
+            console.error("Deep link failed:", err);
+          }
+        };
+      }
+    }
 
     await user.reload();
 
