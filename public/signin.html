@@ -185,7 +185,6 @@ input:focus { border-color: var(--primary); }
   Don't have an account? <a href="#" onclick="window.location.href='register.html' + window.location.search">Register</a>
   </div>
 </div>
-
 <script src="https://www.gstatic.com/firebasejs/10.12.4/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.4/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore-compat.js"></script>
@@ -229,7 +228,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const isAndroid = params.get("return") === "android";
 
     if (isAndroid) {
-      // ✅ ANDROID USERS: Go to decision card
+      // ✅ ANDROID USERS: Go to decision card (never home)
       window.location.href = "auth-android.html";
       return; 
     }
@@ -306,6 +305,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
       }
 
+      // ✅ Trigger Smart Redirect
       handleRedirect(user);
 
     } catch (err) {
@@ -357,7 +357,7 @@ document.addEventListener("DOMContentLoaded", () => {
       console.error("Profile creation failed:", err);
     }
 
-    // ✅ FIX: Ensure Google login path also checks the Android flag
+    // ✅ Ensure Google login path also checks the Android flag
     handleRedirect(user);
   };
 
