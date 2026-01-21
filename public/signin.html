@@ -220,21 +220,30 @@ document.addEventListener("DOMContentLoaded", () => {
     el.style.display = "block";
   }
 
-  /* ===============================
-     HANDLE REDIRECT (ANDROID VS WEB)
+
+ /* ===============================
+     HANDLE REDIRECT (THE AUTHORITY)
      =============================== */
   async function handleRedirect(user) {
+    // We check both the URL and sessionStorage in case the popup cleared the URL
     const params = new URLSearchParams(window.location.search);
-    const isAndroid = params.get("return") === "android";
+    const isAndroid = params.get("return") === "android" || sessionStorage.getItem("isAndroid") === "true";
 
     if (isAndroid) {
-      // ✅ ANDROID USERS: Go to decision card (never home)
-      window.location.href = "auth-android.html";
+      console.log("Android context detected. Yielding to auth-android.html...");
+      // Use replace to ensure they can't "back button" into a half-logged-in state
+      window.location.replace("auth-android.html");
       return; 
     }
 
-    // ✅ WEB USERS: Go to standard home page
+    // Normal web users
     window.location.href = "https://rometrics.app/";
+  }
+
+  // Record the authority immediately on load so we don't lose it
+  const initialParams = new URLSearchParams(window.location.search);
+  if (initialParams.get("return") === "android") {
+    sessionStorage.setItem("isAndroid", "true");
   }
 
   /* ===============================
