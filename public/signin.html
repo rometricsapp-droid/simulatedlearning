@@ -225,29 +225,23 @@ document.addEventListener("DOMContentLoaded", () => {
   /* ===============================
      HANDLE REDIRECT
      =============================== */
-  async function handleRedirect(user) {
-    const params = new URLSearchParams(window.location.search);
-    const isAndroid = params.get("return") === "android";
+ 
+async function handleRedirect(user) {
+  const params = new URLSearchParams(window.location.search);
+  const isAndroid = params.get("return") === "android";
 
-    if (isAndroid) {
-      const modal = document.getElementById("choiceModal");
-      if (modal) modal.style.display = "flex";
+  if (isAndroid) {
+    const token = await user.getIdToken(true);
 
-      const token = await user.getIdToken();
-
-      document.getElementById("goApp").onclick = () => {
-        window.location.href = `rometrics://auth?token=${token}`;
-      };
-
-      document.getElementById("goWeb").onclick = () => {
-        window.location.href = "https://rometrics.app/";
-      };
-
-      return;
-    }
-
-    window.location.href = "https://rometrics.app/";
+    // 🔑 RETURN TO ANDROID APP IMMEDIATELY
+    window.location.href = `rometrics://auth?token=${encodeURIComponent(token)}`;
+    return;
   }
+
+  // 🌐 Normal web users
+  window.location.href = "https://rometrics.app/";
+}
+
 
   /* ===============================
      EMAIL VERIFICATION RETURN

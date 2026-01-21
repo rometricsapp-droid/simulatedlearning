@@ -81,17 +81,10 @@ button {
   cursor:pointer;
 }
 
-button.secondary {
-  background:#0f172a;
-  color:var(--text);
-  border:1px solid var(--border);
-}
-
 .msg {
   margin-top:16px;
   font-size:.85rem;
 }
-
 .msg.error { color:var(--error); }
 .msg.info  { color:var(--primary); }
 </style>
@@ -103,7 +96,6 @@ button.secondary {
   <a href="https://rometrics.app/">
     <img src="rometrics-logo.png" class="logo" alt="ROMetrics">
   </a>
-
   <div id="content"></div>
 </div>
 
@@ -131,36 +123,27 @@ const box = document.getElementById("content");
 /* ===============================
    HELPERS
    =============================== */
-function goWebSignin() {
-  window.location.href = "signin.html";
+function continueToSignin() {
+  if (isAndroid) {
+    window.location.href = "signin.html?return=android";
+  } else {
+    window.location.href = "signin.html";
+  }
 }
 
-function goAndroidSignin() {
-  window.location.href = "signin.html?return=android";
-}
-
-function showNextStep(title, message) {
+function render(title, message, showButton = true) {
   box.innerHTML = `
     <h1>${title}</h1>
     <p>${message}</p>
-
-    <button onclick="${isAndroid ? 'goAndroidSignin()' : 'goWebSignin()'}">
-      Continue to Sign In
-    </button>
-
-    ${isAndroid ? `
-      <button class="secondary" onclick="goWebSignin()">
-        Continue on Web Instead
-      </button>
-    ` : ``}
+    ${showButton ? `<button onclick="continueToSignin()">Continue to Sign In</button>` : ``}
   `;
 }
 
 /* ===============================
-   INVALID / DIRECT ACCESS
+   INVALID ACCESS
    =============================== */
 if (!mode || !oobCode) {
-  showNextStep(
+  render(
     "Invalid Link",
     "This link is invalid or has expired."
   );
@@ -172,13 +155,13 @@ if (!mode || !oobCode) {
 else if (mode === "verifyEmail") {
   auth.applyActionCode(oobCode)
     .then(() => {
-      showNextStep(
+      render(
         "Email Verified",
-        "Your email has been successfully verified."
+        "Your email has been successfully verified. Please sign in to continue."
       );
     })
     .catch(() => {
-      showNextStep(
+      render(
         "Verification Failed",
         "This verification link is invalid or expired."
       );
@@ -211,9 +194,9 @@ else if (mode === "resetPassword") {
 
     try {
       await auth.confirmPasswordReset(oobCode, pass);
-      showNextStep(
+      render(
         "Password Updated",
-        "Your password has been reset successfully."
+        "Your password has been reset. Please sign in."
       );
     } catch {
       msg.textContent = "This reset link is invalid or expired.";
@@ -226,7 +209,7 @@ else if (mode === "resetPassword") {
    OTHER MODES
    =============================== */
 else {
-  showNextStep(
+  render(
     "Action Not Supported",
     "This account action is not supported."
   );
