@@ -1,3 +1,4 @@
+
 <!doctype html>
 <html lang="en">
 <head>
@@ -59,6 +60,16 @@ p {
   color:var(--muted);
 }
 
+input {
+  width:100%;
+  margin-top:14px;
+  background:#0f172a;
+  border:1px solid var(--border);
+  border-radius:12px;
+  padding:12px 16px;
+  color:#fff;
+}
+
 button {
   width:100%;
   margin-top:16px;
@@ -71,11 +82,13 @@ button {
   cursor:pointer;
 }
 
-button.secondary {
-  background:#0f172a;
-  color:#fff;
-  border:1px solid var(--border);
+.msg {
+  margin-top:16px;
+  font-size:.85rem;
 }
+
+.msg.error { color:var(--error); }
+.msg.info  { color:var(--primary); }
 </style>
 </head>
 
@@ -93,6 +106,9 @@ button.secondary {
 <script src="https://www.gstatic.com/firebasejs/10.12.4/firebase-auth-compat.js"></script>
 
 <script>
+/* ===============================
+   FIREBASE INIT
+   =============================== */
 firebase.initializeApp({
   apiKey: "AIzaSyAxMFW5gguPiiaomPbuoMc7suxHmgPEhRg",
   authDomain: "rometricsapp-1444e.firebaseapp.com",
@@ -104,47 +120,36 @@ const auth = firebase.auth();
 const qs = new URLSearchParams(window.location.search);
 const mode = qs.get("mode");
 const oobCode = qs.get("oobCode");
-const isAndroid = qs.get("return") === "android";
 const box = document.getElementById("content");
+//  ANDROID RETURN DETECTION
+const isAndroidReturn = qs.get("return") === "android";
 
 /* ===============================
-   ANDROID HANDOFF (NEW)
+   INVALID / DIRECT ACCESS
    =============================== */
-if (isAndroid) {
-  auth.onAuthStateChanged(async (user) => {
-    if (!user) {
-      location.href = "signin.html?return=android";
-      return;
-    }
+if (!mode || !oobCode) {
 
-    const token = await user.getIdToken(true);
-
+  // ✅ ANDROID RETURN PATH
+  if (isAndroidReturn) {
     box.innerHTML = `
-      <h1>Signed In</h1>
-      <p>You are signed in successfully.</p>
-
-      <button onclick="location.href='rometrics://auth?token=${encodeURIComponent(token)}'">
-        Return to App
-      </button>
-
-      <button class="secondary" onclick="location.href='https://rometrics.app/'">
+      <h1>Continue in App</h1>
+      <p>Your account action was completed. You may return to the ROMetrics app.</p>
+      <button onclick="returnToApp()">Return to App</button>
+      <button style="margin-top:10px;background:#0f172a;color:#fff;border:1px solid var(--border)"
+              onclick="location.href='signin.html'">
         Stay on Web
       </button>
     `;
-  });
+  }
 
-  return;
-}
-
-/* ===============================
-   INVALID / DIRECT ACCESS (WEB)
-   =============================== */
-if (!mode || !oobCode) {
-  box.innerHTML = `
-    <h1>Invalid Link</h1>
-    <p>This link is invalid or has expired.</p>
-    <button onclick="location.href='signin.html'">Go to Sign In</button>
-  `;
+  // 🌐 WEB INVALID LINK
+  else {
+    box.innerHTML = `
+      <h1>Invalid Link</h1>
+      <p>This link is invalid or has expired.</p>
+      <button onclick="location.href='signin.html'">Go to Sign In</button>
+    `;
+  }
 }
 
 /* ===============================
@@ -213,7 +218,7 @@ else if (mode === "resetPassword") {
 }
 
 /* ===============================
-   OTHER MODES
+   OTHER MODES (FUTURE-PROOF)
    =============================== */
 else {
   box.innerHTML = `
@@ -224,6 +229,12 @@ else {
     </button>
   `;
 }
+
+function returnToApp() {
+  // Android app intercepts this
+  window.location.href = "rometrics://auth?verified=true";
+}
+
 </script>
 
 </body>
