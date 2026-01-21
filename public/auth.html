@@ -81,6 +81,12 @@ button {
   cursor:pointer;
 }
 
+button.secondary {
+  background:#0f172a;
+  color:var(--text);
+  border:1px solid var(--border);
+}
+
 .msg {
   margin-top:16px;
   font-size:.85rem;
@@ -119,17 +125,45 @@ const auth = firebase.auth();
 const qs = new URLSearchParams(window.location.search);
 const mode = qs.get("mode");
 const oobCode = qs.get("oobCode");
+const isAndroid = qs.get("return") === "android";
 const box = document.getElementById("content");
+
+/* ===============================
+   HELPERS
+   =============================== */
+function goWebSignin() {
+  window.location.href = "signin.html";
+}
+
+function goAndroidSignin() {
+  window.location.href = "signin.html?return=android";
+}
+
+function showNextStep(title, message) {
+  box.innerHTML = `
+    <h1>${title}</h1>
+    <p>${message}</p>
+
+    <button onclick="${isAndroid ? 'goAndroidSignin()' : 'goWebSignin()'}">
+      Continue to Sign In
+    </button>
+
+    ${isAndroid ? `
+      <button class="secondary" onclick="goWebSignin()">
+        Continue on Web Instead
+      </button>
+    ` : ``}
+  `;
+}
 
 /* ===============================
    INVALID / DIRECT ACCESS
    =============================== */
 if (!mode || !oobCode) {
-  box.innerHTML = `
-    <h1>Invalid Link</h1>
-    <p>This link is invalid or has expired.</p>
-    <button onclick="location.href='signin.html'">Go to Sign In</button>
-  `;
+  showNextStep(
+    "Invalid Link",
+    "This link is invalid or has expired."
+  );
 }
 
 /* ===============================
@@ -138,22 +172,16 @@ if (!mode || !oobCode) {
 else if (mode === "verifyEmail") {
   auth.applyActionCode(oobCode)
     .then(() => {
-      box.innerHTML = `
-        <h1>Email Verified</h1>
-        <p>Your email has been successfully verified.</p>
-        <button onclick="location.href='signin.html'">
-          Continue to Sign In
-        </button>
-      `;
+      showNextStep(
+        "Email Verified",
+        "Your email has been successfully verified."
+      );
     })
     .catch(() => {
-      box.innerHTML = `
-        <h1>Verification Failed</h1>
-        <p>This verification link is invalid or expired.</p>
-        <button onclick="location.href='signin.html'">
-          Go to Sign In
-        </button>
-      `;
+      showNextStep(
+        "Verification Failed",
+        "This verification link is invalid or expired."
+      );
     });
 }
 
@@ -183,13 +211,10 @@ else if (mode === "resetPassword") {
 
     try {
       await auth.confirmPasswordReset(oobCode, pass);
-      box.innerHTML = `
-        <h1>Password Updated</h1>
-        <p>Your password has been reset successfully.</p>
-        <button onclick="location.href='signin.html'">
-          Go to Sign In
-        </button>
-      `;
+      showNextStep(
+        "Password Updated",
+        "Your password has been reset successfully."
+      );
     } catch {
       msg.textContent = "This reset link is invalid or expired.";
       msg.className = "msg error";
@@ -198,16 +223,13 @@ else if (mode === "resetPassword") {
 }
 
 /* ===============================
-   OTHER MODES (FUTURE-PROOF)
+   OTHER MODES
    =============================== */
 else {
-  box.innerHTML = `
-    <h1>Action Not Supported</h1>
-    <p>This account action is not supported.</p>
-    <button onclick="location.href='signin.html'">
-      Go to Sign In
-    </button>
-  `;
+  showNextStep(
+    "Action Not Supported",
+    "This account action is not supported."
+  );
 }
 </script>
 
