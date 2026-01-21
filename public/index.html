@@ -497,6 +497,15 @@ section { padding: 60px 20px; display: flex; justify-content: center; }
 <script>
 document.addEventListener("DOMContentLoaded", () => {
 
+document.addEventListener("DOMContentLoaded", () => {
+
+  // ✅ ADD THIS BLOCK HERE:
+  const params = new URLSearchParams(window.location.search);
+  if (params.get("return") === "android") {
+    sessionStorage.setItem("isAndroid", "true");
+  }
+  // ✅ END OF ADDED BLOCK
+
   // 🔑 SAFE Firebase init (prevents double-app bugs)
   if (!firebase.apps.length) {
     firebase.initializeApp({
