@@ -495,16 +495,15 @@ section { padding: 60px 20px; display: flex; justify-content: center; }
 <script src="https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore-compat.js"></script>
 
 <script>
-document.addEventListener("DOMContentLoaded", () => {
 
 document.addEventListener("DOMContentLoaded", () => {
-
-  // ✅ ADD THIS BLOCK HERE:
-  const params = new URLSearchParams(window.location.search);
-  if (params.get("return") === "android") {
+  // 1. SMART RECOGNITION: Detect Android directly from the browser's identity
+  const isAndroidPhone = /Android/i.test(navigator.userAgent);
+  
+  if (isAndroidPhone) {
     sessionStorage.setItem("isAndroid", "true");
+    console.log("Device Identified: Android System confirmed via UserAgent.");
   }
-  // ✅ END OF ADDED BLOCK
 
   // 🔑 SAFE Firebase init (prevents double-app bugs)
   if (!firebase.apps.length) {
@@ -551,30 +550,35 @@ document.addEventListener("DOMContentLoaded", () => {
     if (signinLink) signinLink.style.display = "none";
     if (profileWrapper) profileWrapper.style.display = "block";
 
-// 1. Detect if this is an Android session
-    const params = new URLSearchParams(window.location.search);
-    const isAndroid = params.get("return") === "android" || sessionStorage.getItem("isAndroid") === "true";
+/* ===============================
+       SMART RECOGNITION (ONE STEP)
+       =============================== */
+    // 1. Detect if the browser identity contains "Android"
+    const isAndroidDevice = /Android/i.test(navigator.userAgent);
 
-    if (isAndroid) {
-      // Save flag so it persists during navigation
-      if (params.get("return") === "android") sessionStorage.setItem("isAndroid", "true");
-      
+    if (isAndroidDevice) {
       const returnBtn = document.getElementById("returnToAppBtn");
+      
       if (returnBtn) {
-        // 2. Make the button visible
+        // 2. Force the green-pill button to show on screen
         returnBtn.style.display = "inline-block"; 
         
-        // 3. Handle the secure token hand-off
+        // 3. Attach the secure token hand-off
         returnBtn.onclick = async () => {
           try {
+            // Generate fresh token for the app
             const token = await user.getIdToken(true);
+            
+            // Deep link back into your Capacitor App
             window.location.href = "rometrics://auth?token=" + encodeURIComponent(token);
           } catch (err) {
-            console.error("Deep link failed:", err);
+            console.error("Handoff failed:", err);
+            alert("App return failed. Please try again.");
           }
         };
       }
     }
+    /* =============================== */
 
     await user.reload();
 
