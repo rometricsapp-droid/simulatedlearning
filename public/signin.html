@@ -231,14 +231,12 @@ async function handleRedirect(user) {
   const isAndroid = params.get("return") === "android";
 
   if (isAndroid) {
-    const token = await user.getIdToken(true);
-
-    // 🔑 RETURN TO ANDROID APP IMMEDIATELY
-    window.location.href = `rometrics://auth?token=${encodeURIComponent(token)}`;
+    // Hand off to Android decision page (user gesture happens there)
+    window.location.href = "auth.html?return=android";
     return;
   }
 
-  // 🌐 Normal web users
+  // Normal web users
   window.location.href = "https://rometrics.app/";
 }
 
