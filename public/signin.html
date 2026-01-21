@@ -206,8 +206,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   const auth = firebase.auth();
-
-  const db   = firebase.firestore();
+  const db = firebase.firestore();
 
   auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
 
@@ -223,22 +222,21 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   /* ===============================
-     HANDLE REDIRECT
+     HANDLE REDIRECT (ANDROID VS WEB)
      =============================== */
- 
-async function handleRedirect(user) {
-  const params = new URLSearchParams(window.location.search);
-  const isAndroid = params.get("return") === "android";
+  async function handleRedirect(user) {
+    const params = new URLSearchParams(window.location.search);
+    const isAndroid = params.get("return") === "android";
 
-  if (isAndroid) {
-    window.location.href = "auth-android.html";
-    return; // 
+    if (isAndroid) {
+      // ✅ ANDROID USERS: Go to decision card
+      window.location.href = "auth-android.html";
+      return; 
+    }
+
+    // ✅ WEB USERS: Go to standard home page
+    window.location.href = "https://rometrics.app/";
   }
-
-  // Normal web users
-  window.location.href = "https://rometrics.app/";
-}
-
 
   /* ===============================
      EMAIL VERIFICATION RETURN
@@ -247,26 +245,21 @@ async function handleRedirect(user) {
   const mode = params.get("mode");
   const oobCode = params.get("oobCode");
 
-
-if (mode === "verifyEmail" && oobCode) {
-  auth.applyActionCode(oobCode)
-    .then(async () => {
-      // 🔑 force auth state refresh if user is already signed in
-      if (auth.currentUser) {
-        await auth.currentUser.reload();
-      }
-
-      msg("Email verified successfully. You can now sign in.", "info");
-    })
-    .catch(() => {
-      msg("Email verification completed. Please sign in.", "info");
-    })
-    .finally(() => {
-      // 🔐 REMOVE TOKENS SO LOGIN FLOW IS CLEAN
-      window.history.replaceState({}, document.title, "/signin.html");
-    });
-}
-
+  if (mode === "verifyEmail" && oobCode) {
+    auth.applyActionCode(oobCode)
+      .then(async () => {
+        if (auth.currentUser) {
+          await auth.currentUser.reload();
+        }
+        msg("Email verified successfully. You can now sign in.", "info");
+      })
+      .catch(() => {
+        msg("Email verification completed. Please sign in.", "info");
+      })
+      .finally(() => {
+        window.history.replaceState({}, document.title, "/signin.html");
+      });
+  }
 
   /* ===============================
      EMAIL / USERNAME SIGN IN
@@ -294,9 +287,6 @@ if (mode === "verifyEmail" && oobCode) {
       const user = cred.user;
       await user.reload();
 
-await user.reload(); // 🔑 force refresh after verification link
-
-
       // Ensure profile exists
       const ref = db.collection("users").doc(user.uid);
       const snap = await ref.get();
@@ -318,23 +308,14 @@ await user.reload(); // 🔑 force refresh after verification link
 
       handleRedirect(user);
 
-} catch (err) {
-  console.error(err);
-
-  if (err.code === "auth/invalid-credential") {
-    msg("Incorrect email or password, or account does not exist.");
-  } else if (err.code === "auth/invalid-email") {
-    msg("Please enter a valid email address.");
-  } else if (err.code === "auth/user-disabled") {
-    msg("This account has been disabled. Contact support.");
-  } else if (err.code === "auth/too-many-requests") {
-    msg("Too many attempts. Please wait a few minutes and try again.");
-  } else {
-    msg("Unable to sign in. Please try again.");
-  }
-}
-
-
+    } catch (err) {
+      console.error(err);
+      if (err.code === "auth/invalid-credential") {
+        msg("Incorrect email or password.");
+      } else {
+        msg("Unable to sign in. Please try again.");
+      }
+    }
   };
 
   /* ===============================
@@ -353,7 +334,6 @@ await user.reload(); // 🔑 force refresh after verification link
       return;
     }
 
-    // Ensure profile exists (do NOT block login if this fails)
     try {
       const ref = db.collection("users").doc(user.uid);
       const snap = await ref.get();
@@ -377,6 +357,7 @@ await user.reload(); // 🔑 force refresh after verification link
       console.error("Profile creation failed:", err);
     }
 
+    // ✅ FIX: Ensure Google login path also checks the Android flag
     handleRedirect(user);
   };
 
