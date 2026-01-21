@@ -295,10 +295,13 @@ document.addEventListener("DOMContentLoaded", () => {
       const user = cred.user;
       await user.reload();
 
-      if (!user.emailVerified) {
-        msg("Please verify your email before signing in.", "info");
-        return;
-      }
+await user.reload(); // 🔑 force refresh after verification link
+
+if (!user.emailVerified) {
+  msg("Please verify your email before signing in.", "info");
+  return;
+}
+
 
       // Ensure profile exists
       const ref = db.collection("users").doc(user.uid);
