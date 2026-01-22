@@ -221,53 +221,25 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
 
- /* ===============================
-     HANDLE REDIRECT (THE AUTHORITY)
-     =============================== */
-  async function handleRedirect(user) {
-    // We check both the URL and sessionStorage in case the popup cleared the URL
-    const params = new URLSearchParams(window.location.search);
-    const isAndroid = params.get("return") === "android" || sessionStorage.getItem("isAndroid") === "true";
-
-    if (isAndroid) {
-      console.log("Android context detected. Yielding to auth-android.html...");
-      // Use replace to ensure they can't "back button" into a half-logged-in state
-      window.location.replace("auth-android.html");
-      return; 
-    }
-
-    // Normal web users
-    window.location.href = "https://rometrics.app/";
-  }
-
-  // Record the authority immediately on load so we don't lose it
-  const initialParams = new URLSearchParams(window.location.search);
-  if (initialParams.get("return") === "android") {
-    sessionStorage.setItem("isAndroid", "true");
-  }
-
-  /* ===============================
-     EMAIL VERIFICATION RETURN
-     =============================== */
+/* ===============================
+   HANDLE REDIRECT (FINAL)
+   =============================== */
+async function handleRedirect(user) {
   const params = new URLSearchParams(window.location.search);
-  const mode = params.get("mode");
-  const oobCode = params.get("oobCode");
+  const redirectUri = params.get("redirect");
 
-  if (mode === "verifyEmail" && oobCode) {
-    auth.applyActionCode(oobCode)
-      .then(async () => {
-        if (auth.currentUser) {
-          await auth.currentUser.reload();
-        }
-        msg("Email verified successfully. You can now sign in.", "info");
-      })
-      .catch(() => {
-        msg("Email verification completed. Please sign in.", "info");
-      })
-      .finally(() => {
-        window.history.replaceState({}, document.title, "/signin.html");
-      });
+  // ✅ ANDROID: return control to the app
+  if (redirectUri) {
+    const token = await user.getIdToken(true);
+    window.location.href =
+      window.location.href = "https://rometrics.app/app-return.html";
+    return;
   }
+
+  // ✅ NORMAL WEB USERS
+  window.location.href = "https://rometrics.app/";
+}
+
 
   /* ===============================
      EMAIL / USERNAME SIGN IN
