@@ -228,9 +228,16 @@ async function handleRedirect(user) {
   const params = new URLSearchParams(window.location.search);
   const redirect = params.get("redirect");
 
+  // ANDROID FLOW → web-hosted return bridge
+  if (redirect === "rometrics://auth") {
+    window.location.href = "/app-return.html";
+    return;
+  }
+
   // WEB FLOW
   window.location.href = "/";
 }
+
 
   /* ===============================
      EMAIL / USERNAME SIGN IN
