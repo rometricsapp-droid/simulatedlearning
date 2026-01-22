@@ -205,12 +205,11 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   const auth = firebase.auth();
-  const db = firebase.firestore();
-
+  const db   = firebase.firestore();
   auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
 
   /* ===============================
-     MESSAGE HELPER
+     MESSAGE HELPER (UNCHANGED)
      =============================== */
   function msg(text, type = "error") {
     const el = document.getElementById("loginConsole");
@@ -220,32 +219,12 @@ document.addEventListener("DOMContentLoaded", () => {
     el.style.display = "block";
   }
 
-async function handleRedirect(user) {
-  const params = new URLSearchParams(window.location.search);
-  const redirectUri = params.get("redirect");
-  if (!redirectUri || !redirectUri.startsWith("rometrics://")) {
-    window.location.href = "https://rometrics.app/";
-    return;
+  /* ===============================
+     ENV DETECT
+     =============================== */
+  function isAndroidApp() {
+    return !!window.Capacitor;
   }
-
-  // 🔴 send ID token to backend
-  const idToken = await user.getIdToken(true);
-
-  const res = await fetch(
-    "https://YOUR-CLOUD-FUNCTION-URL/createCustomToken",
-    {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ idToken })
-    }
-  );
-
-  const { customToken } = await res.json();
-
-  // 🔹 deep link ONLY the custom token
-  const finalUrl = `${redirectUri}?token=${customToken}`;
-  window.location.replace(finalUrl);
-}
 
   /* ===============================
      EMAIL / USERNAME SIGN IN
@@ -292,8 +271,12 @@ async function handleRedirect(user) {
         });
       }
 
-      // ✅ Trigger Smart Redirect
-      handleRedirect(user);
+      // ✅ FINAL REDIRECT
+      if (isAndroidApp()) {
+        window.location.href = "rometrics://auth";
+      } else {
+        window.location.href = "https://rometrics.app/";
+      }
 
     } catch (err) {
       console.error(err);
@@ -306,7 +289,7 @@ async function handleRedirect(user) {
   };
 
   /* ===============================
-     GOOGLE SIGN-IN (POPUP)
+     GOOGLE SIGN-IN
      =============================== */
   document.getElementById("googleLogin").onclick = async () => {
     let user;
@@ -344,12 +327,18 @@ async function handleRedirect(user) {
       console.error("Profile creation failed:", err);
     }
 
-    // ✅ Ensure Google login path also checks the Android flag
-    handleRedirect(user);
+    // ✅ FINAL REDIRECT
+    if (isAndroidApp()) {
+      window.location.href = "rometrics://auth";
+    } else {
+      window.location.href = "https://rometrics.app/";
+    }
   };
 
 });
 </script>
+
+
 
 
 </body>
