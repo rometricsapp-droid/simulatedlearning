@@ -226,20 +226,16 @@ document.addEventListener("DOMContentLoaded", () => {
    =============================== */
 async function handleRedirect(user) {
   const params = new URLSearchParams(window.location.search);
-  const redirectUri = params.get("redirect");
+  const redirect = params.get("redirect");
 
-  const token = await user.getIdToken(true);
-
-  // ✅ ANDROID: send token to Cloud Function
-  if (redirectUri && redirectUri.startsWith("rometrics://")) {
-    window.location.href =
-      "https://us-central1-rometricsapp-1444e.cloudfunctions.net/androidAuth"
-      + "?token=" + encodeURIComponent(token);
+  // ANDROID FLOW — ALWAYS go through app-return.html
+  if (redirect === "rometrics://auth") {
+    window.location.href = "/app-return.html";
     return;
   }
 
-  // ✅ NORMAL WEB USERS
-  window.location.href = "https://rometrics.app/";
+  // WEB FLOW
+  window.location.href = "/";
 }
 
   /* ===============================
