@@ -1,4 +1,3 @@
-
 <!doctype html>
 <html lang="en">
 <head>
@@ -121,35 +120,16 @@ const qs = new URLSearchParams(window.location.search);
 const mode = qs.get("mode");
 const oobCode = qs.get("oobCode");
 const box = document.getElementById("content");
-//  ANDROID RETURN DETECTION
-const isAndroidReturn = qs.get("return") === "android";
 
 /* ===============================
    INVALID / DIRECT ACCESS
    =============================== */
 if (!mode || !oobCode) {
-
-  // ✅ ANDROID RETURN PATH
-  if (isAndroidReturn) {
-    box.innerHTML = `
-      <h1>Continue in App</h1>
-      <p>Your account action was completed. You may return to the ROMetrics app.</p>
-      <button onclick="returnToApp()">Return to App</button>
-      <button style="margin-top:10px;background:#0f172a;color:#fff;border:1px solid var(--border)"
-              onclick="location.href='signin.html'">
-        Stay on Web
-      </button>
-    `;
-  }
-
-  // 🌐 WEB INVALID LINK
-  else {
-    box.innerHTML = `
-      <h1>Invalid Link</h1>
-      <p>This link is invalid or has expired.</p>
-      <button onclick="location.href='signin.html'">Go to Sign In</button>
-    `;
-  }
+  box.innerHTML = `
+    <h1>Invalid Link</h1>
+    <p>This link is invalid or has expired.</p>
+    <button onclick="location.href='signin.html'">Go to Sign In</button>
+  `;
 }
 
 /* ===============================
@@ -229,12 +209,6 @@ else {
     </button>
   `;
 }
-
-function returnToApp() {
-  // Android app intercepts this
-  window.location.href = "rometrics://auth?verified=true";
-}
-
 </script>
 
 </body>
