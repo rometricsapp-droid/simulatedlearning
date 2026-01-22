@@ -226,21 +226,21 @@ document.addEventListener("DOMContentLoaded", () => {
    =============================== */
 async function handleRedirect(user) {
   const params = new URLSearchParams(window.location.search);
-  const redirectUri = params.get("redirect");
+  const redirectUri = params.get("redirect"); // This will be "rometrics://auth"
 
-  // ✅ ANDROID: return control to the app
   if (redirectUri) {
-    const token = await user.getIdToken(true);
-    window.location.href =
-      window.location.href = "https://rometrics.app/app-return.html";
+    // Get the JWT token from Firebase to pass back to the app
+    const token = await user.getIdToken();
+    
+    // Redirect to the app with the token attached
+    // This allows the app to call auth.signInWithCustomToken(token)
+    window.location.href = `${redirectUri}?token=${token}`;
     return;
   }
 
-  // ✅ NORMAL WEB USERS
+  // Normal Web Users
   window.location.href = "https://rometrics.app/";
 }
-
-
   /* ===============================
      EMAIL / USERNAME SIGN IN
      =============================== */
