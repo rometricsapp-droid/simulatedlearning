@@ -325,7 +325,6 @@ section { padding: 60px 20px; display: flex; justify-content: center; }
     <a href="support.html" class="secondary-link">Support</a>
     <a href="about.html" class="secondary-link">About</a>
     
-    <a href="signin.html" id="signinLink">Sign In</a>
     
 
 <div id="profileWrapper" style="display:none; position: relative;">
@@ -460,8 +459,7 @@ section { padding: 60px 20px; display: flex; justify-content: center; }
         </div>
         <div class="copy">
             <h2>Instant Access</h2>
-            <p>Start your evaluation immediately. Register using Gmail, or your personal email address. No credit card is required to begin your trial.</p>
-            <a href="register.html" class="cta-btn">Register Now</a>
+            <p>Start your evaluation immediately. Download the app to begin your trial.</p>
         </div>
     </div>
   </section>
@@ -489,183 +487,17 @@ section { padding: 60px 20px; display: flex; justify-content: center; }
     <p style="color: #64748b; font-size: 0.75rem; margin: 0;">ROMetrics © 2026 | Physical Therapy Motion Analysis Platform</p>
   </div>
 </footer>
-
-<script src="https://www.gstatic.com/firebasejs/10.12.4/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.4/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore-compat.js"></script>
-
 <script>
+/*
+  Web index — NO AUTH
+ 
+*/
 
-document.addEventListener("DOMContentLoaded", () => {
-  // 1. SMART RECOGNITION: Detect Android directly from the browser's identity
-  const isAndroidPhone = /Android/i.test(navigator.userAgent);
-  
-  if (isAndroidPhone) {
-    sessionStorage.setItem("isAndroid", "true");
-    console.log("Device Identified: Android System confirmed via UserAgent.");
-  }
+// Optional: simple guard to prevent accidental reuse
+console.log("Web index loaded (auth disabled).");
 
-  // 🔑 SAFE Firebase init (prevents double-app bugs)
-  if (!firebase.apps.length) {
-    firebase.initializeApp({
-      apiKey: "AIzaSyAxMFW5gguPiiaomPbuoMc7suxHmgPEhRg",
-      authDomain: "rometricsapp-1444e.firebaseapp.com",
-      projectId: "rometricsapp-1444e",
-      appId: "1:1016564998048:web:1d4c7e4780de0323664ec5"
-    });
-  }
-
-  const auth = firebase.auth();
-  const db   = firebase.firestore();
-
-  // Persist session
-  auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
-
-  // 🔁 Canonical username derivation (USE EVERYWHERE)
-  function deriveUsernameFromEmail(email, uid) {
-    const base = (email || "")
-      .split("@")[0]
-      .replace(/[^a-z0-9]/gi, "")
-      .toLowerCase()
-      .slice(0, 9);
-
-    return base || `user${uid.slice(0, 6)}`;
-  }
-
-  // 🔐 READ auth state — do NOT sign in here
-  auth.onAuthStateChanged(async (user) => {
-    const profileWrapper  = document.getElementById("profileWrapper");
-    const signinLink      = document.getElementById("signinLink");
-    const displayUsername = document.getElementById("displayUsername");
-    const statusBadge     = document.getElementById("displayStatus");
-
-    // NOT SIGNED IN
-    if (!user) {
-      if (profileWrapper) profileWrapper.style.display = "none";
-      if (signinLink) signinLink.style.display = "block";
-      return;
-    }
-
-    // SIGNED IN (UI only)
-    if (signinLink) signinLink.style.display = "none";
-    if (profileWrapper) profileWrapper.style.display = "block";
-
-/* ===============================
-       SMART RECOGNITION (ONE STEP)
-       =============================== */
-    // 1. Detect if the browser identity contains "Android"
-    const isAndroidDevice = /Android/i.test(navigator.userAgent);
-
-    if (isAndroidDevice) {
-      const returnBtn = document.getElementById("returnToAppBtn");
-      
-      if (returnBtn) {
-        // 2. Force the green-pill button to show on screen
-        returnBtn.style.display = "inline-block"; 
-        
-        // 3. Attach the secure token hand-off
-        returnBtn.onclick = async () => {
-          try {
-            // Generate fresh token for the app
-            const token = await user.getIdToken(true);
-            
-            // Deep link back into your Capacitor App
-            window.location.href = "rometrics://auth?token=" + encodeURIComponent(token);
-          } catch (err) {
-            console.error("Handoff failed:", err);
-            alert("App return failed. Please try again.");
-          }
-        };
-      }
-    }
-    /* =============================== */
-
-    await user.reload();
-
-    const isGoogleUser = user.providerData.some(
-      p => p.providerId === "google.com"
-    );
-
-    // 🔹 ALWAYS ENSURE FIRESTORE PROFILE EXISTS
-    const ref = db.collection("users").doc(user.uid);
-    let snap;
-
-    try {
-      snap = await ref.get();
-    } catch (err) {
-      console.error("Failed to read user profile:", err);
-      return;
-    }
-
-    // FIRST-TIME GOOGLE (or missing doc) → CREATE PROFILE
-    if (!snap.exists) {
-      const username = deriveUsernameFromEmail(user.email, user.uid);
-
-      await ref.set({
-        email: user.email,
-        username,
-        fullName: user.displayName || null,
-        provider: isGoogleUser ? "google" : "password",
-        createdAt: firebase.firestore.FieldValue.serverTimestamp()
-      });
-
-      snap = await ref.get();
-    }
-
-    // 🔒 EMAIL/PASSWORD USERS MUST VERIFY (DO NOT SIGN OUT)
-    if (!isGoogleUser && !user.emailVerified) {
-      displayUsername.textContent = "Verify Email";
-      statusBadge.textContent = "PENDING";
-      statusBadge.style.color = "#ef4444";
-      statusBadge.style.borderColor = "#ef4444";
-      return;
-    }
-
-    // ✅ FIRESTORE IS SOURCE OF TRUTH FOR USERNAME
-    const data = snap.data();
-    displayUsername.textContent = "@" + data.username;
-
-    const isPro =
-      data.accessExpiry &&
-      data.accessExpiry.toMillis &&
-      data.accessExpiry.toMillis() > Date.now();
-
-    statusBadge.textContent = isPro ? "PRO" : "FREE";
-    const c = isPro ? "var(--accent)" : "#9ca3af";
-    statusBadge.style.color = c;
-    statusBadge.style.borderColor = c;
-  });
-
-  // ===============================
-  // PROFILE DROPDOWN TOGGLE
-  // ===============================
-  window.toggleDropdown = function (e) {
-    e.stopPropagation();
-    const menu = document.getElementById("profileDropdown");
-    if (!menu) return;
-    menu.classList.toggle("show");
-  };
-
-  // Close dropdown when clicking outside
-  document.addEventListener("click", () => {
-    const menu = document.getElementById("profileDropdown");
-    if (menu) menu.classList.remove("show");
-  });
-
-  // ===============================
-  // SIGN OUT HANDLER
-  // ===============================
-  window.handleSignOut = async function () {
-    try {
-      await firebase.auth().signOut();
-      window.location.href = "/signin.html";
-    } catch (err) {
-      console.error("Sign out failed:", err);
-    }
-  };
-
-});
 </script>
+
 
 </body>
 </html>
