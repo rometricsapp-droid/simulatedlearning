@@ -14,5 +14,8 @@
         "destination": "/index.html"
       }
     ]
+  },
+  "projects": {
+    "default": "rometricsapp-1444e"
   }
 }
