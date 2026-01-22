@@ -226,16 +226,18 @@ document.addEventListener("DOMContentLoaded", () => {
    =============================== */
 async function handleRedirect(user) {
   const params = new URLSearchParams(window.location.search);
-  const redirect = params.get("redirect");
+  const redirectUri = params.get("redirect");
 
-  // ANDROID FLOW → web-hosted return bridge
-  if (redirect === "rometrics://auth") {
-    window.location.href = "/app-return.html";
+  // ✅ ANDROID: return control to the app
+  if (redirectUri) {
+    const token = await user.getIdToken(true);
+    window.location.href =
+      window.location.href = "https://rometrics.app/app-return.html";
     return;
   }
 
-  // WEB FLOW
-  window.location.href = "/";
+  // ✅ NORMAL WEB USERS
+  window.location.href = "https://rometrics.app/";
 }
 
 
