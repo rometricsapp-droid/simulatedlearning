@@ -232,7 +232,7 @@ async function handleRedirect(user) {
   if (redirectUri) {
     const token = await user.getIdToken(true);
     window.location.href =
-      redirectUri + "?token=" + encodeURIComponent(token);
+      window.location.href = "https://rometrics.app/app-return.html";
     return;
   }
 
